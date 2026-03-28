@@ -1,57 +1,60 @@
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { supabase } from '@/utils/supabase'
+import type { User, Session } from '@supabase/supabase-js'
 
-// Type definition for AuthState
 interface AuthState {
-  user: {
-    id: string
-    name: string
-    email: string
-    role: string
-  } | null
-  token: string | null
+  user: User | null
+  session: Session | null
   isAuthenticated: boolean
+  isInitialized: boolean
 
   // Actions
-  login: (userData: any, token: string) => void
-  logout: () => void
-  updateProfile: (data: Partial<{ name: string; email: string }>) => void
+  initialize: () => Promise<void>
+  setSession: (session: Session | null) => void
+  logout: () => Promise<void>
 }
 
-// Store definition with Persistence (Local Storage)
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  session: null,
+  isAuthenticated: false,
+  isInitialized: false,
+
+  initialize: async () => {
+    // Get initial session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    set({
+      session,
+      user: session?.user || null,
+      isAuthenticated: !!session,
+      isInitialized: true
+    })
+
+    // Setup listener
+    supabase.auth.onAuthStateChange((_event, newSession) => {
+      set({
+        session: newSession,
+        user: newSession?.user || null,
+        isAuthenticated: !!newSession
+      })
+    })
+  },
+
+  setSession: (session) => {
+    set({
+      session,
+      user: session?.user || null,
+      isAuthenticated: !!session
+    })
+  },
+
+  logout: async () => {
+    await supabase.auth.signOut()
+    set({
       user: null,
-      token: null,
-      isAuthenticated: false,
-
-      login: (userData, token) => {
-        localStorage.setItem('token', token)
-        set({
-          user: userData,
-          token: token,
-          isAuthenticated: true
-        })
-      },
-
-      logout: () => {
-        localStorage.removeItem('token')
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false
-        })
-      },
-
-      updateProfile: (data) =>
-        set((state) => ({
-          user: state.user ? { ...state.user, ...data } : null
-        }))
-    }),
-    {
-      name: 'auth-storage', // Key for LocalStorage
-      storage: createJSONStorage(() => localStorage)
-    }
-  )
-)
+      session: null,
+      isAuthenticated: false
+    })
+  }
+}))

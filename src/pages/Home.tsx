@@ -1,4 +1,4 @@
-import React from 'react'
+import { Link } from 'react-router-dom'
 import Greeting from '@/features/dashboard/components/Greeting'
 import BalanceCard from '@/features/dashboard/components/BalanceCard'
 import SummaryBento from '@/features/dashboard/components/SummaryBento'
@@ -22,9 +22,9 @@ const Home: React.FC = () => {
       </div>
 
       {/* 📱 Mobile Floating Action Button (FAB) */}
-      <button className="md:hidden fixed right-6 bottom-28 w-14 h-14 bg-primary text-on-primary rounded-2xl shadow-xl flex items-center justify-center active:scale-90 transition-transform z-40">
+      <Link to="/add" className="md:hidden fixed right-6 bottom-28 w-14 h-14 bg-primary text-on-primary rounded-2xl shadow-xl flex items-center justify-center active:scale-90 transition-transform z-40">
         <span className="material-symbols-outlined text-3xl">add</span>
-      </button>
+      </Link>
     </div>
   )
 }

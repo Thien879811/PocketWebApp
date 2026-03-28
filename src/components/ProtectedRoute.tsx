@@ -7,8 +7,17 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const { isAuthenticated, isInitialized } = useAuthStore()
   const location = useLocation()
+
+  if (!isInitialized) {
+    // Show a blank or loading state while Supabase checks the session locally
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-surface">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-outline-variant border-t-primary"></div>
+      </div>
+    )
+  }
 
   if (!isAuthenticated) {
     // Redirect to login but keep the current location to redirect back after login

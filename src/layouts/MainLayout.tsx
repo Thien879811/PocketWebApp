@@ -53,10 +53,10 @@ const MainLayout: React.FC = () => {
         </nav>
 
         <div className="p-6 space-y-4">
-            <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary-container text-on-secondary-container px-4 py-3.5 text-sm font-bold hover:bg-secondary-container/80 transition-colors shadow-sm">
+            <Link to="/add" className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary-container text-on-secondary-container px-4 py-3.5 text-sm font-bold hover:bg-secondary-container/80 transition-colors shadow-sm">
                <span className="material-symbols-outlined text-[20px]">add</span>
                New Transaction
-            </button>
+            </Link>
             <button
                onClick={logout}
                className="flex w-full items-center gap-4 rounded-2xl px-5 py-3.5 text-sm font-bold text-error hover:bg-error-container transition-colors"
@@ -102,15 +102,11 @@ const MainLayout: React.FC = () => {
              <span className="material-symbols-outlined text-[24px]">insights</span>
              <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Stats</span>
           </Link>
-          <button className="flex flex-col items-center justify-center p-2 text-on-surface-variant hover:text-primary active:scale-90 transition-all duration-150 min-w-[64px]">
+          <Link to="/add" className="flex flex-col items-center justify-center p-2 text-on-surface-variant hover:text-primary active:scale-90 transition-all duration-150 min-w-[64px]">
              <span className="material-symbols-outlined text-[24px]">add_circle</span>
              <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Add</span>
-          </button>
-          <Link to="/wallet" className={cn("flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/wallet') ? "bg-primary text-on-primary shadow-md rounded-2xl" : "text-on-surface-variant hover:text-primary")}>
-             <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Wallet</span>
           </Link>
-          <Link to="/settings" className={cn("flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/settings') ? "bg-primary text-on-primary shadow-md rounded-2xl" : "text-on-surface-variant hover:text-primary")}>
+          <Link to="/settings" className={cn("flex flex-col items-center justify-center rounded-2xl p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/settings') ? "bg-primary text-on-primary shadow-md" : "text-on-surface-variant hover:text-primary")}>
              <span className="material-symbols-outlined text-[24px]">settings</span>
              <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Settings</span>
           </Link>

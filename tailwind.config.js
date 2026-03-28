@@ -66,11 +66,17 @@ export default {
       borderRadius: {
         "DEFAULT": "0.25rem",
         "lg": "0.5rem",
-        "xl": "0.75rem",
-        "2xl": "1rem", // Added for matching the login card
-        "3xl": "1.5rem",
+        "xl": "1.5rem",
+        "2xl": "2rem",
+        "3xl": "2.5rem",
         "full": "9999px"
       },
+      fontSize: {
+        "display-lg": ["3.5rem", { lineHeight: "1", fontWeight: "800" }],
+        "headline-sm": ["1.25rem", { lineHeight: "1.75rem", fontWeight: "700" }],
+        "label-sm": ["0.75rem", { lineHeight: "1rem", fontWeight: "500", letterSpacing: "0.05em" }],
+        "body-md": ["1rem", { lineHeight: "1.5rem", fontWeight: "400" }],
+      }
     },
   },
   plugins: [

@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { supabase } from '@/utils/supabase'
-import { loginSchema, type LoginFormValues } from '../types/auth.schema'
+import { registerSchema, type RegisterFormValues } from '../types/auth.schema'
 
-export const useLogin = () => {
+export const useRegister = () => {
   const navigate = useNavigate()
 
   // 📋 REACT HOOK FORM SETUP
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
+      fullName: '',
       email: '',
       password: ''
     }
@@ -19,10 +20,15 @@ export const useLogin = () => {
 
   // 🚀 REACT QUERY MUTATION (SUPABASE AUTH)
   const mutation = useMutation({
-    mutationFn: async (data: LoginFormValues) => {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
+    mutationFn: async (data: RegisterFormValues) => {
+      const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          data: {
+            full_name: data.fullName,
+          }
+        }
       })
 
       if (error) {
@@ -32,17 +38,17 @@ export const useLogin = () => {
       return authData
     },
     onSuccess: () => {
-      // Persistent redirect
+      // Persistent redirect (Assuming email confirmation is disabled for direct login)
       navigate('/', { replace: true })
     },
     onError: (error: any) => {
-      // Handle login error
-      console.error('Login failed:', error.message)
+      // Handle registration error
+      console.error('Registration failed:', error.message)
     }
   })
 
   // ⚡ HANDLERS
-  const onSubmit = (data: LoginFormValues) => {
+  const onSubmit = (data: RegisterFormValues) => {
     mutation.mutate(data)
   }
 
