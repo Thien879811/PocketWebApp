@@ -17,7 +17,9 @@ const EditTransaction = lazy(() => import('@/features/transactions/pages/EditTra
 const Wallet = lazy(() => import('@/features/accounts/pages/Wallet'))
 const Stats = lazy(() => import('@/pages/Stats'))
 const Transactions = lazy(() => import('@/features/transactions/pages/Transactions'))
-
+const Goals = lazy(() => import('@/features/goals/pages/Goals'))
+const AddGoal = lazy(() => import('@/features/goals/pages/AddGoal'))
+const EditGoal = lazy(() => import('@/features/goals/pages/EditGoal'))
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center bg-white dark:bg-neutral-950">
@@ -132,6 +134,30 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
              <Wallet />
+          </Suspense>
+        )
+      },
+      {
+        path: 'goals',
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+             <Goals />
+          </Suspense>
+        )
+      },
+      {
+        path: 'goals/add',
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+             <AddGoal />
+          </Suspense>
+        )
+      },
+      {
+        path: 'goals/edit/:id',
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+             <EditGoal />
           </Suspense>
         )
       }

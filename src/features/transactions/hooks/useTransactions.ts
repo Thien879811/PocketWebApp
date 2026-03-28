@@ -43,10 +43,12 @@ export const useTransaction = (id: string | undefined) => {
   })
 }
 
+import { type Category } from '@/features/categories/types/category.schema'
+
 /**
  * 📊 Aggregate statistics from transaction list
  */
-export const getTransactionStats = (transactions: Transaction[]) => {
+export const getTransactionStats = (transactions: Transaction[], categories: Category[] = []) => {
   const now = new Date()
   const currentMonth = now.getMonth()
   const currentYear = now.getFullYear()
@@ -79,7 +81,16 @@ export const getTransactionStats = (transactions: Transaction[]) => {
     })
 
   const topCategories = Object.entries(categoryMap)
-    .map(([name, data]) => ({ name, ...data }))
+    .map(([name, data]) => {
+      const catInfo = categories.find(c => c.name === name)
+      return { 
+        name, 
+        ...data, 
+        limit: catInfo?.limit || 0,
+        icon: catInfo?.icon || 'payments',
+        color: catInfo?.color || 'bg-primary'
+      }
+    })
     .sort((a, b) => b.amount - a.amount)
 
   // 3. Weekly Trends

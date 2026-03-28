@@ -9,8 +9,10 @@ import {
   Camera,
   Heart,
   Zap,
-  Globe
+  Globe,
+  LayoutGrid
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 
 import { clsx, type ClassValue } from 'clsx'
@@ -21,6 +23,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 const Settings: React.FC = () => {
+  const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
 
@@ -31,23 +34,24 @@ const Settings: React.FC = () => {
     {
       title: 'Preferences',
       items: [
-        { icon: Palette, label: 'Appearance', color: 'bg-primary/10 text-primary' },
-        { icon: Bell, label: 'Notifications', color: 'bg-secondary/10 text-secondary' },
-        { icon: Globe, label: 'Language', color: 'bg-tertiary/10 text-tertiary' },
+        { icon: LayoutGrid, label: 'Categories', path: '/settings/categories', color: 'bg-primary/10 text-primary' },
+        { icon: Palette, label: 'Appearance', path: '#', color: 'bg-secondary/10 text-secondary' },
+        { icon: Bell, label: 'Notifications', path: '#', color: 'bg-tertiary/10 text-tertiary' },
+        { icon: Globe, label: 'Language', path: '#', color: 'bg-primary/10 text-primary' },
       ]
     },
     {
       title: 'Security',
       items: [
-        { icon: ShieldCheck, label: 'Privacy & Safety', color: 'bg-primary/10 text-primary' },
-        { icon: Zap, label: 'Connected Apps', color: 'bg-secondary/10 text-secondary' },
+        { icon: ShieldCheck, label: 'Privacy & Safety', path: '#', color: 'bg-primary/10 text-primary' },
+        { icon: Zap, label: 'Connected Apps', path: '#', color: 'bg-secondary/10 text-secondary' },
       ]
     },
     {
       title: 'About',
       items: [
-        { icon: HelpCircle, label: 'Help Center', color: 'bg-primary/10 text-primary' },
-        { icon: Heart, label: 'Support Us', color: 'bg-error/10 text-error' },
+        { icon: HelpCircle, label: 'Help Center', path: '#', color: 'bg-primary/10 text-primary' },
+        { icon: Heart, label: 'Support Us', path: '#', color: 'bg-error/10 text-error' },
       ]
     }
   ]
@@ -89,6 +93,7 @@ const Settings: React.FC = () => {
               {group.items.map((item, iIdx) => (
                 <button
                   key={iIdx}
+                  onClick={() => item.path && item.path !== '#' && navigate(item.path)}
                   className={cn(
                     "w-full flex items-center justify-between p-6 active:bg-primary/5 transition-all group border-b border-outline-variant/10 last:border-0",
                   )}

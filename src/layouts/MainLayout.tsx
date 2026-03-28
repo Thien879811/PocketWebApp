@@ -10,6 +10,7 @@ function cn(...inputs: ClassValue[]) {
 
 const navLinksDesktop = [
   { name: 'Home', path: '/', icon: 'home' },
+  { name: 'Goals', path: '/goals', icon: 'track_changes' },
   { name: 'Ledger', path: '/ledger', icon: 'receipt_long' },
   { name: 'Stats', path: '/stats', icon: 'insights' },
   { name: 'Wallet', path: '/wallet', icon: 'account_balance_wallet' },
@@ -103,6 +104,10 @@ const MainLayout: React.FC = () => {
           <Link to="/" className={cn("flex flex-col items-center justify-center rounded-2xl p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/') ? "bg-primary text-on-primary shadow-md" : "text-on-surface-variant hover:text-primary")}>
              <span className="material-symbols-outlined text-[24px]">home</span>
              <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Home</span>
+          </Link>
+          <Link to="/goals" className={cn("flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/goals') ? "bg-primary text-on-primary shadow-md rounded-2xl" : "text-on-surface-variant hover:text-primary")}>
+             <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: isActive('/goals') ? "'FILL' 1" : "'FILL' 0" }}>track_changes</span>
+             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Goals</span>
           </Link>
           <Link to="/ledger" className={cn("flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/ledger') ? "bg-primary text-on-primary shadow-md rounded-2xl" : "text-on-surface-variant hover:text-primary")}>
              <span className="material-symbols-outlined text-[24px]">receipt_long</span>

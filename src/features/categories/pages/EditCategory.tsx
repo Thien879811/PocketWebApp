@@ -50,6 +50,7 @@ const EditCategory: React.FC = () => {
       setSelectedIcon(category.icon)
       setSelectedColor(category.color || 'bg-primary')
       setType(category.type)
+      setValue('limit', category.limit)
     }
   }, [category, setValue])
 
@@ -57,18 +58,16 @@ const EditCategory: React.FC = () => {
 
   const onSubmit = (data: CategoryFormValues) => {
     if (!id) return
-    updateCategory({ 
-      id, 
-      data: {
-        ...data, 
-        icon: selectedIcon, 
-        type, 
-        color: selectedColor 
-      }
-    }, {
+    updateCategory({ id, data }, {
       onSuccess: () => navigate('/settings/categories')
     })
   }
+
+  useEffect(() => {
+    setValue('icon', selectedIcon)
+    setValue('type', type)
+    setValue('color', selectedColor)
+  }, [selectedIcon, type, selectedColor, setValue])
 
   const handleDelete = () => {
     if (!id) return
@@ -202,6 +201,28 @@ const EditCategory: React.FC = () => {
                 ></button>
               ))}
             </div>
+          </section>
+
+          {/* Monthly Limit Section */}
+          <section className={cn("space-y-4 transition-all duration-300", type === 'income' ? "opacity-0 h-0 overflow-hidden" : "opacity-100")}>
+            <label className="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+              Giới hạn tháng
+              <span className="text-[10px] bg-secondary/10 text-secondary px-2 py-0.5 rounded-full uppercase tracking-widest font-black">Budgeting</span>
+            </label>
+            <div className="bg-surface-container-low p-1 rounded-2xl border border-outline-variant/10 relative group">
+              <span className="absolute left-6 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline transition-colors group-focus-within:text-primary">
+                payments
+              </span>
+              <input 
+                {...register('limit', { valueAsNumber: true })}
+                className="w-full bg-surface-container-lowest border-none rounded-xl pl-14 pr-6 py-4 text-lg font-body focus:ring-2 focus:ring-primary outline-none placeholder:text-outline/50 font-black italic" 
+                placeholder="Đặt giới hạn (VNĐ)" 
+                type="number"
+                step="10000"
+              />
+            </div>
+            <p className="text-[10px] text-on-surface-variant font-medium px-2 italic">Hệ thống sẽ cảnh báo khi bạn chi tiêu vượt ngưỡng này.</p>
+            {errors.limit && <p className="text-xs text-error font-bold px-2">{errors.limit.message}</p>}
           </section>
 
           {/* Preview Card */}

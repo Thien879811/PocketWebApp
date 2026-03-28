@@ -127,7 +127,7 @@ const Login: React.FC = () => {
             <button 
               type="submit"
               disabled={isLoading}
-              className="w-full h-15 bg-primary text-white font-headline font-bold text-lg rounded-2xl shadow-xl shadow-primary/20 active:scale-[0.98] transition-all hover:bg-primary/90 flex items-center justify-center gap-3 disabled:opacity-50"
+              className="w-full h-14 mt-4 bg-primary text-white font-headline font-bold text-lg rounded-2xl shadow-xl shadow-primary/20 active:scale-[0.98] transition-all hover:bg-primary/90 flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Continue'}
             </button>
@@ -141,7 +141,7 @@ const Login: React.FC = () => {
 
             {/* 🌐 Social Logins */}
             <div className="space-y-3">
-              <button type="button" className="w-full h-15 bg-white border border-outline-variant/40 flex items-center justify-center gap-3 rounded-2xl hover:bg-surface-container-low transition-colors active:scale-[0.98] font-semibold text-on-surface">
+              <button type="button" className="w-full h-14 bg-white border border-outline-variant/40 flex items-center justify-center gap-3 rounded-2xl hover:bg-surface-container-low transition-colors active:scale-[0.98] font-semibold text-on-surface">
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
@@ -150,7 +150,7 @@ const Login: React.FC = () => {
                 </svg>
                 Continue with Google
               </button>
-              <button type="button" className="w-full h-15 bg-[#000000] text-white flex items-center justify-center gap-3 rounded-2xl active:scale-[0.98] transition-all font-semibold">
+              <button type="button" className="w-full h-14 bg-white border border-outline-variant/40 flex items-center justify-center gap-3 rounded-2xl hover:bg-surface-container-low transition-colors active:scale-[0.98] font-semibold text-on-surface">
                 <svg className="w-5 h-5 fill-current" viewBox="0 0 384 512">
                   <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-31.4-57.3-114.3-57.7-114.3zm-36.7-133.2c36.4-44.4 21.6-96.9 21.6-96.9s-56 3.6-95.3 49.3c-29.3 34-21.6 81.4-21.6 81.4s49.3 8.3 95.3-33.8z"></path>
                 </svg>
