@@ -12,6 +12,8 @@ const AddTransaction = lazy(() => import('@/features/transactions/pages/AddTrans
 const Settings = lazy(() => import('@/pages/Settings'))
 const Categories = lazy(() => import('@/features/categories/pages/Categories'))
 const AddCategory = lazy(() => import('@/features/categories/pages/AddCategory'))
+const EditCategory = lazy(() => import('@/features/categories/pages/EditCategory'))
+const EditTransaction = lazy(() => import('@/features/transactions/pages/EditTransaction'))
 const Wallet = lazy(() => import('@/features/accounts/pages/Wallet'))
 const Stats = lazy(() => import('@/pages/Stats'))
 
@@ -46,6 +48,16 @@ const router = createBrowserRouter([
       <ProtectedRoute>
         <Suspense fallback={<LoadingScreen />}>
           <AddTransaction />
+        </Suspense>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/edit/:id',
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingScreen />}>
+          <EditTransaction />
         </Suspense>
       </ProtectedRoute>
     )
@@ -87,6 +99,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
             <AddCategory />
+          </Suspense>
+        )
+      },
+      {
+        path: 'settings/categories/edit/:id',
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+            <EditCategory />
           </Suspense>
         )
       },

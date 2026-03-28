@@ -1,5 +1,5 @@
 import React from 'react'
-import { PlusCircle, Info, ChevronLeft, ArrowRight, Loader2, Inbox } from 'lucide-react'
+import { PlusCircle, Info, ChevronLeft, Loader2, Inbox } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCategories } from '../hooks/useCategories'
 
@@ -65,13 +65,14 @@ const Categories: React.FC = () => {
         ) : (
           <div className="grid grid-cols-2 gap-4">
             {categories?.map((cat) => (
-              <CategoryCard 
-                key={cat.id} 
-                icon={cat.icon} 
-                name={cat.name} 
-                type={cat.type} 
-                color={cat.color} 
-              />
+              <div key={cat.id} onClick={() => navigate(`/settings/categories/edit/${cat.id}`)}>
+                <CategoryCard 
+                  icon={cat.icon} 
+                  name={cat.name} 
+                  type={cat.type} 
+                  color={cat.color} 
+                />
+              </div>
             ))}
           </div>
         )}

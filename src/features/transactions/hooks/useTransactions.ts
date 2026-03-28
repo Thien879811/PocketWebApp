@@ -24,6 +24,25 @@ export const useTransactions = () => {
   })
 }
 
+export const useTransaction = (id: string | undefined) => {
+  return useQuery<Transaction>({
+    queryKey: ['transaction', id],
+    queryFn: async () => {
+      if (!id) throw new Error('Transaction ID is required')
+      
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw new Error(error.message)
+      return data
+    },
+    enabled: !!id,
+  })
+}
+
 /**
  * 📊 Aggregate statistics from transaction list
  */

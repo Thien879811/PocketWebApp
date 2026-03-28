@@ -24,6 +24,25 @@ export const useCategories = () => {
   })
 }
 
+export const useCategory = (id: string | undefined) => {
+  return useQuery<Category>({
+    queryKey: ['category', id],
+    queryFn: async () => {
+      if (!id) throw new Error('Category ID is required')
+      
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw new Error(error.message)
+      return data
+    },
+    enabled: !!id,
+  })
+}
+
 export const useCreateCategory = () => {
   const queryClient = useQueryClient()
   const user = useAuthStore((state) => state.user)
@@ -40,6 +59,41 @@ export const useCreateCategory = () => {
 
       if (error) throw new Error(error.message)
       return category
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+  })
+}
+
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<CategoryFormValues> }) => {
+      const { data: category, error } = await supabase
+        .from('categories')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw new Error(error.message)
+      return category
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+  })
+}
+
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('categories').delete().eq('id', id)
+      if (error) throw new Error(error.message)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })

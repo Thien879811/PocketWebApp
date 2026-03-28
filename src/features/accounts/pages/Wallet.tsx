@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { 
-  Plus, TrendingUp, Edit3, Landmark, CreditCard, Sparkles, 
+  Plus, TrendingUp, Landmark, CreditCard, 
   Wallet as WalletIcon, X, Check, Loader2, Landmark as BankIcon, 
-  CreditCard as CardIcon, Coins 
+  CreditCard as CardIcon, Coins, 
+  Sparkles
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAccounts, useCreateAccount } from '../hooks/useAccounts'
@@ -21,7 +22,7 @@ const Wallet: React.FC = () => {
   const { mutate: createAccount, isPending: isCreating } = useCreateAccount()
   const [showAddModal, setShowAddModal] = useState(false)
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<AccountFormValues>({
+  const { register, handleSubmit, reset, setValue, watch } = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
     defaultValues: { balance: 0, type: 'cash' }
   })

@@ -19,10 +19,8 @@ const MainLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const location = useLocation()
   
-  const { user, logout } = useAuthStore((state) => ({
-    user: state.user,
-    logout: state.logout
-  }))
+  const user = useAuthStore((state) => state.user)
+  const logout = useAuthStore((state) => state.logout)
 
   const isActive = (path: string) => location.pathname === path
 
@@ -108,10 +106,6 @@ const MainLayout: React.FC = () => {
           <Link to="/stats" className={cn("flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/stats') ? "bg-primary text-on-primary shadow-md rounded-2xl" : "text-on-surface-variant hover:text-primary")}>
              <span className="material-symbols-outlined text-[24px]">insights</span>
              <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Stats</span>
-          </Link>
-          <Link to="/add" className="flex flex-col items-center justify-center p-2 text-on-surface-variant hover:text-primary active:scale-90 transition-all duration-150 min-w-[64px]">
-             <span className="material-symbols-outlined text-[24px]">add_circle</span>
-             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Add</span>
           </Link>
           <Link to="/wallet" className={cn("flex flex-col items-center justify-center rounded-2xl p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/wallet') ? "bg-primary text-on-primary shadow-md" : "text-on-surface-variant hover:text-primary")}>
              <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>

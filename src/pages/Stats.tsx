@@ -1,7 +1,5 @@
 import React from 'react'
 import { 
-  BarChart3, 
-  PieChart as PieIcon, 
   ArrowUpRight, 
   ArrowDownLeft, 
   BrainCircuit, 
@@ -10,7 +8,6 @@ import {
   Loader2,
   Inbox,
   LayoutGrid,
-  Sparkles
 } from 'lucide-react'
 import { useTransactions, getTransactionStats } from '../features/transactions/hooks/useTransactions'
 

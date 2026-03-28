@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X, ChevronRight, Calendar, Wallet, LayoutGrid, Inbox, Check } from 'lucide-react'
+import { Loader2, X, ChevronRight, Calendar, Wallet, Inbox, Check, Trash2 } from 'lucide-react'
 import { transactionSchema, type TransactionFormValues } from '../types/transaction.schema'
-import { useCreateTransaction } from '../hooks/useTransactionMutations'
+import { useUpdateTransaction, useDeleteTransaction } from '../hooks/useTransactionMutations'
+import { useTransaction } from '../hooks/useTransactions'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { useAccounts } from '../../accounts/hooks/useAccounts'
 import { clsx, type ClassValue } from 'clsx'
@@ -14,9 +15,12 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-const AddTransaction: React.FC = () => {
+const EditTransaction: React.FC = () => {
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { mutate: createTransaction, isPending } = useCreateTransaction()
+  const { data: transaction, isLoading: transactionLoading } = useTransaction(id)
+  const { mutate: updateTransaction, isPending: updatePending } = useUpdateTransaction()
+  const { mutate: deleteTransaction, isPending: deletePending } = useDeleteTransaction()
   const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { data: accounts } = useAccounts()
   
@@ -25,15 +29,19 @@ const AddTransaction: React.FC = () => {
 
   const { handleSubmit, register, setValue, watch, formState: { errors } } = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
-    defaultValues: {
-      amount: 0,
-      type: 'expense',
-      category: '',
-      date: new Date().toISOString().split('T')[0],
-      note: '',
-      account_id: ''
-    }
   })
+
+  useEffect(() => {
+    if (transaction) {
+      setValue('amount', transaction.amount)
+      setValue('type', transaction.type)
+      setValue('category', transaction.category)
+      setValue('date', transaction.date)
+      setValue('note', transaction.note || '')
+      setValue('account_id', transaction.account_id)
+      setTransactionType(transaction.type)
+    }
+  }, [transaction, setValue])
 
   const currentAmount = watch('amount')
   const selectedCategory = watch('category')
@@ -46,11 +54,29 @@ const AddTransaction: React.FC = () => {
   }
 
   const onSubmit = (data: TransactionFormValues) => {
-    createTransaction({ ...data, type: transactionType })
+    if (!id) return
+    updateTransaction({ id, data: { ...data, type: transactionType } })
+  }
+
+  const handleDelete = () => {
+    if (!id) return
+    if (window.confirm('Bạn có chắc chắn muốn xóa giao dịch này?')) {
+      deleteTransaction(id, {
+        onSuccess: () => navigate('/')
+      })
+    }
   }
 
   // Filter categories by selected type
   const filteredCategories = categories?.filter(cat => cat.type === transactionType) || []
+
+  if (transactionLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-surface md:flex md:items-center md:justify-center md:p-8">
@@ -66,8 +92,14 @@ const AddTransaction: React.FC = () => {
           >
             <X className="w-6 h-6 text-on-surface" />
           </button>
-          <h1 className="font-headline font-bold text-xl tracking-tight text-primary">Giao dịch mới</h1>
-          <div className="w-10 h-10"></div>
+          <h1 className="font-headline font-bold text-xl tracking-tight text-primary">Chỉnh sửa giao dịch</h1>
+          <button 
+            type="button"
+            onClick={handleDelete}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-error/10 text-error transition-colors active:scale-95 duration-200"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
         </header>
 
         {/* 🎨 Main Content scrolled area */}
@@ -78,19 +110,18 @@ const AddTransaction: React.FC = () => {
             <section className="text-center">
               <div className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/10">
                 <div className="flex flex-col items-center gap-2">
-                  <span className="font-label text-label-sm uppercase tracking-widest text-on-surface-variant">Số tiền</span>
-                  <div className="flex items-baseline gap-1">
-                    <input 
-                      {...register('amount', { valueAsNumber: true })}
-                      className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px]"
-                      placeholder="0"
-                      type="number"
-                      step="1000"
-                      autoFocus
-                    />
-                    <span className="text-headline-sm font-headline text-on-surface-variant">đ</span>
-                  </div>
-                  {errors.amount && <p className="text-xs text-error font-bold">{errors.amount.message}</p>}
+                   <span className="font-label text-label-sm uppercase tracking-widest text-on-surface-variant">Số tiền</span>
+                   <div className="flex items-baseline gap-1">
+                     <input 
+                       {...register('amount', { valueAsNumber: true })}
+                       className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px]"
+                       placeholder="0"
+                       type="number"
+                       step="1000"
+                     />
+                     <span className="text-headline-sm font-headline text-on-surface-variant">đ</span>
+                   </div>
+                   {errors.amount && <p className="text-xs text-error font-bold">{errors.amount.message}</p>}
                 </div>
 
                 {/* Quick Amount Chips */}
@@ -145,13 +176,6 @@ const AddTransaction: React.FC = () => {
             <section>
               <div className="flex justify-between items-end mb-4 px-2">
                 <h2 className="font-headline text-headline-sm font-bold opacity-80 uppercase tracking-tight text-sm">Danh mục</h2>
-                <button 
-                  type="button" 
-                  onClick={() => navigate('/settings/categories')}
-                  className="text-primary text-xs font-black hover:underline"
-                >
-                  Quản lý
-                </button>
               </div>
 
               {categoriesLoading ? (
@@ -184,14 +208,6 @@ const AddTransaction: React.FC = () => {
                       <span className="font-label text-[10px] font-black tracking-tighter truncate w-full text-center leading-none">{cat.name}</span>
                     </button>
                   ))}
-                  <button 
-                    type="button"
-                    onClick={() => navigate('/settings/categories/add')}
-                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-surface-container-highest/10 border-2 border-dashed border-outline-variant/30 text-outline-variant hover:text-primary transition-all active:scale-95"
-                  >
-                    <LayoutGrid size={24} />
-                    <span className="font-label text-[10px] font-bold tracking-tight">Mới</span>
-                  </button>
                 </div>
               )}
             </section>
@@ -250,10 +266,10 @@ const AddTransaction: React.FC = () => {
           <button 
             type="submit"
             form="transaction-form"
-            disabled={isPending}
+            disabled={updatePending || deletePending}
             className="w-full bg-primary text-on-primary h-16 rounded-[1.5rem] font-headline font-black text-lg shadow-2xl shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
           >
-            {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Lưu giao dịch'}
+            {updatePending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Cập nhật giao dịch'}
           </button>
         </footer>
 
@@ -304,4 +320,4 @@ const AddTransaction: React.FC = () => {
   )
 }
 
-export default AddTransaction
+export default EditTransaction

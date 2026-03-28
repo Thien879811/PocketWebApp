@@ -1,27 +1,28 @@
 import React from 'react'
 import { 
-  User, 
   Bell, 
   ShieldCheck, 
   Palette, 
-  Monitor, 
   HelpCircle, 
   LogOut, 
   ChevronRight, 
   Camera,
   Heart,
-  Smartphone,
-  LayoutGrid,
   Zap,
   Globe
 } from 'lucide-react'
 import { useAuthStore } from '@/store/useAuthStore'
 
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
 const Settings: React.FC = () => {
-  const { user, logout } = useAuthStore((state) => ({
-    user: state.user,
-    logout: state.logout
-  }))
+  const user = useAuthStore((state) => state.user)
+  const logout = useAuthStore((state) => state.logout)
 
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || user?.email || 'User')}&background=005da7&color=fff`
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
@@ -30,9 +31,9 @@ const Settings: React.FC = () => {
     {
       title: 'Preferences',
       items: [
-        { icon: Palette, label: 'Appearance', value: 'Light Mode', color: 'bg-primary/10 text-primary' },
-        { icon: Bell, label: 'Notifications', value: 'On', color: 'bg-secondary/10 text-secondary' },
-        { icon: Globe, label: 'Language', value: 'Tiếng Việt', color: 'bg-tertiary/10 text-tertiary' },
+        { icon: Palette, label: 'Appearance', color: 'bg-primary/10 text-primary' },
+        { icon: Bell, label: 'Notifications', color: 'bg-secondary/10 text-secondary' },
+        { icon: Globe, label: 'Language', color: 'bg-tertiary/10 text-tertiary' },
       ]
     },
     {
@@ -99,7 +100,6 @@ const Settings: React.FC = () => {
                     <span className="font-headline font-black text-lg text-on-surface text-left">{item.label}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    {item.value && <span className="font-label text-xs font-black text-on-surface-variant opacity-40 uppercase tracking-tighter">{item.value}</span>}
                     <ChevronRight className="text-outline-variant group-hover:translate-x-1 transition-transform" />
                   </div>
                 </button>

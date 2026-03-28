@@ -1,15 +1,12 @@
 import React from 'react'
 import { 
-  TrendingUp, 
-  TrendingDown, 
   Plus, 
   ChevronRight, 
   Loader2, 
   Inbox, 
   ArrowUpRight, 
   ArrowDownLeft, 
-  LayoutGrid,
-  Wallet
+  LayoutGrid
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTransactions, getTransactionStats } from '../features/transactions/hooks/useTransactions'
@@ -106,8 +103,12 @@ const Home: React.FC = () => {
             </div>
          ) : (
             <div className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-outline-variant/10 shadow-xl shadow-on-surface/[0.02]">
-               {transactions.slice(0, 5).map((tx) => (
-                  <div key={tx.id} className="p-6 flex items-center justify-between group active:bg-primary/5 transition-all duration-300 border-b border-outline-variant/10 last:border-0">
+                {transactions.slice(0, 5).map((tx) => (
+                  <div 
+                    key={tx.id} 
+                    onClick={() => navigate(`/edit/${tx.id}`)}
+                    className="p-6 flex items-center justify-between group active:bg-primary/5 cursor-pointer transition-all duration-300 border-b border-outline-variant/10 last:border-0"
+                  >
                      <div className="flex items-center gap-5">
                         <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex flex-shrink-0 items-center justify-center shadow-inner group-hover:bg-white transition-all">
                            <LayoutGrid size={24} className="text-primary opacity-60" />
