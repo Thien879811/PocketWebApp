@@ -12,6 +12,8 @@ const AddTransaction = lazy(() => import('@/features/transactions/pages/AddTrans
 const Settings = lazy(() => import('@/pages/Settings'))
 const Categories = lazy(() => import('@/features/categories/pages/Categories'))
 const AddCategory = lazy(() => import('@/features/categories/pages/AddCategory'))
+const Wallet = lazy(() => import('@/features/accounts/pages/Wallet'))
+const Stats = lazy(() => import('@/pages/Stats'))
 
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
@@ -92,7 +94,7 @@ const router = createBrowserRouter([
         path: 'stats',
         element: (
           <Suspense fallback={<LoadingScreen />}>
-            <div className="p-8"><h1 className="text-2xl font-bold">Stats</h1><p className="mt-2 text-neutral-500">Coming soon...</p></div>
+             <Stats />
           </Suspense>
         )
       },
@@ -100,7 +102,7 @@ const router = createBrowserRouter([
         path: 'wallet',
         element: (
           <Suspense fallback={<LoadingScreen />}>
-            <div className="p-8"><h1 className="text-2xl font-bold">Wallet</h1><p className="mt-2 text-neutral-500">Coming soon...</p></div>
+             <Wallet />
           </Suspense>
         )
       }

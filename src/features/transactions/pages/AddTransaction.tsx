@@ -2,10 +2,11 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X, ChevronRight, Calendar, Wallet, Camera, LayoutGrid, Inbox } from 'lucide-react'
+import { Loader2, X, ChevronRight, Calendar, Wallet, Camera, LayoutGrid, Inbox, Check, Plus } from 'lucide-react'
 import { transactionSchema, type TransactionFormValues } from '../types/transaction.schema'
 import { useCreateTransaction } from '../hooks/useCreateTransaction'
 import { useCategories } from '../../categories/hooks/useCategories'
+import { useAccounts } from '../../accounts/hooks/useAccounts'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -17,7 +18,10 @@ const AddTransaction: React.FC = () => {
   const navigate = useNavigate()
   const { mutate: createTransaction, isPending } = useCreateTransaction()
   const { data: categories, isLoading: categoriesLoading } = useCategories()
+  const { data: accounts, isLoading: accountsLoading } = useAccounts()
+  
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense')
+  const [showAccountSelector, setShowAccountSelector] = useState(false)
 
   const { handleSubmit, register, setValue, watch, formState: { errors } } = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -26,12 +30,16 @@ const AddTransaction: React.FC = () => {
       type: 'expense',
       category: '',
       date: new Date().toISOString().split('T')[0],
-      note: ''
+      note: '',
+      account_id: ''
     }
   })
 
   const currentAmount = watch('amount')
   const selectedCategory = watch('category')
+  const selectedAccountId = watch('account_id')
+  
+  const selectedAccount = accounts?.find(a => a.id === selectedAccountId)
 
   const handleQuickAdd = (val: number) => {
     setValue('amount', (currentAmount || 0) + val)
@@ -58,11 +66,11 @@ const AddTransaction: React.FC = () => {
           >
             <X className="w-6 h-6 text-on-surface" />
           </button>
-          <h1 className="font-headline font-bold text-xl tracking-tight text-primary">New Transaction</h1>
+          <h1 className="font-headline font-bold text-xl tracking-tight text-primary">Giao dịch mới</h1>
           <div className="w-10 h-10"></div>
         </header>
 
-        {/* 🎨 Main Content */}
+        {/* 🎨 Main Content scrolled area */}
         <main className="flex-1 overflow-y-auto px-4 pb-40 no-scrollbar">
           <form id="transaction-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 pt-4">
             
@@ -70,17 +78,17 @@ const AddTransaction: React.FC = () => {
             <section className="text-center">
               <div className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/10">
                 <div className="flex flex-col items-center gap-2">
-                  <span className="font-label text-label-sm uppercase tracking-widest text-on-surface-variant">Amount</span>
+                  <span className="font-label text-label-sm uppercase tracking-widest text-on-surface-variant">Số tiền</span>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-headline-sm font-headline text-on-surface-variant">¥</span>
                     <input 
                       {...register('amount', { valueAsNumber: true })}
                       className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px]"
-                      placeholder="0.00"
+                      placeholder="0"
                       type="number"
-                      step="0.01"
+                      step="1000"
                       autoFocus
                     />
+                    <span className="text-headline-sm font-headline text-on-surface-variant">đ</span>
                   </div>
                   {errors.amount && <p className="text-xs text-error font-bold">{errors.amount.message}</p>}
                 </div>
@@ -91,10 +99,10 @@ const AddTransaction: React.FC = () => {
                     <button 
                       key={val}
                       type="button"
-                      onClick={() => handleQuickAdd(val)}
+                      onClick={() => handleQuickAdd(val * 1000)}
                       className="px-4 py-2 bg-surface-container-high rounded-full font-label text-label-sm text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors flex-shrink-0"
                     >
-                      +¥{val}
+                      +{val}k đ
                     </button>
                   ))}
                 </div>
@@ -103,7 +111,7 @@ const AddTransaction: React.FC = () => {
 
             {/* 🔄 Type Toggle */}
             <section>
-              <div className="bg-surface-container-high p-1.5 rounded-full flex relative">
+              <div className="bg-surface-container-high p-1.5 rounded-full flex relative shadow-inner">
                 <button 
                   type="button"
                   onClick={() => {
@@ -111,11 +119,11 @@ const AddTransaction: React.FC = () => {
                     setValue('type', 'income');
                   }}
                   className={cn(
-                    "flex-1 py-2.5 rounded-full font-label text-body-md font-bold transition-all",
-                    transactionType === 'income' ? "bg-secondary text-white shadow-md" : "text-on-surface-variant hover:bg-surface-bright"
+                    "flex-1 py-3 rounded-full font-label text-body-md font-black transition-all duration-300",
+                    transactionType === 'income' ? "bg-secondary text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
                   )}
                 >
-                  Income
+                  Thu nhập
                 </button>
                 <button 
                   type="button"
@@ -124,11 +132,11 @@ const AddTransaction: React.FC = () => {
                     setValue('type', 'expense');
                   }}
                   className={cn(
-                    "flex-1 py-2.5 rounded-full font-label text-body-md font-bold transition-all",
-                    transactionType === 'expense' ? "bg-primary text-white shadow-md" : "text-on-surface-variant hover:bg-surface-bright"
+                    "flex-1 py-3 rounded-full font-label text-body-md font-black transition-all duration-300",
+                    transactionType === 'expense' ? "bg-primary text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
                   )}
                 >
-                  Expense
+                  Chi tiêu
                 </button>
               </div>
             </section>
@@ -136,13 +144,13 @@ const AddTransaction: React.FC = () => {
             {/* 📂 Category Grid */}
             <section>
               <div className="flex justify-between items-end mb-4 px-2">
-                <h2 className="font-headline text-headline-sm">Category</h2>
+                <h2 className="font-headline text-headline-sm font-bold opacity-80 uppercase tracking-tight text-sm">Danh mục</h2>
                 <button 
                   type="button" 
                   onClick={() => navigate('/settings/categories')}
-                  className="text-primary text-xs font-bold hover:underline"
+                  className="text-primary text-xs font-black hover:underline"
                 >
-                  Manage
+                  Quản lý
                 </button>
               </div>
 
@@ -153,8 +161,8 @@ const AddTransaction: React.FC = () => {
               ) : filteredCategories.length === 0 ? (
                 <div className="bg-surface-container-low rounded-3xl p-8 text-center space-y-3 cursor-pointer hover:bg-surface-container-high transition-colors" onClick={() => navigate('/settings/categories/add')}>
                    <Inbox className="w-8 h-8 text-outline-variant mx-auto" />
-                   <p className="text-xs text-outline font-bold uppercase tracking-tight">No {transactionType} categories found</p>
-                   <p className="text-[10px] text-primary font-bold">Tap to add your first category</p>
+                   <p className="text-xs text-outline font-bold uppercase tracking-tight">Trống danh mục {transactionType === 'income' ? 'thu nhập' : 'chi tiêu'}</p>
+                   <p className="text-[10px] text-primary font-bold">Thêm danh mục mới</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-4 gap-3">
@@ -164,94 +172,133 @@ const AddTransaction: React.FC = () => {
                       type="button"
                       onClick={() => setValue('category', cat.name)}
                       className={cn(
-                        "flex flex-col items-center gap-2 p-3 rounded-2xl transition-all active:scale-[0.9]",
+                        "flex flex-col items-center gap-2 p-3.5 rounded-2xl transition-all duration-200 active:scale-[0.9]",
                         selectedCategory === cat.name 
-                          ? cn("shadow-sm", transactionType === 'income' ? "bg-secondary/10 text-secondary" : "bg-primary-fixed text-on-primary-fixed")
-                          : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high"
+                          ? cn("shadow-xl ring-2", transactionType === 'income' ? "bg-secondary/10 text-secondary ring-secondary/30" : "bg-primary-fixed text-on-primary-fixed ring-primary/30")
+                          : "bg-surface-container-low text-on-surface-variant/80 hover:bg-surface-container-high"
                       )}
                     >
                       <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: selectedCategory === cat.name ? "'FILL' 1" : "'FILL' 0" }}>
                         {cat.icon}
                       </span>
-                      <span className="font-label text-[10px] font-bold tracking-tight truncate w-full text-center">{cat.name}</span>
+                      <span className="font-label text-[10px] font-black tracking-tighter truncate w-full text-center leading-none">{cat.name}</span>
                     </button>
                   ))}
-                  
-                  {/* Plus button for new category */}
                   <button 
                     type="button"
                     onClick={() => navigate('/settings/categories/add')}
-                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-surface-container-highest/20 border-2 border-dashed border-outline-variant/30 text-outline-variant hover:text-primary transition-all"
+                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-surface-container-highest/10 border-2 border-dashed border-outline-variant/30 text-outline-variant hover:text-primary transition-all active:scale-95"
                   >
-                    <LayoutGrid className="w-6 h-6" />
-                    <span className="font-label text-[10px] font-bold tracking-tight">New</span>
+                    <LayoutGrid size={24} />
+                    <span className="font-label text-[10px] font-bold tracking-tight">Mới</span>
                   </button>
                 </div>
               )}
-              {errors.category && <p className="text-xs text-error font-bold mt-2 px-2">{errors.category.message}</p>}
             </section>
 
             {/* 📝 Form Details */}
-            <section className="flex flex-col gap-4">
+            <section className="flex flex-col gap-4 mb-20">
+              
+              {/* Wallet Selector */}
+              <div 
+                className={cn(
+                  "flex items-center gap-4 p-5 rounded-3xl border transition-all cursor-pointer group shadow-sm",
+                  selectedAccountId ? "bg-primary/5 border-primary/20" : "bg-surface-container-lowest border-outline-variant/10 hover:bg-surface-container-low"
+                )}
+                onClick={() => setShowAccountSelector(true)}
+              >
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", selectedAccountId ? "bg-primary text-on-primary" : "bg-surface-container text-primary")}>
+                  <Wallet size={20} />
+                </div>
+                <div className="flex-1 text-left">
+                  <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-0.5">Tài khoản / Ví</label>
+                  <span className={cn("text-body-md font-bold", selectedAccountId ? "text-on-surface" : "text-outline-variant italic")}>
+                    {selectedAccount ? selectedAccount.name : 'Chọn một tài khoản...'}
+                  </span>
+                </div>
+                <ChevronRight size={20} className="text-outline-variant group-hover:translate-x-1 transition-transform" />
+              </div>
+
               {/* Date Input */}
-              <div className="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 group cursor-pointer relative">
+              <div className="flex items-center gap-4 bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10 group cursor-pointer relative shadow-sm hover:bg-surface-container-low transition-colors">
                 <Calendar className="w-5 h-5 text-primary" />
                 <div className="flex-1">
-                  <label className="block font-label text-[10px] uppercase text-outline mb-0.5">Date</label>
+                  <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-0.5">Ngày tháng</label>
                   <input 
                     {...register('date')}
                     type="date"
-                    className="w-full bg-transparent border-none p-0 text-body-md font-bold focus:ring-0"
+                    className="w-full bg-transparent border-none p-0 text-body-md font-bold focus:ring-0 text-on-surface"
                   />
                 </div>
               </div>
 
-              {/* Wallet Selector Mock */}
-              <div className="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
-                <Wallet className="w-5 h-5 text-primary" />
-                <div className="flex-1 text-left">
-                  <label className="block font-label text-[10px] uppercase text-outline mb-0.5">Wallet / Account</label>
-                  <span className="text-body-md font-bold text-on-surface">Main Savings Account</span>
-                </div>
-                <ChevronRight className="w-5 h-5 text-outline-variant" />
-              </div>
-
               {/* Notes */}
-              <div className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10">
-                <label className="block font-label text-[10px] uppercase text-outline mb-2">Note</label>
+              <div className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/10 shadow-sm">
+                <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-3">Ghi chú</label>
                 <textarea 
                   {...register('note')}
-                  className="w-full bg-transparent border-none p-0 text-body-md focus:ring-0 min-h-[100px] placeholder:text-outline-variant font-medium leading-relaxed" 
-                  placeholder="Add details about this transaction..."
+                  className="w-full bg-transparent border-none p-0 text-body-md focus:ring-0 min-h-[120px] placeholder:text-outline-variant/50 font-medium leading-relaxed" 
+                  placeholder="Bạn đã chi tiêu việc gì?..."
                 ></textarea>
-              </div>
-
-              {/* Photo Receipt Mock */}
-              <div className="relative group cursor-pointer">
-                <div className="w-full h-36 border-2 border-dashed border-outline-variant/40 rounded-3xl flex flex-col items-center justify-center gap-2 text-outline-variant hover:border-primary-container hover:text-primary transition-all bg-white/50 backdrop-blur-sm">
-                  <Camera className="w-8 h-8" />
-                  <span className="font-label text-label-sm font-bold">Add Receipt Photo</span>
-                </div>
               </div>
             </section>
           </form>
         </main>
 
         {/* 🚀 Footer Action */}
-        <footer className="absolute bottom-0 w-full p-6 bg-surface/80 backdrop-blur-xl z-20 border-t border-white/20">
+        <footer className="absolute bottom-0 w-full p-6 pt-2 bg-surface/80 backdrop-blur-3xl z-[30] border-t border-white/20">
           <button 
             type="submit"
             form="transaction-form"
             disabled={isPending}
-            className="w-full bg-primary text-on-primary py-4 rounded-2xl font-headline font-extra-bold text-lg shadow-xl shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-primary text-on-primary h-16 rounded-[1.5rem] font-headline font-black text-lg shadow-2xl shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
           >
-            {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Save Transaction'}
+            {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Lưu giao dịch'}
           </button>
-          
-          {/* Mobile indicator spacer */}
-          <div className="h-6 md:hidden"></div>
         </footer>
 
+        {/* 🏦 ACCOUNT SELECTOR DRAWER */}
+        {showAccountSelector && (
+          <div className="fixed inset-0 z-[100] flex flex-col md:absolute">
+             <div className="absolute inset-0 bg-on-background/60 backdrop-blur-md animate-in fade-in" onClick={() => setShowAccountSelector(false)} />
+             <div className="mt-auto bg-surface rounded-t-[3rem] p-8 pb-12 relative z-10 animate-in slide-in-from-bottom duration-300 max-h-[80%] overflow-y-auto">
+                <div className="w-12 h-1.5 bg-outline-variant/40 rounded-full mx-auto mb-8"></div>
+                <div className="flex items-center justify-between mb-8">
+                   <h3 className="font-headline font-black text-2xl text-on-surface">Chọn tài khoản</h3>
+                   <button onClick={() => setShowAccountSelector(false)} className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+                     <X size={20} />
+                   </button>
+                </div>
+                <div className="grid gap-4">
+                  {accounts?.map(acc => (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => {
+                        setValue('account_id', acc.id);
+                        setShowAccountSelector(false);
+                      }}
+                      className={cn(
+                        "flex items-center gap-5 p-5 rounded-3xl transition-all active:scale-[0.97] border",
+                        selectedAccountId === acc.id ? "bg-primary text-on-primary shadow-lg border-primary" : "bg-surface-container-lowest text-on-surface border-outline-variant/10 hover:bg-surface-container-low"
+                      )}
+                    >
+                      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", selectedAccountId === acc.id ? "bg-white/20" : "bg-surface-container text-primary shadow-inner")}>
+                         <Wallet size={24} />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <p className="font-headline font-bold text-lg leading-tight">{acc.name}</p>
+                        <p className={cn("font-label text-xs font-bold opacity-60", selectedAccountId === acc.id ? "text-white" : "text-outline")}>
+                          Số dư: {acc.balance?.toLocaleString('vi-VN')}đ
+                        </p>
+                      </div>
+                      {selectedAccountId === acc.id && <Check size={18} strokeWidth={3} />}
+                    </button>
+                  ))}
+                </div>
+             </div>
+          </div>
+        )}
       </div>
     </div>
   )

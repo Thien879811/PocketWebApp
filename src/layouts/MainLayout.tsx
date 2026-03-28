@@ -106,6 +106,10 @@ const MainLayout: React.FC = () => {
              <span className="material-symbols-outlined text-[24px]">add_circle</span>
              <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Add</span>
           </Link>
+          <Link to="/wallet" className={cn("flex flex-col items-center justify-center rounded-2xl p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/wallet') ? "bg-primary text-on-primary shadow-md" : "text-on-surface-variant hover:text-primary")}>
+             <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Wallet</span>
+          </Link>
           <Link to="/settings" className={cn("flex flex-col items-center justify-center rounded-2xl p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/settings') ? "bg-primary text-on-primary shadow-md" : "text-on-surface-variant hover:text-primary")}>
              <span className="material-symbols-outlined text-[24px]">settings</span>
              <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Settings</span>
