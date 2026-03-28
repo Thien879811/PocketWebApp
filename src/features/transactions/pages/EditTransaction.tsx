@@ -253,7 +253,16 @@ const EditTransaction: React.FC = () => {
                 <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-3">Ghi chú</label>
                 <textarea 
                   {...register('note')}
-                  className="w-full bg-transparent border-none p-0 text-body-md focus:ring-0 min-h-[120px] placeholder:text-outline-variant/50 font-medium leading-relaxed" 
+                  className="    w-full 
+                      bg-transparent 
+                      border-none 
+                      p-0 
+                      focus:ring-0 
+                      min-h-[120px] 
+                      text-on-surface
+                      placeholder:text-outline-variant/50 
+                      font-medium 
+                      leading-relaxed" 
                   placeholder="Bạn đã chi tiêu việc gì?..."
                 ></textarea>
               </div>

@@ -3,10 +3,10 @@ import {
   Plus, TrendingUp, Landmark, CreditCard, 
   Wallet as WalletIcon, X, Check, Loader2, Landmark as BankIcon, 
   CreditCard as CardIcon, Coins, 
-  Sparkles
+  Sparkles, Trash2
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useAccounts, useCreateAccount } from '../hooks/useAccounts'
+import { useAccounts, useCreateAccount, useDeleteAccount } from '../hooks/useAccounts'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { accountSchema, type AccountFormValues } from '../types/account.schema'
@@ -20,7 +20,14 @@ function cn(...inputs: ClassValue[]) {
 const Wallet: React.FC = () => {
   const { data: accounts, isLoading } = useAccounts()
   const { mutate: createAccount, isPending: isCreating } = useCreateAccount()
+  const { mutate: deleteAccount } = useDeleteAccount()
   const [showAddModal, setShowAddModal] = useState(false)
+
+  const handleDeleteAccount = (id: string, name: string) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xoá ví "${name}"? Dữ liệu xoá sẽ không thể khôi phục.`)) {
+      deleteAccount(id)
+    }
+  }
 
   const { register, handleSubmit, reset, setValue, watch } = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
@@ -100,6 +107,16 @@ const Wallet: React.FC = () => {
                    acc.type === 'credit' ? <CreditCard size={28} /> : 
                    <WalletIcon size={28} />}
                 </div>
+                
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteAccount(acc.id!, acc.name)
+                  }}
+                  className="p-2 -mr-2 bg-transparent opacity-40 hover:opacity-100 hover:text-error hover:bg-error/10 rounded-full transition-all active:scale-95"
+                >
+                  <Trash2 size={20} />
+                </button>
               </div>
 
               <div className="relative z-10 mt-8">
