@@ -69,7 +69,7 @@ const AddGoal: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-32">
-            
+
             {/* Hero Insight Card: Visual Motivation */}
             <div className="relative overflow-hidden rounded-[2rem] h-48 mb-10 group shadow-lg">
               <img alt="Motivation" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://images.unsplash.com/photo-1554200876-56c2f25224fa?q=80&w=800&auto=format&fit=crop" />
@@ -87,12 +87,12 @@ const AddGoal: React.FC = () => {
               <div className="space-y-2">
                 <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="goal_name">Goal Name</label>
                 <div className="relative">
-                  <input 
+                  <input
                     {...register('name')}
-                    className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg font-bold focus:ring-2 focus:ring-primary/40 transition-all placeholder:text-outline font-headline" 
-                    id="goal_name" 
-                    placeholder="e.g., Tokyo Apartment, New Laptop" 
-                    type="text" 
+                    className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg font-bold focus:ring-2 focus:ring-primary/40 transition-all placeholder:text-outline font-headline"
+                    id="goal_name"
+                    placeholder="e.g., Tokyo Apartment, New Laptop"
+                    type="text"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40">
                     <span className="material-symbols-outlined font-light">edit_note</span>
@@ -107,12 +107,12 @@ const AddGoal: React.FC = () => {
                 <div className="space-y-2">
                   <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="target_amount">Target Amount (VNĐ)</label>
                   <div className="relative">
-                    <input 
+                    <input
                       {...register('target_amount', { valueAsNumber: true })}
-                      className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 transition-all font-mono font-bold" 
-                      id="target_amount" 
-                      placeholder="0" 
-                      type="number" 
+                      className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 transition-all font-mono font-bold"
+                      id="target_amount"
+                      placeholder="0"
+                      type="number"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-primary font-label text-xs">VNĐ</span>
                   </div>
@@ -123,12 +123,12 @@ const AddGoal: React.FC = () => {
                 <div className="space-y-2">
                   <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="current_amount">Initial Deposit</label>
                   <div className="relative">
-                    <input 
+                    <input
                       {...register('current_amount', { valueAsNumber: true })}
-                      className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 transition-all font-mono font-bold" 
-                      id="current_amount" 
-                      placeholder="0" 
-                      type="number" 
+                      className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 transition-all font-mono font-bold"
+                      id="current_amount"
+                      placeholder="0"
+                      type="number"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-secondary font-label text-xs">VNĐ</span>
                   </div>
@@ -140,11 +140,11 @@ const AddGoal: React.FC = () => {
               <div className="space-y-2">
                 <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="target_date">Target Date</label>
                 <div className="relative">
-                  <input 
+                  <input
                     {...register('target_date')}
-                    className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 transition-all font-bold" 
-                    id="target_date" 
-                    type="date" 
+                    className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 transition-all font-bold"
+                    id="target_date"
+                    type="date"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant/40">
                     <span className="material-symbols-outlined">calendar_today</span>
@@ -157,14 +157,14 @@ const AddGoal: React.FC = () => {
                 <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1">Choose Icon</label>
                 <div className="grid grid-cols-5 md:grid-cols-10 gap-3 p-4 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10">
                   {ICONS.map(icon => (
-                    <button 
+                    <button
                       key={icon}
                       type="button"
                       onClick={() => setSelectedIcon(icon)}
                       className={cn(
                         "aspect-square flex items-center justify-center rounded-2xl transition-all transform active:scale-90",
-                        selectedIcon === icon 
-                          ? "bg-primary/10 text-primary border-2 border-primary/20 scale-105" 
+                        selectedIcon === icon
+                          ? "bg-primary/10 text-primary border-2 border-primary/20 scale-105"
                           : "text-on-surface-variant hover:bg-surface-container border border-transparent"
                       )}
                     >
@@ -175,11 +175,12 @@ const AddGoal: React.FC = () => {
                   ))}
                 </div>
               </div>
+
             </section>
 
             {/* Save Action */}
-            <div className="fixed bottom-0 left-0 w-full p-6 bg-surface/90 backdrop-blur-xl border-t border-white/20 z-40 md:absolute md:rounded-b-[3rem]">
-              <button 
+            <div className="pt-6 pb-8">
+              <button
                 type="submit"
                 disabled={isPending}
                 className="w-full bg-[#4A90E2] text-white py-5 px-8 rounded-2xl font-bold font-headline text-lg shadow-[0_8px_30px_rgb(74,144,226,0.3)] hover:shadow-[0_12px_40px_rgb(74,144,226,0.5)] transition-all transform active:scale-[0.98] flex justify-center items-center gap-2"

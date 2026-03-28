@@ -221,7 +221,7 @@ const EditGoal: React.FC = () => {
             </section>
 
             {/* Save Action */}
-            <div className="fixed bottom-0 left-0 w-full p-6 bg-surface/90 backdrop-blur-xl border-t border-white/20 z-40 md:absolute md:rounded-b-[3rem]">
+            <div className="pt-6 pb-8">
               <button 
                 type="submit"
                 disabled={updatePending || deletePending}
