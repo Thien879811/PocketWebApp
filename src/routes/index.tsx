@@ -16,6 +16,7 @@ const EditCategory = lazy(() => import('@/features/categories/pages/EditCategory
 const EditTransaction = lazy(() => import('@/features/transactions/pages/EditTransaction'))
 const Wallet = lazy(() => import('@/features/accounts/pages/Wallet'))
 const Stats = lazy(() => import('@/pages/Stats'))
+const Transactions = lazy(() => import('@/features/transactions/pages/Transactions'))
 
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
@@ -107,6 +108,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
             <EditCategory />
+          </Suspense>
+        )
+      },
+      {
+        path: 'ledger',
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+             <Transactions />
           </Suspense>
         )
       },
