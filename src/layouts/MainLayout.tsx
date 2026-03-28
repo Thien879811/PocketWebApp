@@ -18,18 +18,25 @@ const navLinksDesktop = [
 const MainLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const location = useLocation()
-  const logout = useAuthStore((state) => state.logout)
+  
+  const { user, logout } = useAuthStore((state) => ({
+    user: state.user,
+    logout: state.logout
+  }))
 
   const isActive = (path: string) => location.pathname === path
+
+  const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || user?.email || 'User')}&background=005da7&color=fff`
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
 
   return (
     <div className="flex h-screen bg-surface font-body text-on-surface selection:bg-primary/10 overflow-hidden">
       
-      {/* 🚀 DESKTOP SIDEBAR (Visible on md and up) */}
+      {/* 🚀 DESKTOP SIDEBAR */}
       <aside className="hidden md:flex w-72 flex-col border-r border-outline-variant/20 bg-surface-container-lowest/80 backdrop-blur-xl z-10 transition-all">
         <div className="p-8 flex items-center gap-3 mt-2">
           <div className="w-10 h-10 rounded-full bg-surface-container-high flex flex-shrink-0 items-center justify-center overflow-hidden border border-outline-variant/20 shadow-sm">
-             <img alt="User avatar" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3qbMdqwOz9RwAVZKAj5V3PZM3Yi44RlwEHAcK25w3GFeF1kTO85VzraKRiIYmHVXBfHomskoE-fg-fYx4wUdCM-TifDzrufWanLW2CdEpAmZWDpofsK-j_Je9fd1g19WKbQZ4BJ_4SFF9LUTFohrO7n4khmFzITttbHzjJhbIhBgZZu9sbn-ZFap_YVp0BrFRlM9R8CkhhbWyImttUqkX36UEvhG_eITgtR74AMbTWt8w62gp3696GBylkmV-7o6jfMNmdklKJnk" />
+             <img alt="User avatar" className="w-full h-full object-cover" src={avatarUrl} />
           </div>
           <h1 className="text-2xl font-headline font-extrabold tracking-tight text-primary italic">PocketFlow</h1>
         </div>
@@ -70,11 +77,11 @@ const MainLayout: React.FC = () => {
       {/* 📱 MAIN CONTENT WRAPPER */}
       <div className="flex flex-1 flex-col overflow-hidden relative bg-surface">
         
-        {/* Mobile Top Header (Sticky) */}
+        {/* Mobile Top Header */}
         <header className="flex h-16 items-center justify-between px-6 bg-[#f7f9ff]/90 dark:bg-slate-950/90 backdrop-blur-md md:hidden sticky top-0 z-30 transition-all">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-surface-container-high flex flex-shrink-0 items-center justify-center overflow-hidden border border-outline-variant/10 shadow-sm" onClick={() => setIsSidebarOpen(true)}>
-              <img alt="User" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3qbMdqwOz9RwAVZKAj5V3PZM3Yi44RlwEHAcK25w3GFeF1kTO85VzraKRiIYmHVXBfHomskoE-fg-fYx4wUdCM-TifDzrufWanLW2CdEpAmZWDpofsK-j_Je9fd1g19WKbQZ4BJ_4SFF9LUTFohrO7n4khmFzITttbHzjJhbIhBgZZu9sbn-ZFap_YVp0BrFRlM9R8CkhhbWyImttUqkX36UEvhG_eITgtR74AMbTWt8w62gp3696GBylkmV-7o6jfMNmdklKJnk"/>
+              <img alt="User" className="w-full h-full object-cover" src={avatarUrl}/>
             </div>
             <span className="font-headline font-bold text-xl tracking-tight text-primary italic">PocketFlow</span>
           </div>
@@ -116,29 +123,47 @@ const MainLayout: React.FC = () => {
           </Link>
         </nav>
 
-        {/* 📱 MOBILE MODAL/DRAWER (For Avatar Menu if needed) */}
+        {/* 📱 MOBILE SIDEBAR */}
         {isSidebarOpen && (
-           <div className="fixed inset-0 z-50 flex md:hidden">
+           <div className="fixed inset-0 z-[100] flex md:hidden">
               <div className="fixed inset-0 bg-on-background/40 backdrop-blur-sm transition-opacity" onClick={() => setIsSidebarOpen(false)} />
-              <aside className="relative flex w-80 flex-col bg-surface-container-lowest p-8 shadow-2xl transition-transform ease-out duration-300">
+              <aside className="relative flex w-80 flex-col bg-surface p-8 shadow-2xl animate-in slide-in-from-left duration-300">
                  <button 
                     onClick={() => setIsSidebarOpen(false)}
-                    className="absolute right-6 top-6 rounded-full p-2 bg-surface-container-high text-on-surface-variant"
+                    className="absolute right-6 top-6 rounded-full p-2 bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"
                  >
                     <span className="material-symbols-outlined">close</span>
                  </button>
-                 <div className="mb-8 mt-4 flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden border border-outline-variant/20 shadow-sm">
-                      <img alt="User" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3qbMdqwOz9RwAVZKAj5V3PZM3Yi44RlwEHAcK25w3GFeF1kTO85VzraKRiIYmHVXBfHomskoE-fg-fYx4wUdCM-TifDzrufWanLW2CdEpAmZWDpofsK-j_Je9fd1g19WKbQZ4BJ_4SFF9LUTFohrO7n4khmFzITttbHzjJhbIhBgZZu9sbn-ZFap_YVp0BrFRlM9R8CkhhbWyImttUqkX36UEvhG_eITgtR74AMbTWt8w62gp3696GBylkmV-7o6jfMNmdklKJnk"/>
+                 <div className="mb-10 mt-6 flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center overflow-hidden border border-outline-variant/20 shadow-lg">
+                      <img alt="User" className="w-full h-full object-cover" src={avatarUrl}/>
                     </div>
                     <div>
-                      <h3 className="font-headline font-bold text-lg">Alex Manager</h3>
-                      <p className="font-label text-xs text-on-surface-variant">name@atelier.com</p>
+                      <h3 className="font-headline font-black text-xl tracking-tight text-on-surface">{displayName}</h3>
+                      <p className="font-label text-xs font-bold text-on-surface-variant opacity-60 truncate w-40">{user?.email}</p>
                     </div>
                  </div>
+                 
+                 <div className="flex-1 space-y-4">
+                    {navLinksDesktop.map((link) => (
+                      <Link 
+                        key={link.path}
+                        to={link.path} 
+                        onClick={() => setIsSidebarOpen(false)}
+                        className={cn(
+                          "flex items-center gap-5 p-4 rounded-2xl text-lg font-headline font-black transition-all",
+                          isActive(link.path) ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container"
+                        )}
+                      >
+                         <span className="material-symbols-outlined text-2xl">{link.icon}</span>
+                         {link.name}
+                      </Link>
+                    ))}
+                 </div>
+
                  <button
                     onClick={() => { setIsSidebarOpen(false); logout(); }}
-                    className="mt-auto flex items-center justify-center gap-2 rounded-2xl border border-error/20 px-5 py-4 text-sm font-bold text-error hover:bg-error-container/30 transition-colors"
+                    className="mt-auto flex items-center justify-center gap-3 rounded-2xl border-2 border-error/10 bg-error/5 p-5 text-lg font-headline font-black text-error hover:bg-error hover:text-white transition-all active:scale-95 shadow-xl shadow-error/10"
                  >
                     <span className="material-symbols-outlined">logout</span>
                     Sign Out
