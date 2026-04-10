@@ -20,6 +20,7 @@ const Transactions = lazy(() => import('@/features/transactions/pages/Transactio
 const Goals = lazy(() => import('@/features/goals/pages/Goals'))
 const AddGoal = lazy(() => import('@/features/goals/pages/AddGoal'))
 const EditGoal = lazy(() => import('@/features/goals/pages/EditGoal'))
+const AISettings = lazy(() => import('@/pages/AISettings'))
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center bg-white dark:bg-neutral-950">
@@ -110,6 +111,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
             <EditCategory />
+          </Suspense>
+        )
+      },
+      {
+        path: 'settings/ai',
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+            <AISettings />
           </Suspense>
         )
       },

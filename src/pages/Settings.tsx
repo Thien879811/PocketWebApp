@@ -10,7 +10,8 @@ import {
   Heart,
   Zap,
   Globe,
-  LayoutGrid
+  LayoutGrid,
+  Sparkles
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -41,10 +42,11 @@ const Settings: React.FC = () => {
       ]
     },
     {
-      title: 'Security',
+      title: 'Security & Integrations',
       items: [
         { icon: ShieldCheck, label: 'Privacy & Safety', path: '#', color: 'bg-primary/10 text-primary' },
         { icon: Zap, label: 'Connected Apps', path: '#', color: 'bg-secondary/10 text-secondary' },
+        { icon: Sparkles, label: 'AI Assistant', path: '/settings/ai', color: 'bg-amber-600/10 text-amber-600' },
       ]
     },
     {
