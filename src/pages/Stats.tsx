@@ -238,7 +238,7 @@ const Stats: React.FC = () => {
             </div>
 
             <div className="space-y-4">
-              {allCategoriesWithData.filter(c => c.amount > 0 || (c?.limit ?? 0) > 0).map((cat) => (
+              {allCategoriesWithData.map((cat) => (
                 <div 
                   key={cat.id} 
                   onClick={() => handleCategoryClick(cat.id)}
