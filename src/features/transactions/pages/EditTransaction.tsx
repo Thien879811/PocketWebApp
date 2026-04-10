@@ -35,7 +35,7 @@ const EditTransaction: React.FC = () => {
     if (transaction) {
       setValue('amount', transaction.amount)
       setValue('type', transaction.type)
-      setValue('category', transaction.category)
+      setValue('category_id', transaction.category_id)
       setValue('date', transaction.date)
       setValue('note', transaction.note || '')
       setValue('account_id', transaction.account_id)
@@ -44,7 +44,7 @@ const EditTransaction: React.FC = () => {
   }, [transaction, setValue])
 
   const currentAmount = watch('amount')
-  const selectedCategory = watch('category')
+  const selectedCategoryId = watch('category_id')
   const selectedAccountId = watch('account_id')
   
   const selectedAccount = accounts?.find(a => a.id === selectedAccountId)
@@ -194,15 +194,15 @@ const EditTransaction: React.FC = () => {
                     <button 
                       key={cat.id}
                       type="button"
-                      onClick={() => setValue('category', cat.name)}
+                      onClick={() => setValue('category_id', cat.id)}
                       className={cn(
                         "flex flex-col items-center gap-2 p-3.5 rounded-2xl transition-all duration-200 active:scale-[0.9]",
-                        selectedCategory === cat.name 
+                        selectedCategoryId === cat.id 
                           ? cn("shadow-xl ring-2", transactionType === 'income' ? "bg-secondary/10 text-secondary ring-secondary/30" : "bg-primary-fixed text-on-primary-fixed ring-primary/30")
                           : "bg-surface-container-low text-on-surface-variant/80 hover:bg-surface-container-high"
                       )}
                     >
-                      <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: selectedCategory === cat.name ? "'FILL' 1" : "'FILL' 0" }}>
+                      <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: selectedCategoryId === cat.id ? "'FILL' 1" : "'FILL' 0" }}>
                         {cat.icon}
                       </span>
                       <span className="font-label text-[10px] font-black tracking-tighter truncate w-full text-center leading-none">{cat.name}</span>

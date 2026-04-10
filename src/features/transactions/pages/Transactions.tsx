@@ -4,7 +4,10 @@ import {
   Inbox, 
   Search,
   Filter,
-  ArrowLeft
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Calendar
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTransactions } from '../hooks/useTransactions'
@@ -20,15 +23,26 @@ const Transactions: React.FC = () => {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [selectedDate, setSelectedDate] = useState(new Date())
   
   const { data: transactions, isLoading: txLoading } = useTransactions()
   const { data: categories } = useCategories()
 
   const filteredTransactions = transactions?.filter(tx => {
-    const matchesSearch = tx.category.toLowerCase().includes(search.toLowerCase()) || 
+    // Filter by Month & Year
+    const txDate = new Date(tx.date)
+    const isSameMonth = txDate.getMonth() === selectedDate.getMonth() && 
+                       txDate.getFullYear() === selectedDate.getFullYear()
+    
+    if (!isSameMonth) return false
+
+    const categoryName = categories?.find(c => c.id === tx.category_id)?.name || ''
+    const matchesSearch = categoryName.toLowerCase().includes(search.toLowerCase()) || 
                          (tx.note || '').toLowerCase().includes(search.toLowerCase())
-    const matchesFilter = filter === 'all' || tx.type === filter
-    return matchesSearch && matchesFilter
+    const matchesTypeFilter = filter === 'all' || tx.type === filter
+    const matchesCategoryFilter = categoryFilter === 'all' || tx.category_id === categoryFilter
+    return matchesSearch && matchesTypeFilter && matchesCategoryFilter
   })
 
   // Group by date
@@ -41,10 +55,25 @@ const Transactions: React.FC = () => {
     groupedTransactions[dateStr].push(tx)
   })
 
-  // Helper to get category icon
-  const getCategoryIcon = (categoryName: string) => {
-    const cat = categories?.find(c => c.name === categoryName)
-    return cat?.icon || 'payments'
+  // Helper to get category info from ID
+  const getCategoryName = (categoryId: string) => {
+    return categories?.find(c => c.id === categoryId)?.name || 'Unknown'
+  }
+
+  const getCategoryIcon = (categoryId: string) => {
+    return categories?.find(c => c.id === categoryId)?.icon || 'payments'
+  }
+
+  const handlePrevMonth = () => {
+    setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
+  }
+
+  const handleNextMonth = () => {
+    setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+  }
+
+  const handleResetDate = () => {
+    setSelectedDate(new Date())
   }
 
   if (txLoading) {
@@ -85,6 +114,38 @@ const Transactions: React.FC = () => {
           </div>
         </div>
 
+        {/* 🗓️ Month Selector */}
+        <div className="bg-surface-container-low p-5 rounded-[2.5rem] border border-outline-variant/10 shadow-sm flex items-center justify-between">
+            <button 
+              onClick={handlePrevMonth}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface hover:bg-white transition-all shadow-sm active:scale-90"
+            >
+              <ChevronLeft size={20} className="text-on-surface-variant" />
+            </button>
+
+            <div 
+              onClick={handleResetDate}
+              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
+            >
+               <div className="flex items-center gap-2 mb-0.5">
+                  <Calendar size={14} className="text-primary" />
+                  <span className="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary opacity-60">
+                    {selectedDate.getFullYear()}
+                  </span>
+               </div>
+               <h3 className="font-headline font-black text-xl text-on-surface tracking-tight uppercase">
+                 Tháng {selectedDate.getMonth() + 1}
+               </h3>
+            </div>
+
+            <button 
+              onClick={handleNextMonth}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface hover:bg-white transition-all shadow-sm active:scale-90"
+            >
+              <ChevronRight size={20} className="text-on-surface-variant" />
+            </button>
+        </div>
+
         {/* 🔍 Search Bar */}
         <div className="relative group">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant opacity-40 group-focus-within:opacity-100 transition-opacity" />
@@ -94,6 +155,36 @@ const Transactions: React.FC = () => {
                placeholder="Search by category, note..."
                className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-[2rem] py-5 pl-14 pr-6 text-on-surface font-label font-bold text-sm focus:ring-4 focus:ring-primary/10 transition-all shadow-xl shadow-on-surface/[0.02]"
             />
+        </div>
+
+        {/* 📋 Category Filter */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            onClick={() => setCategoryFilter('all')}
+            className={cn(
+              "px-4 py-2 rounded-full font-label font-black text-[10px] uppercase tracking-widest whitespace-nowrap transition-all border",
+              categoryFilter === 'all'
+                ? "bg-primary text-on-primary border-primary shadow-lg shadow-primary/20"
+                : "bg-surface-container-high text-on-surface-variant border-outline-variant/10 hover:bg-white"
+            )}
+          >
+            Tất cả
+          </button>
+          {categories?.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setCategoryFilter(cat.id)}
+              className={cn(
+                "px-4 py-2 rounded-full font-label font-black text-[10px] uppercase tracking-widest whitespace-nowrap transition-all border flex items-center gap-2",
+                categoryFilter === cat.id
+                  ? "bg-primary text-on-primary border-primary shadow-lg shadow-primary/20"
+                  : "bg-surface-container-high text-on-surface-variant border-outline-variant/10 hover:bg-white"
+              )}
+            >
+              <span className="material-symbols-outlined text-sm">{cat.icon}</span>
+              {cat.name}
+            </button>
+          ))}
         </div>
       </section>
 
@@ -108,7 +199,7 @@ const Transactions: React.FC = () => {
                  No transactions <br /> matches found
                </p>
                <button 
-                 onClick={() => { setSearch(''); setFilter('all'); }}
+                 onClick={() => { setSearch(''); setFilter('all'); setCategoryFilter('all'); }}
                  className="text-primary font-black text-xs uppercase tracking-tighter hover:underline"
                >
                  Clear all filters
@@ -132,11 +223,11 @@ const Transactions: React.FC = () => {
                            <div className="flex items-center gap-5">
                               <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex flex-shrink-0 items-center justify-center shadow-inner group-hover:bg-white transition-all transform group-hover:rotate-6 duration-300">
                                  <span className="material-symbols-outlined text-2xl text-primary opacity-70">
-                                   {getCategoryIcon(tx.category)}
+                                   {getCategoryIcon(tx.category_id)}
                                  </span>
                               </div>
                               <div className="overflow-hidden">
-                                 <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5 truncate group-hover:text-primary transition-colors">{tx.category}</p>
+                                 <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5 truncate group-hover:text-primary transition-colors">{getCategoryName(tx.category_id)}</p>
                                  <p className="font-label text-[10px] text-on-surface-variant font-black truncate w-40 opacity-50 uppercase tracking-tighter leading-none">
                                     {tx.note || (tx.type === 'income' ? 'Thu nhập' : 'Chi tiêu')}
                                  </p>

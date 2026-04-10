@@ -48,12 +48,11 @@ import { type Category } from '@/features/categories/types/category.schema'
 /**
  * 📊 Aggregate statistics from transaction list
  */
-export const getTransactionStats = (transactions: Transaction[], categories: Category[] = []) => {
-  const now = new Date()
-  const currentMonth = now.getMonth()
-  const currentYear = now.getFullYear()
+export const getTransactionStats = (transactions: Transaction[], categories: Category[] = [], targetDate: Date = new Date()) => {
+  const currentMonth = targetDate.getMonth()
+  const currentYear = targetDate.getFullYear()
 
-  // Filter current month
+  // Filter Target month
   const thisMonthTx = transactions.filter(tx => {
     const d = new Date(tx.date)
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear
@@ -73,18 +72,19 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
   thisMonthTx
     .filter(tx => tx.type === 'expense')
     .forEach(tx => {
-      if (!categoryMap[tx.category]) {
-        categoryMap[tx.category] = { amount: 0, count: 0 }
+      if (!categoryMap[tx.category_id]) {
+        categoryMap[tx.category_id] = { amount: 0, count: 0 }
       }
-      categoryMap[tx.category].amount += tx.amount
-      categoryMap[tx.category].count += 1
+      categoryMap[tx.category_id].amount += tx.amount
+      categoryMap[tx.category_id].count += 1
     })
 
   const topCategories = Object.entries(categoryMap)
-    .map(([name, data]) => {
-      const catInfo = categories.find(c => c.name === name)
+    .map(([categoryId, data]) => {
+      const catInfo = categories.find(c => c.id === categoryId)
       return { 
-        name, 
+        name: catInfo?.name || 'Unknown',
+        id: categoryId,
         ...data, 
         limit: catInfo?.limit || 0,
         icon: catInfo?.icon || 'payments',

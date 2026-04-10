@@ -11,13 +11,15 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { useTransactions, getTransactionStats } from '../features/transactions/hooks/useTransactions'
 import { useAccounts } from '../features/accounts/hooks/useAccounts'
+import { useCategories } from '../features/categories/hooks/useCategories'
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
   const { data: transactions, isLoading: txLoading } = useTransactions()
   const { data: accounts, isLoading: accLoading } = useAccounts()
+  const { data: categories } = useCategories()
   
-  const stats = transactions ? getTransactionStats(transactions) : null
+  const stats = transactions ? getTransactionStats(transactions, categories || []) : null
   const totalBalance = accounts?.reduce((acc, curr) => acc + (curr.balance || 0), 0) || 0
 
   if (txLoading || accLoading) {
@@ -114,7 +116,9 @@ const Home: React.FC = () => {
                            <LayoutGrid size={24} className="text-primary opacity-60" />
                         </div>
                         <div>
-                           <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5">{tx.category}</p>
+                           <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5">
+                              {categories?.find(c => c.id === tx.category_id)?.name || 'Unknown'}
+                           </p>
                            <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-tighter opacity-50">
                               {new Date(tx.date).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })} • {tx.type === 'income' ? 'Thu nhập' : 'Chi tiêu'}
                            </p>
