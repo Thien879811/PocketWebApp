@@ -31,17 +31,38 @@ export const useCreateTransaction = () => {
 
       if (accError) throw new Error(accError.message)
 
-      // 3. Update Balance
-      const newBalance = data.type === 'income' 
-        ? (account.balance || 0) + data.amount 
-        : (account.balance || 0) - data.amount
+      // 3. Update Balances
+      if (data.type === 'withdrawal') {
+        // Decrease source account
+        await supabase
+          .from('accounts')
+          .update({ balance: (account.balance || 0) - data.amount })
+          .eq('id', data.account_id)
 
-      const { error: updateError } = await supabase
-        .from('accounts')
-        .update({ balance: newBalance })
-        .eq('id', data.account_id)
+        // Find and increase cash account
+        const { data: cashAccount, error: cashError } = await supabase
+          .from('accounts')
+          .select('id, balance')
+          .eq('user_id', user.id)
+          .eq('type', 'cash')
+          .single()
 
-      if (updateError) throw new Error(updateError.message)
+        if (!cashError && cashAccount) {
+          await supabase
+            .from('accounts')
+            .update({ balance: (cashAccount.balance || 0) + data.amount })
+            .eq('id', cashAccount.id)
+        }
+      } else {
+        const newBalance = data.type === 'income' 
+          ? (account.balance || 0) + data.amount 
+          : (account.balance || 0) - data.amount
+
+        await supabase
+          .from('accounts')
+          .update({ balance: newBalance })
+          .eq('id', data.account_id)
+      }
 
       return transaction
     },
@@ -80,14 +101,37 @@ export const useUpdateTransaction = () => {
 
       if (oldAccError) throw new Error(oldAccError.message)
 
-      const revertedOldBalance = oldTx.type === 'income'
-        ? (oldAccount.balance || 0) - oldTx.amount
-        : (oldAccount.balance || 0) + oldTx.amount
+      if (oldTx.type === 'withdrawal') {
+        // Increase source account
+        await supabase
+          .from('accounts')
+          .update({ balance: (oldAccount.balance || 0) + oldTx.amount })
+          .eq('id', oldTx.account_id)
 
-      await supabase
-        .from('accounts')
-        .update({ balance: revertedOldBalance })
-        .eq('id', oldTx.account_id)
+        // Find and decrease cash account
+        const { data: cashAccount, error: cashError } = await supabase
+          .from('accounts')
+          .select('id, balance')
+          .eq('user_id', user.id)
+          .eq('type', 'cash')
+          .single()
+
+        if (!cashError && cashAccount) {
+          await supabase
+            .from('accounts')
+            .update({ balance: (cashAccount.balance || 0) - oldTx.amount })
+            .eq('id', cashAccount.id)
+        }
+      } else {
+        const revertedOldBalance = oldTx.type === 'income'
+          ? (oldAccount.balance || 0) - oldTx.amount
+          : (oldAccount.balance || 0) + oldTx.amount
+
+        await supabase
+          .from('accounts')
+          .update({ balance: revertedOldBalance })
+          .eq('id', oldTx.account_id)
+      }
 
       // 3. Update Transaction
       const { data: transaction, error: txError } = await supabase
@@ -108,14 +152,37 @@ export const useUpdateTransaction = () => {
 
       if (newAccError) throw new Error(newAccError.message)
 
-      const newBalance = data.type === 'income'
-        ? (newAccount.balance || 0) + data.amount
-        : (newAccount.balance || 0) - data.amount
+      if (data.type === 'withdrawal') {
+        // Decrease source account
+        await supabase
+          .from('accounts')
+          .update({ balance: (newAccount.balance || 0) - data.amount })
+          .eq('id', data.account_id)
 
-      await supabase
-        .from('accounts')
-        .update({ balance: newBalance })
-        .eq('id', data.account_id)
+        // Find and increase cash account
+        const { data: cashAccount, error: cashError } = await supabase
+          .from('accounts')
+          .select('id, balance')
+          .eq('user_id', user.id)
+          .eq('type', 'cash')
+          .single()
+
+        if (!cashError && cashAccount) {
+          await supabase
+            .from('accounts')
+            .update({ balance: (cashAccount.balance || 0) + data.amount })
+            .eq('id', cashAccount.id)
+        }
+      } else {
+        const newBalance = data.type === 'income'
+          ? (newAccount.balance || 0) + data.amount
+          : (newAccount.balance || 0) - data.amount
+
+        await supabase
+          .from('accounts')
+          .update({ balance: newBalance })
+          .eq('id', data.account_id)
+      }
 
       return transaction
     },
@@ -144,7 +211,7 @@ export const useDeleteTransaction = () => {
 
       if (fetchError) throw new Error(fetchError.message)
 
-      // 2. Revert balance
+      // 2. Revert balances
       const { data: account, error: accError } = await supabase
         .from('accounts')
         .select('balance')
@@ -153,14 +220,37 @@ export const useDeleteTransaction = () => {
 
       if (accError) throw new Error(accError.message)
 
-      const revertedBalance = tx.type === 'income'
-        ? (account.balance || 0) - tx.amount
-        : (account.balance || 0) + tx.amount
+      if (tx.type === 'withdrawal') {
+        // Increase source account
+        await supabase
+          .from('accounts')
+          .update({ balance: (account.balance || 0) + tx.amount })
+          .eq('id', tx.account_id)
 
-      await supabase
-        .from('accounts')
-        .update({ balance: revertedBalance })
-        .eq('id', tx.account_id)
+        // Find and decrease cash account
+        const { data: cashAccount, error: cashError } = await supabase
+          .from('accounts')
+          .select('id, balance')
+          .eq('user_id', user.id)
+          .eq('type', 'cash')
+          .single()
+
+        if (!cashError && cashAccount) {
+          await supabase
+            .from('accounts')
+            .update({ balance: (cashAccount.balance || 0) - tx.amount })
+            .eq('id', cashAccount.id)
+        }
+      } else {
+        const revertedBalance = tx.type === 'income'
+          ? (account.balance || 0) - tx.amount
+          : (account.balance || 0) + tx.amount
+
+        await supabase
+          .from('accounts')
+          .update({ balance: revertedBalance })
+          .eq('id', tx.account_id)
+      }
 
       // 3. Delete transaction
       const { error: deleteError } = await supabase

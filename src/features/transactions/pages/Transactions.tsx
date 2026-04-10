@@ -37,7 +37,8 @@ const Transactions: React.FC = () => {
     
     if (!isSameMonth) return false
 
-    const categoryName = categories?.find(c => c.id === tx.category_id)?.name || ''
+    const cat = categories?.find(c => c.id === tx.category_id)
+    const categoryName = cat?.name || (tx.type === 'withdrawal' ? 'Rút tiền' : '')
     const matchesSearch = categoryName.toLowerCase().includes(search.toLowerCase()) || 
                          (tx.note || '').toLowerCase().includes(search.toLowerCase())
     const matchesTypeFilter = filter === 'all' || tx.type === filter
@@ -56,12 +57,14 @@ const Transactions: React.FC = () => {
   })
 
   // Helper to get category info from ID
-  const getCategoryName = (categoryId: string) => {
-    return categories?.find(c => c.id === categoryId)?.name || 'Unknown'
+  const getCategoryName = (categoryId?: string, type?: string) => {
+    if (type === 'withdrawal') return 'Rút tiền'
+    return categories?.find(c => c.id === categoryId)?.name || 'Chưa phân loại'
   }
 
-  const getCategoryIcon = (categoryId: string) => {
-    return categories?.find(c => c.id === categoryId)?.icon || 'payments'
+  const getCategoryIcon = (categoryId?: string, type?: string) => {
+    if (type === 'withdrawal') return 'payments'
+    return categories?.find(c => c.id === categoryId)?.icon || 'help_outline'
   }
 
   const handlePrevMonth = () => {
@@ -223,20 +226,22 @@ const Transactions: React.FC = () => {
                            <div className="flex items-center gap-5">
                               <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex flex-shrink-0 items-center justify-center shadow-inner group-hover:bg-white transition-all transform group-hover:rotate-6 duration-300">
                                  <span className="material-symbols-outlined text-2xl text-primary opacity-70">
-                                   {getCategoryIcon(tx.category_id)}
+                                   {getCategoryIcon(tx.category_id, tx.type)}
                                  </span>
                               </div>
                               <div className="overflow-hidden">
-                                 <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5 truncate group-hover:text-primary transition-colors">{getCategoryName(tx.category_id)}</p>
+                                 <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5 truncate group-hover:text-primary transition-colors">
+                                   {getCategoryName(tx.category_id, tx.type)}
+                                 </p>
                                  <p className="font-label text-[10px] text-on-surface-variant font-black truncate w-40 opacity-50 uppercase tracking-tighter leading-none">
-                                    {tx.note || (tx.type === 'income' ? 'Thu nhập' : 'Chi tiêu')}
+                                    {tx.note || (tx.type === 'income' ? 'Thu nhập' : tx.type === 'expense' ? 'Chi tiêu' : 'Rút tiền mặt')}
                                  </p>
                               </div>
                            </div>
                            <div className="text-right">
                               <p className={cn(
                                  "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
-                                 tx.type === 'income' ? "text-secondary" : "text-on-surface"
+                                 tx.type === 'income' ? "text-secondary" : tx.type === 'expense' ? "text-on-surface" : "text-amber-600"
                               )}>
                                  {tx.type === 'income' ? '+' : '-'}{tx.amount.toLocaleString('vi-VN')}đ
                               </p>

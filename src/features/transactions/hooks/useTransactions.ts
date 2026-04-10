@@ -70,13 +70,14 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
   // 2. Category Breakdown
   const categoryMap: Record<string, { amount: number, count: number }> = {}
   thisMonthTx
-    .filter(tx => tx.type === 'expense')
+    .filter(tx => tx.type === 'expense' && tx.category_id)
     .forEach(tx => {
-      if (!categoryMap[tx.category_id]) {
-        categoryMap[tx.category_id] = { amount: 0, count: 0 }
+      const catId = tx.category_id!
+      if (!categoryMap[catId]) {
+        categoryMap[catId] = { amount: 0, count: 0 }
       }
-      categoryMap[tx.category_id].amount += tx.amount
-      categoryMap[tx.category_id].count += 1
+      categoryMap[catId].amount += tx.amount
+      categoryMap[catId].count += 1
     })
 
   const topCategories = Object.entries(categoryMap)
@@ -108,6 +109,6 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     totalExpense,
     topCategories,
     weeklyTrends,
-    thisMonthCount: thisMonthTx.length
+    thisMonthCount: thisMonthTx.filter(tx => tx.type !== 'withdrawal').length
   }
 }

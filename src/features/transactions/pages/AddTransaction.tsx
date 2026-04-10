@@ -20,7 +20,7 @@ const AddTransaction: React.FC = () => {
   const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { data: accounts } = useAccounts()
   
-  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense')
+  const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'withdrawal'>('expense')
   const [showAccountSelector, setShowAccountSelector] = useState(false)
 
   const { handleSubmit, register, setValue, watch, formState: { errors } } = useForm<TransactionFormValues>({
@@ -46,7 +46,13 @@ const AddTransaction: React.FC = () => {
   }
 
   const onSubmit = (data: TransactionFormValues) => {
-    createTransaction({ ...data, type: transactionType })
+    // For withdrawals, set category_id to null if empty
+    const submissionData = { ...data, type: transactionType }
+    if (transactionType === 'withdrawal' && !data.category_id) {
+      // @ts-ignore - Supabase accepts null for category_id
+      submissionData.category_id = null
+    }
+    createTransaction(submissionData)
   }
 
   // Filter categories by selected type
@@ -119,7 +125,7 @@ const AddTransaction: React.FC = () => {
                     setValue('type', 'income');
                   }}
                   className={cn(
-                    "flex-1 py-3 rounded-full font-label text-body-md font-black transition-all duration-300",
+                    "flex-1 py-3 rounded-full font-label text-[10px] sm:text-xs font-black transition-all duration-300",
                     transactionType === 'income' ? "bg-secondary text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
                   )}
                 >
@@ -132,17 +138,32 @@ const AddTransaction: React.FC = () => {
                     setValue('type', 'expense');
                   }}
                   className={cn(
-                    "flex-1 py-3 rounded-full font-label text-body-md font-black transition-all duration-300",
+                    "flex-1 py-3 rounded-full font-label text-[10px] sm:text-xs font-black transition-all duration-300",
                     transactionType === 'expense' ? "bg-primary text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
                   )}
                 >
                   Chi tiêu
                 </button>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setTransactionType('withdrawal');
+                    setValue('type', 'withdrawal');
+                    setValue('category_id', ''); // Clear category for withdrawal
+                  }}
+                  className={cn(
+                    "flex-1 py-3 rounded-full font-label text-[10px] sm:text-xs font-black transition-all duration-300",
+                    transactionType === 'withdrawal' ? "bg-amber-600 text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
+                  )}
+                >
+                  Rút tiền
+                </button>
               </div>
             </section>
 
             {/* 📂 Category Grid */}
-            <section>
+            {transactionType !== 'withdrawal' && (
+              <section>
               <div className="flex justify-between items-end mb-4 px-2">
                 <h2 className="font-headline text-headline-sm font-bold opacity-80 uppercase tracking-tight text-sm">Danh mục</h2>
                 <button 
@@ -195,6 +216,7 @@ const AddTransaction: React.FC = () => {
                 </div>
               )}
             </section>
+            )}
 
             {/* 📝 Form Details */}
             <section className="flex flex-col gap-4 mb-20">
