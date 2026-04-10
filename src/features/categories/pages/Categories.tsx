@@ -16,9 +16,10 @@ const Categories: React.FC = () => {
       <div>
         <span className="block font-headline font-bold text-lg text-on-surface truncate pr-2">{name}</span>
         <span className={`inline-block px-2 py-0.5 mt-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+          type === 'withdrawal' ? 'bg-amber-600/10 text-amber-600' :
           type === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'
         }`}>
-          {type}
+          {type === 'withdrawal' ? 'Rút tiền' : type}
         </span>
       </div>
     </div>

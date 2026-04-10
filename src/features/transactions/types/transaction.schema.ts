@@ -7,7 +7,8 @@ export const transactionSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   account_id: z.string().min(1, 'Please select an account'),
   note: z.string().max(500).optional(),
-  receipt_url: z.string().url().optional()
+  receipt_url: z.string().url().optional(),
+  fee: z.number().or(z.nan()).transform(v => isNaN(v) ? 0 : v).optional()
 })
 
 export type TransactionFormValues = z.infer<typeof transactionSchema>

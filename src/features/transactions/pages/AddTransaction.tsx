@@ -162,8 +162,7 @@ const AddTransaction: React.FC = () => {
             </section>
 
             {/* 📂 Category Grid */}
-            {transactionType !== 'withdrawal' && (
-              <section>
+            <section>
               <div className="flex justify-between items-end mb-4 px-2">
                 <h2 className="font-headline text-headline-sm font-bold opacity-80 uppercase tracking-tight text-sm">Danh mục</h2>
                 <button 
@@ -216,7 +215,6 @@ const AddTransaction: React.FC = () => {
                 </div>
               )}
             </section>
-            )}
 
             {/* 📝 Form Details */}
             <section className="flex flex-col gap-4 mb-20">
@@ -253,6 +251,24 @@ const AddTransaction: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {/* Fee Input for Withdrawals */}
+              {transactionType === 'withdrawal' && (
+                <div className="flex items-center gap-4 bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10 group cursor-pointer relative shadow-sm hover:bg-surface-container-low transition-colors">
+                  <div className="flex-1">
+                    <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-0.5">Phí rút tiền ném vào ngân hàng</label>
+                    <div className="flex items-center gap-1">
+                      <input 
+                        {...register('fee', { valueAsNumber: true })}
+                        type="number"
+                        placeholder="0"
+                        className="w-full bg-transparent border-none p-0 text-body-md font-bold focus:ring-0 text-on-surface"
+                      />
+                      <span className="font-bold text-outline-variant">đ</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Notes */}
               <div className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/10 shadow-sm">

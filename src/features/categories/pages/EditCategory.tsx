@@ -67,7 +67,7 @@ const EditCategory: React.FC = () => {
 
   const [selectedIcon, setSelectedIcon] = useState('home')
   const [selectedColor, setSelectedColor] = useState('bg-primary')
-  const [type, setType] = useState<'income' | 'expense'>('expense')
+  const [type, setType] = useState<'income' | 'expense' | 'withdrawal'>('expense')
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -183,6 +183,17 @@ const EditCategory: React.FC = () => {
                 <ArrowUp className="w-4 h-4" />
                 <span>Expense</span>
               </button>
+              <button 
+                type="button"
+                onClick={() => setType('withdrawal')}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all active:scale-95",
+                  type === 'withdrawal' ? "bg-amber-600 text-white shadow-md" : "bg-surface-container-lowest text-outline"
+                )}
+              >
+                <ArrowUp className="w-4 h-4 opacity-0" />
+                <span>Withdrawal</span>
+              </button>
             </div>
           </section>
 
@@ -233,7 +244,7 @@ const EditCategory: React.FC = () => {
           </section>
 
           {/* Monthly Limit Section */}
-          <section className={cn("space-y-4 transition-all duration-300", type === 'income' ? "opacity-0 h-0 overflow-hidden" : "opacity-100")}>
+          <section className={cn("space-y-4 transition-all duration-300", type === 'income' || type === 'withdrawal' ? "opacity-0 h-0 overflow-hidden" : "opacity-100")}>
             <label className="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
               Giới hạn tháng
               <span className="text-[10px] bg-secondary/10 text-secondary px-2 py-0.5 rounded-full uppercase tracking-widest font-black">Budgeting</span>
@@ -264,7 +275,7 @@ const EditCategory: React.FC = () => {
                 <div>
                   <p className="font-headline font-bold text-on-surface text-lg leading-tight">{categoryName || 'New Category'}</p>
                   <p className="font-body text-xs text-outline font-semibold tracking-wide uppercase opacity-70">
-                    {type === 'income' ? 'Revenue Stream' : 'Expense Center'}
+                    {type === 'income' ? 'Revenue Stream' : type === 'expense' ? 'Expense Center' : 'Account Transfer'}
                   </p>
                 </div>
               </div>

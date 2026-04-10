@@ -36,7 +36,7 @@ export const useCreateTransaction = () => {
         // Decrease source account
         await supabase
           .from('accounts')
-          .update({ balance: (account.balance || 0) - data.amount })
+          .update({ balance: (account.balance || 0) - data.amount - (data.fee || 0) })
           .eq('id', data.account_id)
 
         // Find and increase cash account
@@ -105,7 +105,7 @@ export const useUpdateTransaction = () => {
         // Increase source account
         await supabase
           .from('accounts')
-          .update({ balance: (oldAccount.balance || 0) + oldTx.amount })
+          .update({ balance: (oldAccount.balance || 0) + oldTx.amount + (oldTx.fee || 0) })
           .eq('id', oldTx.account_id)
 
         // Find and decrease cash account
@@ -156,7 +156,7 @@ export const useUpdateTransaction = () => {
         // Decrease source account
         await supabase
           .from('accounts')
-          .update({ balance: (newAccount.balance || 0) - data.amount })
+          .update({ balance: (newAccount.balance || 0) - data.amount - (data.fee || 0) })
           .eq('id', data.account_id)
 
         // Find and increase cash account
@@ -224,7 +224,7 @@ export const useDeleteTransaction = () => {
         // Increase source account
         await supabase
           .from('accounts')
-          .update({ balance: (account.balance || 0) + tx.amount })
+          .update({ balance: (account.balance || 0) + tx.amount + (tx.fee || 0) })
           .eq('id', tx.account_id)
 
         // Find and decrease cash account
