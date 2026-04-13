@@ -75,7 +75,7 @@ const BudgetHistoryDetail: React.FC = () => {
                   <p className="font-label text-xs uppercase tracking-wider font-bold opacity-80 mb-1">Thời gian áp dụng</p>
                   <p className="font-headline font-bold text-xl flex items-center gap-2">
                      <Calendar size={18} />
-                     {plan.start_date.slice(5)} - {plan.end_date.slice(5)}
+                     {plan.start_date.slice(5)} tới {plan.end_date.slice(5)}
                   </p>
                </div>
                
