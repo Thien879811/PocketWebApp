@@ -10,7 +10,6 @@ function cn(...inputs: ClassValue[]) {
 
 const navLinksDesktop = [
   { name: 'Home', path: '/', icon: 'home' },
-  { name: 'Goals', path: '/goals', icon: 'track_changes' },
   { name: 'Ledger', path: '/ledger', icon: 'receipt_long' },
   { name: 'Stats', path: '/stats', icon: 'insights' },
   { name: 'Wallet', path: '/wallet', icon: 'account_balance_wallet' },

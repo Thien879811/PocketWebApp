@@ -12,7 +12,8 @@ import {
   Globe,
   LayoutGrid,
   Sparkles,
-  History
+  History,
+  Target
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -37,6 +38,7 @@ const Settings: React.FC = () => {
       title: 'Preferences',
       items: [
         { icon: LayoutGrid, label: 'Categories', path: '/settings/categories', color: 'bg-primary/10 text-primary' },
+        { icon: Target, label: 'Mục tiêu tích lũy', path: '/goals', color: 'bg-success/10 text-success' },
         { icon: History, label: 'Lịch sử ngân sách', path: '/settings/budget-history', color: 'bg-secondary/10 text-secondary' },
         { icon: Palette, label: 'Appearance', path: '#', color: 'bg-tertiary/10 text-tertiary' },
         { icon: Bell, label: 'Notifications', path: '#', color: 'bg-error/10 text-error' },
