@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/utils/format'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
@@ -160,7 +161,7 @@ const Stats: React.FC = () => {
                 <div>
                   <p className="font-label text-xs uppercase tracking-[0.2em] font-black opacity-60 mb-2">Đã chi tiêu tháng này</p>
                   <h1 className="font-headline font-black text-4xl tracking-tighter italic">
-                    {totalSpent.toLocaleString('vi-VN')}đ
+                    {formatCurrency(totalSpent)}đ
                   </h1>
                 </div>
                 <div className="bg-white/20 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/20">
@@ -173,7 +174,7 @@ const Stats: React.FC = () => {
               <div className="space-y-4 mb-8 relative z-10">
                 <div className="flex justify-between items-end text-sm">
                   <span className="font-black italic text-xs tracking-wider opacity-90">{Math.round(progress)}% ngân sách</span>
-                  <span className="opacity-60 text-[10px] uppercase font-black tracking-widest">Mục tiêu: {totalBudget.toLocaleString('vi-VN')}đ</span>
+                  <span className="opacity-60 text-[10px] uppercase font-black tracking-widest">Mục tiêu: {formatCurrency(totalBudget)}đ</span>
                 </div>
                 <div className="h-4 w-full bg-white/20 rounded-full overflow-hidden p-1">
                   <div 
@@ -219,7 +220,7 @@ const Stats: React.FC = () => {
                   {isCurrentMonth ? 'Hạn mức / Ngày' : 'Trung bình / Ngày'}
                 </p>
                 <p className="font-headline font-black text-2xl text-on-surface tracking-tighter italic">
-                  {Math.round(isCurrentMonth ? dailyLimit : (totalSpent / lastDay)).toLocaleString('vi-VN')}đ
+                  {formatCurrency(Math.round(isCurrentMonth ? dailyLimit : (totalSpent / lastDay)))}đ
                 </p>
               </div>
             </div>
@@ -253,7 +254,7 @@ const Stats: React.FC = () => {
                     <div className="flex justify-between items-end">
                       <span className="font-headline font-black text-lg text-on-surface tracking-tight leading-none italic">{cat.name}</span>
                       <span className="font-label text-[10px] text-on-surface-variant font-black opacity-60 uppercase tracking-tighter">
-                        {cat.amount.toLocaleString('vi-VN')} / {cat.limit ? cat.limit.toLocaleString('vi-VN') : '∞'} đ
+                        {formatCurrency(cat.amount)} / {cat.limit ? formatCurrency(cat.limit) : '∞'} đ
                       </span>
                     </div>
                     <div className="relative h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
@@ -268,7 +269,7 @@ const Stats: React.FC = () => {
                     </div>
                     {cat.limit && cat.amount > cat.limit && (
                        <p className="text-[9px] text-error font-black uppercase tracking-widest flex items-center gap-1 italic">
-                         <AlertCircle size={10} /> Quá ngưỡng { (cat.amount - cat.limit).toLocaleString('vi-VN') }đ
+                         <AlertCircle size={10} /> Quá ngưỡng { formatCurrency(cat.amount - cat.limit) }đ
                        </p>
                     )}
                   </div>

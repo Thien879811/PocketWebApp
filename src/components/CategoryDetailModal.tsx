@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/utils/format'
 import React, { useMemo } from 'react'
 import { X, TrendingUp, AlertCircle } from 'lucide-react'
 import { type Category } from '@/features/categories/types/category.schema'
@@ -117,7 +118,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
                 Tổng chi tiêu
               </p>
               <p className="font-headline font-black text-2xl text-on-surface tracking-tighter">
-                {categoryData.totalAmount.toLocaleString('vi-VN')}đ
+                {formatCurrency(categoryData.totalAmount)}đ
               </p>
             </div>
 
@@ -137,7 +138,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
                 Trung bình / giao dịch
               </p>
               <p className="font-headline font-black text-2xl text-on-surface tracking-tighter">
-                {categoryData.avgAmount.toLocaleString('vi-VN', { maximumFractionDigits: 0 })}đ
+                {formatCurrency(categoryData.avgAmount)}đ
               </p>
             </div>
 
@@ -147,7 +148,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
                 Giao dịch lớn nhất
               </p>
               <p className="font-headline font-black text-2xl text-on-surface tracking-tighter">
-                {categoryData.maxAmount.toLocaleString('vi-VN')}đ
+                {formatCurrency(categoryData.maxAmount)}đ
               </p>
             </div>
           </div>
@@ -158,7 +159,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
               <div className="flex justify-between items-center mb-4">
                 <p className="font-headline font-black text-sm text-on-surface">Hạn mức ngân sách</p>
                 <span className="text-on-surface-variant text-xs font-black opacity-60">
-                  {categoryData.totalAmount.toLocaleString('vi-VN')} / {category.limit.toLocaleString('vi-VN')}đ
+                  {formatCurrency(categoryData.totalAmount)} / {formatCurrency(category.limit)}đ
                 </span>
               </div>
               <div className="h-3 w-full bg-surface-container-high rounded-full overflow-hidden mb-3">
@@ -181,8 +182,8 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
                   )}
                 >
                   {categoryData.exceeded
-                    ? `Quá ${(categoryData.totalAmount - category.limit).toLocaleString('vi-VN')}đ`
-                    : `Còn ${categoryData.remaining?.toLocaleString('vi-VN')}đ`}
+                    ? `Quá ${formatCurrency(categoryData.totalAmount - category.limit)}đ`
+                    : `Còn ${formatCurrency(categoryData.remaining)}đ`}
                 </span>
               </div>
 
@@ -227,7 +228,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
                     >
                       <p className="font-headline font-black text-sm">
                         {tx.type === 'expense' ? '-' : '+'}
-                        {tx.amount.toLocaleString('vi-VN')}đ
+                        {formatCurrency(tx.amount)}đ
                       </p>
                     </div>
                   </div>

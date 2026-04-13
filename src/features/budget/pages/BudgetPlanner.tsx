@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/utils/format'
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Target, Calendar, TrendingUp, AlertTriangle, CheckCircle2, TrendingDown, PiggyBank, Edit3, X, Loader2 } from 'lucide-react'
@@ -215,9 +216,9 @@ const BudgetPlanner: React.FC = () => {
                         <div>
                           <p className="font-label text-xs uppercase tracking-wider font-bold opacity-80 mb-1">Tổng còn lại</p>
                           <h2 className="font-headline font-black text-4xl">
-                            {todayStatus?.remainingTotal.toLocaleString('vi-VN')} đ
+                            {formatCurrency(todayStatus?.remainingTotal)} đ
                           </h2>
-                          <p className="text-xs opacity-80 mt-1">/ {currentPlan.total_budget.toLocaleString('vi-VN')} đ ngân sách</p>
+                          <p className="text-xs opacity-80 mt-1">/ {formatCurrency(currentPlan.total_budget)} đ ngân sách</p>
                         </div>
                       </div>
 
@@ -230,7 +231,7 @@ const BudgetPlanner: React.FC = () => {
                           />
                         </div>
                         <div className="flex justify-between text-[10px] font-bold opacity-80">
-                          <span>Đã tiêu {todayStatus?.totalSpent.toLocaleString('vi-VN')} đ</span>
+                          <span>Đã tiêu {todayStatus?.formatCurrency(totalSpent)} đ</span>
                           <span>{progressPercentage.toFixed(1)}%</span>
                         </div>
                       </div>
@@ -257,7 +258,7 @@ const BudgetPlanner: React.FC = () => {
                     <div className="flex flex-col items-center text-center py-4">
                       <p className="text-sm font-bold text-on-surface-variant mb-1">Hạn mức tối đa</p>
                       <h4 className={cn("font-headline font-black text-4xl mb-4", todayStatus?.isExceeded ? "text-error" : "text-primary")}>
-                        {todayStatus?.remainingDaily.toLocaleString('vi-VN')} đ
+                        {formatCurrency(todayStatus?.remainingDaily)} đ
                       </h4>
 
                       {todayStatus?.isExceeded ? (

@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/utils/format'
 import React from 'react'
 import { Plus, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -33,7 +34,7 @@ const Goals: React.FC = () => {
             <span className="text-sm font-label opacity-80 tracking-widest uppercase">Overview</span>
             <h2 className="font-headline text-4xl md:text-5xl font-extrabold mt-2 mb-1 tracking-tight">Total Saved</h2>
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl md:text-6xl font-headline font-black tracking-tighter">{totalSaved.toLocaleString('vi-VN')}</span>
+              <span className="text-5xl md:text-6xl font-headline font-black tracking-tighter">{formatCurrency(totalSaved)}</span>
               <span className="text-2xl font-headline opacity-90 font-bold">VNĐ</span>
             </div>
             <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/10">
@@ -75,8 +76,8 @@ const Goals: React.FC = () => {
                 </p>
                 <div className="mb-6">
                   <div className="flex justify-between text-sm font-bold mb-2">
-                    <span className="text-on-surface">{goal.current_amount.toLocaleString('vi-VN')}</span>
-                    <span className="text-on-surface-variant opacity-60">{goal.target_amount.toLocaleString('vi-VN')}</span>
+                    <span className="text-on-surface">{formatCurrency(goal.current_amount)}</span>
+                    <span className="text-on-surface-variant opacity-60">{formatCurrency(goal.target_amount)}</span>
                   </div>
                   <div className="h-3 w-full bg-surface-container-highest rounded-full overflow-hidden">
                     <div className={cn("h-full rounded-full transition-all duration-1000", goal.color || "bg-primary")} style={{ width: `${percentage}%` }}></div>

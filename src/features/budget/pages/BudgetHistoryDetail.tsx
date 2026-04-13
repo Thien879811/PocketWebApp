@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/utils/format'
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Calendar, Loader2, Info } from 'lucide-react'
@@ -83,7 +84,7 @@ const BudgetHistoryDetail: React.FC = () => {
                   <div className="flex justify-between items-end">
                      <div>
                         <p className="text-[10px] font-bold uppercase opacity-80 mb-1">Tổng thiết lập ngân sách</p>
-                        <p className="font-headline font-black text-2xl">{plan.total_budget.toLocaleString('vi-VN')} đ</p>
+                        <p className="font-headline font-black text-2xl">{formatCurrency(plan.total_budget)} đ</p>
                      </div>
                   </div>
                   <div>
@@ -94,7 +95,7 @@ const BudgetHistoryDetail: React.FC = () => {
                       />
                     </div>
                     <div className="flex justify-between mt-2 text-xs font-bold opacity-90">
-                      <span>Đã tiêu {totalSpent.toLocaleString('vi-VN')} đ</span>
+                      <span>Đã tiêu {formatCurrency(totalSpent)} đ</span>
                       <span>{progress.toFixed(1)}%</span>
                     </div>
                   </div>
@@ -141,7 +142,7 @@ const BudgetHistoryDetail: React.FC = () => {
                                "font-headline font-black text-base flex items-center gap-1",
                                isExpense ? "text-on-surface" : "text-primary"
                             )}>
-                               {isExpense ? '-' : '+'} {tx.amount.toLocaleString('vi-VN')}đ
+                               {isExpense ? '-' : '+'} {formatCurrency(tx.amount)}đ
                             </div>
                          </div>
                       )

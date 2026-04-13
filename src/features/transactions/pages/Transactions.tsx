@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/utils/format'
 import React, { useState } from 'react'
 import { 
   Loader2, 
@@ -243,7 +244,7 @@ const Transactions: React.FC = () => {
                                  "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
                                  tx.type === 'income' ? "text-secondary" : tx.type === 'expense' ? "text-on-surface" : "text-amber-600"
                               )}>
-                                 {tx.type === 'income' ? '+' : '-'}{tx.amount.toLocaleString('vi-VN')}đ
+                                 {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}đ
                               </p>
                            </div>
                         </div>

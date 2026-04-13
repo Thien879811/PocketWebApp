@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/utils/format'
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
@@ -352,7 +353,7 @@ const EditTransaction: React.FC = () => {
                       <div className="flex-1 text-left">
                         <p className="font-headline font-bold text-lg leading-tight">{acc.name}</p>
                         <p className={cn("font-label text-xs font-bold opacity-60", selectedAccountId === acc.id ? "text-white" : "text-outline")}>
-                          Số dư: {acc.balance?.toLocaleString('vi-VN')}đ
+                          Số dư: {formatCurrency(acc.balance)}đ
                         </p>
                       </div>
                       {selectedAccountId === acc.id && <Check size={18} strokeWidth={3} />}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { 
-  Plus, TrendingUp, Landmark, CreditCard, 
+  Plus, Landmark, CreditCard, 
   Wallet as WalletIcon, X, Check, Loader2, Landmark as BankIcon, 
   CreditCard as CardIcon, Coins, 
   Sparkles, Trash2
@@ -59,10 +59,6 @@ const Wallet: React.FC = () => {
             <h2 className="font-headline font-black text-4xl tracking-tighter text-on-surface">
               {totalNetWorth.toLocaleString('vi-VN')}đ
             </h2>
-            <div className="bg-secondary-container/20 text-secondary px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-black self-center mb-1 backdrop-blur-md border border-secondary/10 shadow-sm">
-              <TrendingUp size={14} strokeWidth={3} />
-              2.4%
-            </div>
           </div>
           <p className="text-on-surface-variant text-sm mt-3 opacity-80 italic font-bold">
             Tính toán trên {accounts?.length || 0} tài khoản đang hoạt động

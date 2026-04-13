@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/utils/format'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, History, Loader2, Calendar, Target, CheckCircle2, TrendingUp } from 'lucide-react'
@@ -77,7 +78,7 @@ const BudgetHistory: React.FC = () => {
                           <div className="flex justify-between items-start mb-4">
                              <div>
                                 <h3 className="font-headline font-black text-xl text-on-surface">
-                                   {plan.total_budget.toLocaleString('vi-VN')} đ
+                                   {formatCurrency(plan.total_budget)} đ
                                 </h3>
                                 <p className="text-[11px] font-bold text-on-surface-variant flex items-center gap-1.5 mt-1 opacity-80 uppercase tracking-wide">
                                    <Calendar size={12} />
@@ -101,7 +102,7 @@ const BudgetHistory: React.FC = () => {
                              </div>
                              <div className="flex justify-between items-center text-[11px] font-bold">
                                 <span className={cn(isExceeded ? "text-error" : "text-on-surface-variant")}>
-                                   Đã tiêu: {totalSpent.toLocaleString('vi-VN')} đ
+                                   Đã tiêu: {formatCurrency(totalSpent)} đ
                                 </span>
                                 <span className={isExceeded ? "text-error" : "text-on-surface"}>
                                    {progress.toFixed(1)}%
