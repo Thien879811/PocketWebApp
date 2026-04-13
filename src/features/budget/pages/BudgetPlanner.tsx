@@ -107,8 +107,8 @@ const BudgetPlanner: React.FC = () => {
             // SETUP / EDIT BUDGET PLAN
             // ======================
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-primary/5 rounded-3xl p-8 text-center mb-8 border border-primary/10">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="glass rounded-3xl p-8 glass-border dark:shadow-glass-dark text-center mb-8">
+                <div className="w-16 h-16 glass rounded-full flex items-center justify-center mx-auto mb-4 transform hover:scale-110 transition-all dark:shadow-glass-dark group-hover:shadow-glow-primary">
                   <PiggyBank className="w-8 h-8 text-primary" />
                 </div>
                 <h2 className="font-headline font-black text-2xl text-on-surface mb-2">Thết lập lớp khiên!</h2>
@@ -116,9 +116,9 @@ const BudgetPlanner: React.FC = () => {
               </div>
 
               <form onSubmit={handleSavePlan} className="space-y-6">
-                <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/10 shadow-sm">
+                <div className="glass p-6 rounded-3xl dark:shadow-glass-dark">
                   <label className="block font-label text-xs uppercase font-black text-primary opacity-80 mb-4">Tổng ngân sách</label>
-                  <div className="flex items-baseline gap-2 border-b-2 border-outline-variant/20 focus-within:border-primary pb-2 transition-colors">
+                  <div className="flex items-baseline gap-2 border-b-2 border-primary/20 focus-within:border-primary pb-2 smooth-transition">
                     <input 
                       type="number"
                       required
@@ -126,7 +126,7 @@ const BudgetPlanner: React.FC = () => {
                       step="1000"
                       value={budgetAmount}
                       onChange={e => setBudgetAmount(e.target.value)}
-                      className="bg-transparent border-none text-4xl font-headline font-black text-on-surface focus:ring-0 w-full p-0"
+                      className="glass border-none text-4xl font-headline font-black text-on-surface focus:ring-0 w-full p-0 dark:shadow-glass-dark rounded-none"
                       placeholder="0"
                     />
                     <span className="text-xl font-headline text-on-surface-variant font-bold">đ</span>
@@ -134,25 +134,25 @@ const BudgetPlanner: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10 shadow-sm">
-                    <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-2">Từ ngày</label>
+                  <div className="glass p-5 rounded-3xl dark:shadow-glass-dark">
+                    <label className="block font-label text-[10px] uppercase font-black text-primary opacity-70 mb-2">Từ ngày</label>
                     <input 
                       type="date"
                       required
                       value={startDate}
                       onChange={e => setStartDate(e.target.value)}
-                      className="bg-transparent border-none p-0 text-sm font-bold text-on-surface focus:ring-0 w-full"
+                      className="glass border-none p-0 text-sm font-bold text-on-surface focus:ring-0 w-full dark:shadow-glass-dark rounded-none"
                     />
                   </div>
-                  <div className="bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10 shadow-sm">
-                    <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-2">Đến ngày</label>
+                  <div className="glass p-5 rounded-3xl dark:shadow-glass-dark">
+                    <label className="block font-label text-[10px] uppercase font-black text-primary opacity-70 mb-2">Đến ngày</label>
                     <input 
                       type="date"
                       required
                       min={startDate}
                       value={endDate}
                       onChange={e => setEndDate(e.target.value)}
-                      className="bg-transparent border-none p-0 text-sm font-bold text-on-surface focus:ring-0 w-full"
+                      className="glass border-none p-0 text-sm font-bold text-on-surface focus:ring-0 w-full dark:shadow-glass-dark rounded-none"
                     />
                   </div>
                 </div>
@@ -168,7 +168,7 @@ const BudgetPlanner: React.FC = () => {
                             end.setDate(end.getDate() + days - 1)
                             setEndDate(end.toISOString().split('T')[0])
                          }}
-                         className="px-4 py-2 rounded-full border border-outline-variant/20 text-xs font-bold text-on-surface-variant hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors whitespace-nowrap flex-shrink-0"
+                         className="glass px-4 py-2 rounded-full text-xs font-bold text-primary dark:shadow-glass-dark smooth-transition transform hover:scale-105 active:scale-95 whitespace-nowrap flex-shrink-0"
                       >
                          + {days} ngày
                       </button>
@@ -178,7 +178,7 @@ const BudgetPlanner: React.FC = () => {
                 <button 
                   type="submit"
                   disabled={createBudget.isPending || updateBudget.isPending}
-                  className="w-full bg-primary text-on-primary h-14 rounded-[1.5rem] font-headline font-black text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:-translate-y-0.5 active:scale-95 transition-all mt-8 disabled:opacity-50 flex justify-center items-center gap-2"
+                  className="w-full glass text-primary h-14 rounded-[1.5rem] font-headline font-black text-lg dark:shadow-glow-primary smooth-transition transform hover:scale-102 active:scale-95 mt-8 disabled:opacity-50 flex justify-center items-center gap-2"
                 >
                   {(createBudget.isPending || updateBudget.isPending) && <Loader2 className="w-5 h-5 animate-spin" />}
                   {isEditing ? 'Lưu thay đổi' : 'Bắt đầu kế hoạch'}
@@ -205,29 +205,29 @@ const BudgetPlanner: React.FC = () => {
               ) : (
                 <>
                   {/* OVERVIEW WIDGET */}
-                  <div className="bg-primary text-on-primary rounded-[2.5rem] p-6 relative overflow-hidden shadow-2xl shadow-primary/20">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                  <div className="glass rounded-[2.5rem] p-6 glass-border dark:shadow-glow-primary relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     
                     <div className="relative z-10">
                       <div className="flex justify-between items-start mb-6">
                         <div>
-                          <p className="font-label text-xs uppercase tracking-wider font-bold opacity-80 mb-1">Tổng còn lại</p>
-                          <h2 className="font-headline font-black text-4xl">
+                          <p className="font-label text-xs uppercase tracking-wider font-bold opacity-80 mb-1 text-on-surface">Tổng còn lại</p>
+                          <h2 className="font-headline font-black text-4xl text-on-surface glow">
                             {formatCurrency(todayStatus?.remainingTotal)}
                           </h2>
-                          <p className="text-xs opacity-80 mt-1">/ {formatCurrency(currentPlan.total_budget)} ngân sách</p>
+                          <p className="text-xs opacity-80 mt-1 text-on-surface-variant">/ {formatCurrency(currentPlan.total_budget)} ngân sách</p>
                         </div>
                       </div>
 
                       {/* Progress bar */}
                       <div className="space-y-2 mb-4">
-                        <div className="h-3 w-full bg-black/20 rounded-full overflow-hidden backdrop-blur-sm">
+                        <div className="h-3 w-full glass rounded-full overflow-hidden dark:shadow-glass-dark">
                           <div 
-                            className={cn("h-full rounded-full transition-all duration-1000", progressPercentage > 90 ? "bg-red-400" : "bg-white")} 
+                            className={cn("h-full rounded-full smooth-transition duration-1000", progressPercentage > 90 ? "bg-red-400" : "bg-primary")} 
                             style={{ width: `${progressPercentage}%` }} 
                           />
                         </div>
-                        <div className="flex justify-between text-[10px] font-bold opacity-80">
+                        <div className="flex justify-between text-[10px] font-bold opacity-80 text-on-surface-variant">
                           <span>Đã tiêu {formatCurrency(todayStatus?.totalSpent)}</span>
                           <span>{progressPercentage.toFixed(1)}%</span>
                         </div>
@@ -236,41 +236,38 @@ const BudgetPlanner: React.FC = () => {
                   </div>
 
                   {/* DAILY BUDGET WIDGET */}
-                  <div className={cn(
-                    "rounded-3xl p-6 border shadow-sm transition-all",
-                    todayStatus?.isExceeded ? "bg-error/5 border-error/20" : "bg-surface-container-lowest border-outline-variant/10"
-                  )}>
+                  <div className="glass rounded-3xl p-6 dark:shadow-glass-dark smooth-transition">
                     <div className="flex justify-between items-center mb-6">
                       <div className="flex items-center gap-3">
-                        <div className={cn("p-2 rounded-xl", todayStatus?.isExceeded ? "bg-error/20 text-error" : "bg-secondary/20 text-secondary")}>
+                        <div className={cn("p-2 glass rounded-xl", todayStatus?.isExceeded ? "text-error" : "text-secondary")}>
                           {todayStatus?.isExceeded ? <TrendingDown size={20} /> : <TrendingUp size={20} />}
                         </div>
                         <h3 className="font-headline font-bold text-lg text-on-surface">Ngân sách hôm nay</h3>
                       </div>
-                      <span className="bg-surface-container-high px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant flex items-center gap-1">
+                      <span className="glass px-3 py-1 rounded-full text-xs font-bold text-primary flex items-center gap-1 dark:shadow-glass-dark">
                         <Calendar size={12} /> {todayStr}
                       </span>
                     </div>
 
                     <div className="flex flex-col items-center text-center py-4">
                       <p className="text-sm font-bold text-on-surface-variant mb-1">Hạn mức tối đa</p>
-                      <h4 className={cn("font-headline font-black text-4xl mb-4", todayStatus?.isExceeded ? "text-error" : "text-primary")}>
+                      <h4 className={cn("font-headline font-black text-4xl mb-4 glow", todayStatus?.isExceeded ? "text-error" : "text-primary")}>
                         {formatCurrency(todayStatus?.remainingDaily)}
                       </h4>
 
                       {todayStatus?.isExceeded ? (
-                        <div className="flex items-center gap-2 text-xs font-bold text-error bg-error/10 px-4 py-2 rounded-full">
+                        <div className="flex items-center gap-2 text-xs font-bold text-error glass px-4 py-2 rounded-full dark:shadow-glass-dark">
                           <AlertTriangle size={14} /> Bạn đã chi lố hạn mức hôm nay!
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 text-[11px] font-bold text-secondary bg-secondary/10 px-3 py-2 rounded-full">
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-secondary glass px-3 py-2 rounded-full dark:shadow-glass-dark">
                           <CheckCircle2 size={14} /> Tốt lắm, hãy giữ vững phong độ nhé!
                         </div>
                       )}
                     </div>
 
                     {/* ROLLOVER EXPLANATION */}
-                    <div className="mt-4 pt-4 border-t border-outline-variant/10">
+                    <div className="mt-4 pt-4 border-t border-on-surface/10">
                       <p className="text-[11px] text-on-surface-variant leading-relaxed font-medium">
                         💡 <strong className="text-on-surface">Công thức Rollover:</strong> Số dư hạn mức ngân sách ngày hôm nay sẽ tự động được cộng dồn và chia đều cho những ngày còn lại!
                       </p>

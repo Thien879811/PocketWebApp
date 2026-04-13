@@ -53,11 +53,11 @@ const Wallet: React.FC = () => {
     <div className="max-w-lg mx-auto md:max-w-none pt-4 pb-24 scrollbar-hide">
       
       {/* 🏔️ Net Worth HeroSection */}
-      <section className="mb-12 px-2 flex justify-between items-start">
+      <section className="mb-12 px-2 glass rounded-[2rem] p-8 glass-border dark:shadow-glass-dark">
         <div>
           <p className="font-label text-on-surface-variant text-xs uppercase tracking-[0.2em] font-black mb-3 opacity-60">Tổng tài sản</p>
           <div className="flex items-baseline gap-3">
-            <h2 className="font-headline font-black text-4xl tracking-tighter text-on-surface">
+            <h2 className="font-headline font-black text-4xl tracking-tighter text-on-surface glow">
               {totalNetWorth.toLocaleString('vi-VN')}đ
             </h2>
           </div>
@@ -65,14 +65,6 @@ const Wallet: React.FC = () => {
             Tính toán trên {accounts?.length || 0} tài khoản đang hoạt động
           </p>
         </div>
-        
-        <button 
-          onClick={() => setShowAddModal(true)}
-          className="hidden md:flex flex-col items-center gap-2 p-4 bg-primary text-on-primary rounded-3xl shadow-xl shadow-primary/20 active:scale-95 transition-all"
-        >
-          <Plus size={24} strokeWidth={3} />
-          <span className="font-bold text-xs uppercase tracking-tighter">Thêm ví</span>
-        </button>
       </section>
 
       {/* 💳 Account Cards */}
@@ -86,18 +78,16 @@ const Wallet: React.FC = () => {
             <div 
               key={acc.id}
               className={cn(
-                "relative overflow-hidden p-8 rounded-[2.5rem] min-h-[180px] flex flex-col justify-between transition-all duration-300 group shadow-xl",
-                acc.type === 'bank' ? "bg-primary text-on-primary shadow-primary/20 hover:brightness-110" : 
-                acc.type === 'credit' ? "bg-surface-container-high text-on-surface border border-outline-variant/10 shadow-sm hover:bg-surface-bright" :
-                "bg-surface-container-lowest text-on-surface border border-outline-variant/10 shadow-sm hover:bg-surface-bright"
+                "relative overflow-hidden p-8 rounded-[2.5rem] min-h-[180px] flex flex-col justify-between glass smooth-transition transform hover:scale-105 active:scale-95 group dark:shadow-glass-dark",
+                acc.type === 'bank' ? "dark:shadow-glow-primary" : ""
               )}
             >
               <div className="flex justify-between items-start relative z-10">
                 <div className={cn(
-                  "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg border",
-                  acc.type === 'bank' ? "bg-white/10 border-white/20" : 
-                  acc.type === 'credit' ? "bg-error-container/30 border-error/10 text-error" : 
-                  "bg-secondary-container/10 border-outline-variant/20 text-secondary"
+                "w-14 h-14 glass rounded-2xl flex items-center justify-center dark:shadow-glass-dark transform group-hover:scale-110 transition-all group-hover:rotate-12 duration-300",
+                acc.type === 'bank' ? "text-primary" : 
+                acc.type === 'credit' ? "text-error" : 
+                "text-secondary"
                 )}>
                   {acc.type === 'bank' ? <Landmark size={28} /> : 
                    acc.type === 'credit' ? <CreditCard size={28} /> : 
@@ -117,25 +107,25 @@ const Wallet: React.FC = () => {
 
               <div className="relative z-10 mt-8">
                 <div className="flex items-center gap-2 mb-1.5 opacity-80">
-                  <h3 className="font-headline font-bold text-lg">{acc.name}</h3>
+                  <h3 className="font-headline font-bold text-lg text-on-surface">{acc.name}</h3>
                   {acc.provider && (
                     <span className={cn(
-                      "text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest border",
-                      acc.type === 'bank' ? "bg-white/10 border-white/10" : "bg-surface-container-high border-outline-variant/20"
+                      "text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest glass dark:shadow-glass-dark",
+                      acc.type === 'bank' ? "text-primary" : "text-on-surface-variant"
                     )}>
                       {acc.provider}
                     </span>
                   )}
                 </div>
-                <p className="font-headline font-black text-2xl tracking-tight">
+                <p className="font-headline font-black text-2xl tracking-tight text-on-surface glow">
                   {acc.balance?.toLocaleString('vi-VN')}
                 </p>
 
                 {acc.type === 'credit' && acc.limit && (
                    <div className="mt-6">
-                      <div className="w-full h-2.5 bg-surface-container-highest rounded-full overflow-hidden border border-outline-variant/10 p-0.5">
+                      <div className="w-full h-2.5 glass rounded-full overflow-hidden p-0.5 dark:shadow-glass-dark">
                          <div 
-                           className="h-full bg-error rounded-full" 
+                           className="h-full bg-error rounded-full smooth-transition" 
                            style={{ width: `${Math.min((Math.abs(acc.balance) / acc.limit) * 100, 100)}%` }} 
                          />
                       </div>
