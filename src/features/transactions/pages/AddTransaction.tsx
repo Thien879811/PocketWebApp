@@ -128,7 +128,7 @@ const AddTransaction: React.FC = () => {
                   )}
                   {!isBudgetEmpty && willExceed && (
                     <div className="mt-2 text-[10px] font-bold text-error bg-error/10 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
-                       <AlertTriangle className="w-3.5 h-3.5" /> Vượt quá hạn mức {formatCurrency(targetRemaining)} đ/ngày!
+                       <AlertTriangle className="w-3.5 h-3.5" /> Vượt quá hạn mức {formatCurrency(targetRemaining)}/ngày!
                     </div>
                   )}
                 </div>
@@ -370,7 +370,7 @@ const AddTransaction: React.FC = () => {
                       <div className="flex-1 text-left">
                         <p className="font-headline font-bold text-lg leading-tight">{acc.name}</p>
                         <p className={cn("font-label text-xs font-bold opacity-60", selectedAccountId === acc.id ? "text-white" : "text-outline")}>
-                          Số dư: {formatCurrency(acc.balance)}đ
+                          Số dư: {formatCurrency(acc.balance)}
                         </p>
                       </div>
                       {selectedAccountId === acc.id && <Check size={18} strokeWidth={3} />}

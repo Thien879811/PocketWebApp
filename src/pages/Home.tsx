@@ -52,7 +52,7 @@ const Home: React.FC = () => {
             <div className="relative z-10 space-y-2">
                <p className="font-label text-xs uppercase tracking-[0.2em] font-black opacity-60">Tổng số dư</p>
                <h3 className="font-headline font-black text-4xl tracking-tighter">
-                 {formatCurrency(totalBalance)}đ
+                 {formatCurrency(totalBalance)}
                </h3>
                <div className="flex items-center gap-2 mt-4">
                   <span className="text-secondary-fixed bg-white/10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/5">+240.000đ hôm nay</span>
@@ -65,14 +65,14 @@ const Home: React.FC = () => {
                      <ArrowDownLeft size={16} strokeWidth={3} />
                      <span className="text-[10px] font-black uppercase tracking-widest">Thu nhập</span>
                   </div>
-                  <p className="text-xl font-black italic tracking-tight">{formatCurrency(stats?.totalIncome) || '0'}đ</p>
+                  <p className="text-xl font-black italic tracking-tight">{formatCurrency(stats?.totalIncome) || '0'}</p>
                </div>
                <div className="space-y-1">
                   <div className="flex items-center gap-1.5 opacity-60 text-tertiary-fixed">
                      <ArrowUpRight size={16} strokeWidth={3} />
                      <span className="text-[10px] font-black uppercase tracking-widest">Chi tiêu</span>
                   </div>
-                  <p className="text-xl font-black italic tracking-tight">{formatCurrency(stats?.totalExpense) || '0'}đ</p>
+                  <p className="text-xl font-black italic tracking-tight">{formatCurrency(stats?.totalExpense) || '0'}</p>
                </div>
             </div>
 
@@ -145,7 +145,7 @@ const Home: React.FC = () => {
                            "font-headline font-black text-xl italic tracking-tighter",
                            tx.type === 'income' ? "text-secondary" : "text-on-surface"
                         )}>
-                           {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}đ
+                           {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                         </p>
                      </div>
                   </div>

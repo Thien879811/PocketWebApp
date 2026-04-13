@@ -81,7 +81,7 @@ const BudgetHistoryDetail: React.FC = () => {
                   <div className="flex justify-between items-end">
                      <div>
                         <p className="text-[10px] font-bold uppercase opacity-80 mb-1">Tổng thiết lập ngân sách</p>
-                        <p className="font-headline font-black text-2xl">{formatCurrency(plan.total_budget)} đ</p>
+                        <p className="font-headline font-black text-2xl">{formatCurrency(plan.total_budget)}</p>
                      </div>
                   </div>
                   <div>
@@ -92,7 +92,7 @@ const BudgetHistoryDetail: React.FC = () => {
                       />
                     </div>
                     <div className="flex justify-between mt-2 text-xs font-bold opacity-90">
-                      <span>Đã tiêu {formatCurrency(totalSpent)} đ</span>
+                      <span>Đã tiêu {formatCurrency(totalSpent)}</span>
                       <span>{progress.toFixed(1)}%</span>
                     </div>
                   </div>

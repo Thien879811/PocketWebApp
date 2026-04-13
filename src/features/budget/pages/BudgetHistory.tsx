@@ -75,7 +75,7 @@ const BudgetHistory: React.FC = () => {
                           <div className="flex justify-between items-start mb-4">
                              <div>
                                 <h3 className="font-headline font-black text-xl text-on-surface">
-                                   {formatCurrency(plan.total_budget)} đ
+                                   {formatCurrency(plan.total_budget)}
                                 </h3>
                                 <p className="text-[11px] font-bold text-on-surface-variant flex items-center gap-1.5 mt-1 opacity-80 uppercase tracking-wide">
                                    <Calendar size={12} />
@@ -99,7 +99,7 @@ const BudgetHistory: React.FC = () => {
                              </div>
                              <div className="flex justify-between items-center text-[11px] font-bold">
                                 <span className={cn(isExceeded ? "text-error" : "text-on-surface-variant")}>
-                                   Đã tiêu: {formatCurrency(totalSpent)} đ
+                                   Đã tiêu: {formatCurrency(totalSpent)}
                                 </span>
                                 <span className={isExceeded ? "text-error" : "text-on-surface"}>
                                    {progress.toFixed(1)}%

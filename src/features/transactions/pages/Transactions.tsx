@@ -239,7 +239,7 @@ const Transactions: React.FC = () => {
                                  "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
                                  tx.type === 'income' ? "text-secondary" : tx.type === 'expense' ? "text-on-surface" : "text-amber-600"
                               )}>
-                                 {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}đ
+                                 {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                               </p>
                            </div>
                         </div>

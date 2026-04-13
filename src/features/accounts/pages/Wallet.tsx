@@ -128,7 +128,7 @@ const Wallet: React.FC = () => {
                   )}
                 </div>
                 <p className="font-headline font-black text-2xl tracking-tight">
-                  {acc.balance?.toLocaleString('vi-VN')}đ
+                  {acc.balance?.toLocaleString('vi-VN')}
                 </p>
 
                 {acc.type === 'credit' && acc.limit && (

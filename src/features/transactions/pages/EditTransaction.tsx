@@ -353,7 +353,7 @@ const EditTransaction: React.FC = () => {
                       <div className="flex-1 text-left">
                         <p className="font-headline font-bold text-lg leading-tight">{acc.name}</p>
                         <p className={cn("font-label text-xs font-bold opacity-60", selectedAccountId === acc.id ? "text-white" : "text-outline")}>
-                          Số dư: {formatCurrency(acc.balance)}đ
+                          Số dư: {formatCurrency(acc.balance)}
                         </p>
                       </div>
                       {selectedAccountId === acc.id && <Check size={18} strokeWidth={3} />}
