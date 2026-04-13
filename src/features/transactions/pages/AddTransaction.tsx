@@ -2,11 +2,13 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X, ChevronRight, Calendar, Wallet, LayoutGrid, Inbox, Check } from 'lucide-react'
+import { Loader2, X, ChevronRight, Calendar, Wallet, LayoutGrid, Inbox, Check, AlertTriangle } from 'lucide-react'
 import { transactionSchema, type TransactionFormValues } from '../types/transaction.schema'
 import { useCreateTransaction } from '../hooks/useTransactionMutations'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { useAccounts } from '../../accounts/hooks/useAccounts'
+import { useActiveBudget, getDailyBudgetStatus } from '../../budget/hooks/useBudget'
+import { useTransactions } from '../../transactions/hooks/useTransactions'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -19,6 +21,8 @@ const AddTransaction: React.FC = () => {
   const { mutate: createTransaction, isPending } = useCreateTransaction()
   const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { data: accounts } = useAccounts()
+  const { data: currentPlan } = useActiveBudget()
+  const { data: transactions } = useTransactions()
   
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'withdrawal'>('expense')
   const [showAccountSelector, setShowAccountSelector] = useState(false)
@@ -52,11 +56,27 @@ const AddTransaction: React.FC = () => {
       // @ts-ignore - Supabase accepts null for category_id
       submissionData.category_id = null
     }
+    
     createTransaction(submissionData)
   }
 
   // Filter categories by selected type
   const filteredCategories = categories?.filter(cat => cat.type === transactionType) || []
+
+  // Budget checks
+  const dateStr = watch('date') || new Date().toISOString().split('T')[0]
+  const todayStatus = (currentPlan && transactions) ? getDailyBudgetStatus(currentPlan, transactions, dateStr) : null
+  
+  const isBudgetEmpty = Boolean(currentPlan && todayStatus?.budgetEmpty && transactionType === 'expense')
+  const targetRemaining = isBudgetEmpty ? 0 : (todayStatus?.remainingDaily || 0)
+  const willExceed = Boolean(currentPlan && transactionType === 'expense' && (currentAmount || 0) > targetRemaining)
+  
+  // Vibration effect helper
+  React.useEffect(() => {
+    if (willExceed && "vibrate" in navigator) {
+       navigator.vibrate(200)
+    }
+  }, [willExceed])
 
   return (
     <div className="min-h-screen bg-surface md:flex md:items-center md:justify-center md:p-8">
@@ -88,7 +108,8 @@ const AddTransaction: React.FC = () => {
                   <div className="flex items-baseline gap-1">
                     <input 
                       {...register('amount', { valueAsNumber: true })}
-                      className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px]"
+                      disabled={isBudgetEmpty}
+                      className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px] disabled:opacity-50"
                       placeholder="0"
                       type="number"
                       step="1000"
@@ -97,6 +118,18 @@ const AddTransaction: React.FC = () => {
                     <span className="text-headline-sm font-headline text-on-surface-variant">đ</span>
                   </div>
                   {errors.amount && <p className="text-xs text-error font-bold">{errors.amount.message}</p>}
+                  
+                  {/* Budget Warnings UI */}
+                  {isBudgetEmpty && (
+                    <div className="mt-2 text-xs font-bold text-error bg-error/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
+                       <X className="w-4 h-4" /> Hết ngân sách kế hoạch, không thể chi thêm!
+                    </div>
+                  )}
+                  {!isBudgetEmpty && willExceed && (
+                    <div className="mt-2 text-[10px] font-bold text-error bg-error/10 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
+                       <AlertTriangle className="w-3.5 h-3.5" /> Vượt quá hạn mức {(targetRemaining).toLocaleString('vi-VN')} đ/ngày!
+                    </div>
+                  )}
                 </div>
 
                 {/* Quick Amount Chips */}
@@ -297,8 +330,8 @@ const AddTransaction: React.FC = () => {
           <button 
             type="submit"
             form="transaction-form"
-            disabled={isPending}
-            className="w-full bg-primary text-on-primary h-16 rounded-[1.5rem] font-headline font-black text-lg shadow-2xl shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            disabled={isPending || isBudgetEmpty}
+            className="w-full bg-primary text-on-primary h-16 rounded-[1.5rem] font-headline font-black text-lg shadow-2xl shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:active:scale-100 disabled:hover:brightness-100 disabled:cursor-not-allowed"
           >
             {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Lưu giao dịch'}
           </button>

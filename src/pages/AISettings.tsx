@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ChevronLeft, Sparkles, Key, Loader2, Save } from 'lucide-react'
+import { ChevronLeft, Sparkles, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTransactions } from '@/features/transactions/hooks/useTransactions'

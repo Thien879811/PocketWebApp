@@ -6,7 +6,8 @@ import {
   Inbox, 
   ArrowUpRight, 
   ArrowDownLeft, 
-  LayoutGrid
+  LayoutGrid,
+  Target
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTransactions, getTransactionStats } from '../features/transactions/hooks/useTransactions'
@@ -83,6 +84,25 @@ const Home: React.FC = () => {
             <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-[100px] pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
             <div className="absolute -left-10 -top-10 w-40 h-40 bg-secondary/20 rounded-full blur-[80px] pointer-events-none"></div>
          </div>
+      </section>
+
+      {/* 🎯 Dashboard Shortcuts */}
+      <section className="mb-10 px-2 grid grid-cols-2 gap-4">
+          <button onClick={() => navigate('/budget')} className="bg-surface-container-lowest p-5 rounded-[2rem] border border-outline-variant/10 text-left hover:bg-surface-container-low transition-all active:scale-95 group shadow-sm">
+             <div className="w-12 h-12 bg-primary/10 text-primary rounded-[1rem] flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform">
+                <Target size={24} />
+             </div>
+             <h4 className="font-headline font-black text-lg text-on-surface leading-none mb-1">Kế hoạch<br/>chi tiêu</h4>
+             <p className="font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest opacity-60">Ngân sách</p>
+          </button>
+          
+          <button onClick={() => navigate('/goals')} className="bg-surface-container-lowest p-5 rounded-[2rem] border border-outline-variant/10 text-left hover:bg-surface-container-low transition-all active:scale-95 group shadow-sm">
+             <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-[1rem] flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform">
+                <ArrowUpRight size={24} />
+             </div>
+             <h4 className="font-headline font-black text-lg text-on-surface leading-none mb-1">Mục tiêu<br/>tích lũy</h4>
+             <p className="font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest opacity-60">Saving Goals</p>
+          </button>
       </section>
 
       {/* 📂 Recent Activity Section */}
