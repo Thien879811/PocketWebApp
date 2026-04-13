@@ -13,10 +13,15 @@ registerSW({ immediate: true })
 const App: React.FC = () => {
   const initializeAuth = useAuthStore((state) => state.initialize)
   const isDarkMode = useThemeStore((state) => state.isDarkMode)
+  const initializeTheme = useThemeStore((state) => state.initializeTheme)
 
   useEffect(() => {
     initializeAuth()
   }, [initializeAuth])
+
+  useEffect(() => {
+    initializeTheme()
+  }, [initializeTheme])
 
   useEffect(() => {
     if (isDarkMode) {

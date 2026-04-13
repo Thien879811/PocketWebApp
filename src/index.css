@@ -102,10 +102,65 @@ body {
   width: 100%;
 }
 
+/* Input and form elements styling */
+input, textarea, select {
+  @apply transition-colors duration-300;
+  color-scheme: light dark;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-outline rounded-full transition-colors duration-300;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-outline-variant;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  @apply bg-outline;
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  @apply bg-outline-variant;
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Focus states for better accessibility */
+input:focus, textarea:focus, select:focus {
+  @apply outline-none ring-2 ring-primary ring-opacity-50;
+}
+
+.dark input:focus, .dark textarea:focus, .dark select:focus {
+  @apply ring-primary ring-opacity-75;
+}
+
+/* Dialog and modal backdrop */
+dialog::backdrop {
+  @apply bg-black/50;
+}
+
+/* Placeholder styling */
+::placeholder {
+  @apply text-on-surface-variant opacity-60;
+}
+
+.dark ::placeholder {
+  @apply text-on-surface-variant opacity-70;
 }
