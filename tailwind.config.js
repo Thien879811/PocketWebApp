@@ -85,6 +85,35 @@ export default {
         "headline-sm": ["1.25rem", { lineHeight: "1.75rem", fontWeight: "700" }],
         "label-sm": ["0.75rem", { lineHeight: "1rem", fontWeight: "500", letterSpacing: "0.05em" }],
         "body-md": ["1rem", { lineHeight: "1.5rem", fontWeight: "400" }],
+      },
+      boxShadow: {
+        'glass-dark': 'inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.3)',
+        'glow-primary': '0 0 24px rgba(75, 168, 244, 0.3)',
+        'glow-secondary': '0 0 24px rgba(45, 212, 164, 0.3)',
+        'glow-error': '0 0 24px rgba(255, 107, 107, 0.3)',
+      },
+      backdropFilter: {
+        'blur-xl': 'blur(16px)',
+        'blur-2xl': 'blur(20px)',
+      },
+      animation: {
+        'float': 'float 3s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+        'gradient-shift': 'gradient-shift 3s ease-in-out infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { boxShadow: '0 0 24px rgba(75, 168, 244, 0.2)' },
+          '50%': { boxShadow: '0 0 32px rgba(75, 168, 244, 0.4)' },
+        },
+        'gradient-shift': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
       }
     },
   },

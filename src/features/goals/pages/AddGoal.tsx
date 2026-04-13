@@ -89,7 +89,7 @@ const AddGoal: React.FC = () => {
                 <div className="relative">
                   <input
                     {...register('name')}
-                    className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg font-bold focus:ring-2 focus:ring-primary/40 transition-all placeholder:text-outline font-headline"
+                    className="w-full glass border-none rounded-2xl py-4 px-5 text-lg font-bold focus:ring-2 focus:ring-primary/40 smooth-transition placeholder:text-on-surface-variant/50 font-headline dark:shadow-glass-dark"
                     id="goal_name"
                     placeholder="e.g., Tokyo Apartment, New Laptop"
                     type="text"
@@ -109,7 +109,7 @@ const AddGoal: React.FC = () => {
                   <div className="relative">
                     <input
                       {...register('target_amount', { valueAsNumber: true })}
-                      className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 transition-all font-mono font-bold"
+                      className="w-full glass border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 smooth-transition font-mono font-bold dark:shadow-glass-dark"
                       id="target_amount"
                       placeholder="0"
                       type="number"
@@ -125,7 +125,7 @@ const AddGoal: React.FC = () => {
                   <div className="relative">
                     <input
                       {...register('current_amount', { valueAsNumber: true })}
-                      className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 transition-all font-mono font-bold"
+                      className="w-full glass border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 smooth-transition font-mono font-bold dark:shadow-glass-dark"
                       id="current_amount"
                       placeholder="0"
                       type="number"
@@ -142,7 +142,7 @@ const AddGoal: React.FC = () => {
                 <div className="relative">
                   <input
                     {...register('target_date')}
-                    className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 transition-all font-bold"
+                    className="w-full glass border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 smooth-transition font-bold dark:shadow-glass-dark"
                     id="target_date"
                     type="date"
                   />
@@ -155,17 +155,17 @@ const AddGoal: React.FC = () => {
               {/* Icon Selector Grid */}
               <div className="space-y-3">
                 <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1">Choose Icon</label>
-                <div className="grid grid-cols-5 md:grid-cols-10 gap-3 p-4 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10">
+                <div className="grid grid-cols-5 md:grid-cols-10 gap-3 p-4 glass rounded-2xl dark:shadow-glass-dark">
                   {ICONS.map(icon => (
                     <button
                       key={icon}
                       type="button"
                       onClick={() => setSelectedIcon(icon)}
                       className={cn(
-                        "aspect-square flex items-center justify-center rounded-2xl transition-all transform active:scale-90",
+                        "aspect-square flex items-center justify-center rounded-2xl smooth-transition transform active:scale-90 hover:scale-110",
                         selectedIcon === icon
-                          ? "bg-primary/10 text-primary border-2 border-primary/20 scale-105"
-                          : "text-on-surface-variant hover:bg-surface-container border border-transparent"
+                          ? "glass dark:shadow-glow-primary text-primary border-2 border-primary/20 scale-105"
+                          : "text-on-surface-variant hover:bg-surface-container/50 border border-transparent"
                       )}
                     >
                       <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: selectedIcon === icon ? "'FILL' 1" : "'FILL' 0" }}>
@@ -183,7 +183,7 @@ const AddGoal: React.FC = () => {
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full bg-[#4A90E2] text-white py-5 px-8 rounded-2xl font-bold font-headline text-lg shadow-[0_8px_30px_rgb(74,144,226,0.3)] hover:shadow-[0_12px_40px_rgb(74,144,226,0.5)] transition-all transform active:scale-[0.98] flex justify-center items-center gap-2"
+                className="w-full glass text-primary py-5 px-8 rounded-2xl font-bold font-headline text-lg dark:shadow-glow-primary smooth-transition transform hover:scale-102 active:scale-[0.98] flex justify-center items-center gap-2"
               >
                 {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Create Goal'}
               </button>

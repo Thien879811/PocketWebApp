@@ -114,10 +114,10 @@ const Transactions: React.FC = () => {
         </div>
 
         {/* 🗓️ Month Selector */}
-        <div className="bg-surface-container-low p-5 rounded-[2.5rem] border border-outline-variant/10 shadow-sm flex items-center justify-between">
+        <div className="glass rounded-[2.5rem] p-5 flex items-center justify-between dark:shadow-glass-dark">
             <button 
               onClick={handlePrevMonth}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface hover:bg-white transition-all shadow-sm active:scale-90"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-high hover:bg-primary/10 transition-all shadow-sm active:scale-90 dark:hover:shadow-glow-primary"
             >
               <ChevronLeft size={20} className="text-on-surface-variant" />
             </button>
@@ -139,7 +139,7 @@ const Transactions: React.FC = () => {
 
             <button 
               onClick={handleNextMonth}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface hover:bg-white transition-all shadow-sm active:scale-90"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-high hover:bg-primary/10 transition-all shadow-sm active:scale-90 dark:hover:shadow-glow-primary"
             >
               <ChevronRight size={20} className="text-on-surface-variant" />
             </button>
@@ -152,7 +152,7 @@ const Transactions: React.FC = () => {
                value={search}
                onChange={(e) => setSearch(e.target.value)}
                placeholder="Search by category, note..."
-               className="w-full bg-surface-container-lowest border border-outline-variant/10 rounded-[2rem] py-5 pl-14 pr-6 text-on-surface font-label font-bold text-sm focus:ring-4 focus:ring-primary/10 transition-all shadow-xl shadow-on-surface/[0.02]"
+               className="w-full glass rounded-[2rem] py-5 pl-14 pr-6 text-on-surface font-label font-bold text-sm focus:ring-4 focus:ring-primary/20 transition-all dark:shadow-glass-dark dark:placeholder-on-surface-variant/50"
             />
         </div>
 
@@ -161,10 +161,10 @@ const Transactions: React.FC = () => {
           <button
             onClick={() => setCategoryFilter('all')}
             className={cn(
-              "px-4 py-2 rounded-full font-label font-black text-[10px] uppercase tracking-widest whitespace-nowrap transition-all border",
+              "px-6 py-3 rounded-full font-label font-bold text-sm whitespace-nowrap smooth-transition flex items-center gap-2 flex-shrink-0 transform hover:scale-105 active:scale-95",
               categoryFilter === 'all'
-                ? "bg-primary text-on-primary border-primary shadow-lg shadow-primary/20"
-                : "bg-surface-container-high text-on-surface-variant border-outline-variant/10 hover:bg-white"
+                ? "glass dark:shadow-glow-primary scale-105 text-primary"
+                : "bg-surface-container-highest hover:bg-surface-container/50 dark:hover:shadow-glass-dark text-on-surface-variant"
             )}
           >
             Tất cả
@@ -174,13 +174,13 @@ const Transactions: React.FC = () => {
               key={cat.id}
               onClick={() => setCategoryFilter(cat.id)}
               className={cn(
-                "px-4 py-2 rounded-full font-label font-black text-[10px] uppercase tracking-widest whitespace-nowrap transition-all border flex items-center gap-2",
+                "px-6 py-3 rounded-full font-label font-bold text-sm whitespace-nowrap smooth-transition flex items-center gap-2 flex-shrink-0 transform hover:scale-105 active:scale-95",
                 categoryFilter === cat.id
-                  ? "bg-primary text-on-primary border-primary shadow-lg shadow-primary/20"
-                  : "bg-surface-container-high text-on-surface-variant border-outline-variant/10 hover:bg-white"
+                  ? "glass dark:shadow-glow-primary scale-105 text-primary"
+                  : "bg-surface-container-highest hover:bg-surface-container/50 dark:hover:shadow-glass-dark text-on-surface-variant"
               )}
             >
-              <span className="material-symbols-outlined text-sm">{cat.icon}</span>
+              <span className="material-symbols-outlined text-base">{cat.icon}</span>
               {cat.name}
             </button>
           ))}
@@ -190,11 +190,11 @@ const Transactions: React.FC = () => {
       {/* 📂 Transaction Groups */}
       <section className="space-y-12 px-2">
          {Object.entries(groupedTransactions).length === 0 ? (
-            <div className="bg-surface-container-low rounded-[3rem] p-16 text-center border-2 border-dashed border-outline-variant/30 space-y-4">
-               <div className="w-20 h-20 bg-surface-container-high rounded-full flex items-center justify-center mx-auto opacity-40">
-                  <Inbox className="w-10 h-10" />
+            <div className="glass rounded-[3rem] p-16 text-center space-y-4 glass-border dark:shadow-glass-dark">
+               <div className="w-20 h-20 glass rounded-full flex items-center justify-center mx-auto opacity-60 group-hover:shadow-glow-primary transition-all transform group-hover:scale-110 duration-300 dark:shadow-glass-dark">
+                  <Inbox className="w-10 h-10 text-primary opacity-70" />
                </div>
-               <p className="text-on-surface-variant font-black text-sm uppercase opacity-40 tracking-widest leading-relaxed">
+               <p className="text-on-surface-variant font-headline font-black text-sm uppercase opacity-60 tracking-widest leading-relaxed">
                  No transactions <br /> matches found
                </p>
                <button 
@@ -212,21 +212,21 @@ const Transactions: React.FC = () => {
                      <div className="h-[1px] flex-1 bg-outline-variant/10 ml-6"></div>
                   </div>
                   
-                  <div className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-outline-variant/10 shadow-xl shadow-on-surface/[0.02]">
+                  <div className="glass rounded-[3rem] overflow-hidden dark:shadow-glass-dark">
                      {items.map((tx) => (
                         <div 
                            key={tx.id} 
                            onClick={() => navigate(`/edit/${tx.id}`)}
-                           className="p-6 flex items-center justify-between group active:bg-primary/5 cursor-pointer transition-all duration-300 border-b border-outline-variant/10 last:border-0"
+                           className="p-6 flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 dark:hover:shadow-glow-primary cursor-pointer smooth-transition border-b border-outline-variant/10 last:border-0 transform hover:scale-101 hover:-translate-y-0.5"
                         >
                            <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex flex-shrink-0 items-center justify-center shadow-inner group-hover:bg-white transition-all transform group-hover:rotate-6 duration-300">
-                                 <span className="material-symbols-outlined text-2xl text-primary opacity-70">
+                              <div className="w-14 h-14 rounded-2xl glass flex flex-shrink-0 items-center justify-center group-hover:shadow-glow-primary transition-all transform group-hover:rotate-6 duration-300 dark:shadow-glass-dark">
+                                 <span className="material-symbols-outlined text-2xl text-primary opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all">
                                    {getCategoryIcon(tx.category_id, tx.type)}
                                  </span>
                               </div>
                               <div className="overflow-hidden">
-                                 <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5 truncate group-hover:text-primary transition-colors">
+                                 <p className="font-headline font-black text-lg text-on-surface group-hover:text-primary transition-all leading-none mb-1.5 truncate">
                                    {getCategoryName(tx.category_id, tx.type)}
                                  </p>
                                  <p className="font-label text-[10px] text-on-surface-variant font-black truncate w-40 opacity-50 uppercase tracking-tighter leading-none">

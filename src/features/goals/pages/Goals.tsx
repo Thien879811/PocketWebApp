@@ -25,20 +25,20 @@ const Goals: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto pb-24">
       <section className="mb-12">
-        <div className="relative overflow-hidden rounded-[2rem] p-8 bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-xl">
+        <div className="relative overflow-hidden rounded-[2rem] p-8 glass glass-border text-on-surface dark:shadow-glass-dark">
           <div className="relative z-10">
             <span className="text-sm font-label opacity-80 tracking-widest uppercase">Overview</span>
-            <h2 className="font-headline text-4xl md:text-5xl font-extrabold mt-2 mb-1 tracking-tight">Total Saved</h2>
+            <h2 className="font-headline text-4xl md:text-5xl font-extrabold mt-2 mb-1 tracking-tight text-on-surface">Total Saved</h2>
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl md:text-6xl font-headline font-black tracking-tighter">{formatCurrency(totalSaved)}</span>
-              <span className="text-2xl font-headline opacity-90 font-bold">VNĐ</span>
+              <span className="text-5xl md:text-6xl font-headline font-black tracking-tighter glow">{formatCurrency(totalSaved)}</span>
+              <span className="text-2xl font-headline opacity-90 font-bold text-on-surface-variant">VNĐ</span>
             </div>
-            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/10">
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>trending_up</span>
-              <span className="text-sm font-bold">Keep the momentum going!</span>
+            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 glass dark:shadow-glass-dark rounded-full border border-white/10">
+              <span className="material-symbols-outlined text-sm text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>trending_up</span>
+              <span className="text-sm font-bold text-on-surface">Keep the momentum going!</span>
             </div>
           </div>
-          <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
         </div>
       </section>
 
@@ -59,14 +59,14 @@ const Goals: React.FC = () => {
               : 0
 
             return (
-              <div key={goal.id} className="bg-surface-container-lowest rounded-[2rem] p-6 transition-all duration-300 hover:shadow-lg group shadow-sm border border-outline-variant/10">
+              <div key={goal.id} className="glass rounded-[2rem] p-6 smooth-transition hover:shadow-glow-primary group transform hover:scale-105 active:scale-95 dark:shadow-glass-dark">
                 <div className="flex justify-between items-start mb-6">
-                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform", goal.color || "bg-primary/10 text-primary")}>
-                    <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>{goal.icon}</span>
+                  <div className={cn("w-14 h-14 glass rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform group-hover:shadow-glow-primary dark:shadow-glass-dark transform group-hover:rotate-12", goal.color || "bg-primary/10 text-primary")}>
+                    <span className="material-symbols-outlined text-3xl text-primary opacity-80 group-hover:opacity-100" style={{ fontVariationSettings: "'FILL' 1" }}>{goal.icon}</span>
                   </div>
-                  <span className={cn("font-headline font-black text-xl", goal.color ? goal.color.replace('bg-', 'text-') : "text-primary")}>{percentage}%</span>
+                  <span className={cn("font-headline font-black text-xl glow", goal.color ? goal.color.replace('bg-', 'text-') : "text-primary")}>{percentage}%</span>
                 </div>
-                <h4 className="font-headline text-xl font-bold mb-1">{goal.name}</h4>
+                <h4 className="font-headline text-xl font-bold mb-1 group-hover:text-primary transition-colors">{goal.name}</h4>
                 <p className="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-6 opacity-70">
                   Target: {goal.target_date ? new Date(goal.target_date).toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' }) : 'Ongoing'}
                 </p>
@@ -75,13 +75,13 @@ const Goals: React.FC = () => {
                     <span className="text-on-surface">{formatCurrency(goal.current_amount)}</span>
                     <span className="text-on-surface-variant opacity-60">{formatCurrency(goal.target_amount)}</span>
                   </div>
-                  <div className="h-3 w-full bg-surface-container-highest rounded-full overflow-hidden">
-                    <div className={cn("h-full rounded-full transition-all duration-1000", goal.color || "bg-primary")} style={{ width: `${percentage}%` }}></div>
+                  <div className="h-3 w-full glass rounded-full overflow-hidden dark:shadow-glass-dark">
+                    <div className={cn("h-full rounded-full smooth-transition duration-1000", goal.color || "bg-primary")} style={{ width: `${percentage}%` }}></div>
                   </div>
                 </div>
                 <button 
                   onClick={() => navigate(`/goals/edit/${goal.id}`)}
-                  className="w-full py-4 rounded-xl bg-surface-container-low text-primary font-bold text-sm group-hover:bg-primary group-hover:text-white transition-colors active:scale-95"
+                  className="w-full py-4 rounded-xl glass text-primary font-bold text-sm group-hover:shadow-glow-primary smooth-transition active:scale-95 transform hover:scale-102 dark:shadow-glass-dark"
                 >
                   View Details
                 </button>
@@ -90,11 +90,11 @@ const Goals: React.FC = () => {
           })}
 
           {/* New Goal */}
-          <div onClick={() => navigate('/goals/add')} className="relative overflow-hidden rounded-[2rem] p-6 bg-surface-container border-2 border-dashed border-outline-variant/40 flex flex-col items-center justify-center text-center group cursor-pointer hover:border-primary transition-all min-h-[320px] active:scale-[0.98]">
-            <div className="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant group-hover:bg-primary group-hover:text-white transition-all duration-300 mb-4 shadow-sm">
+          <div onClick={() => navigate('/goals/add')} className="relative overflow-hidden rounded-[2rem] p-6 glass glass-border flex flex-col items-center justify-center text-center group cursor-pointer smooth-transition transform hover:scale-105 active:scale-[0.98] min-h-[320px] dark:shadow-glass-dark">
+            <div className="w-16 h-16 glass rounded-full flex items-center justify-center text-primary group-hover:shadow-glow-primary transition-all duration-300 mb-4 transform group-hover:scale-110 dark:shadow-glass-dark">
               <span className="material-symbols-outlined text-3xl">add</span>
             </div>
-            <h4 className="font-headline text-lg font-bold">New Goal</h4>
+            <h4 className="font-headline text-lg font-bold text-on-surface">New Goal</h4>
             <p className="text-sm text-on-surface-variant mt-1 font-medium opacity-80">Start planning your next milestone</p>
           </div>
         </div>

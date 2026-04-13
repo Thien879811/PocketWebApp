@@ -10,13 +10,13 @@ const Categories: React.FC = () => {
 
   // 🎨 Category Card Component
   const CategoryCard = ({ icon, name, type, color }: any) => (
-    <div className="group relative bg-surface-container-lowest p-5 rounded-2xl flex flex-col gap-4 hover:bg-surface-bright transition-all duration-300 active:scale-95 cursor-pointer border border-outline-variant/10 shadow-sm">
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
-        <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 0" }}>{icon}</span>
+    <div className="group relative glass rounded-3xl p-6 flex flex-col gap-4 hover:shadow-glow-primary cursor-pointer smooth-transition transform hover:scale-105 active:scale-95 dark:shadow-glass-dark">
+      <div className={`w-14 h-14 glass rounded-2xl flex items-center justify-center transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 dark:shadow-glass-dark ${color}`}>
+        <span className="material-symbols-outlined text-3xl text-primary opacity-80 group-hover:opacity-100" style={{ fontVariationSettings: "'FILL' 0" }}>{icon}</span>
       </div>
       <div>
-        <span className="block font-headline font-bold text-lg text-on-surface truncate pr-2">{name}</span>
-        <span className={`inline-block px-2 py-0.5 mt-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+        <span className="block font-headline font-bold text-lg text-on-surface truncate pr-2 group-hover:text-primary transition-colors">{name}</span>
+        <span className={`inline-block px-3 py-1.5 mt-2 rounded-full text-xs font-bold uppercase tracking-wider glass transition-all group-hover:shadow-glow-primary dark:shadow-glass-dark ${
           type === 'withdrawal' ? 'bg-amber-600/10 text-amber-600' :
           type === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'
         }`}>
@@ -54,13 +54,13 @@ const Categories: React.FC = () => {
             <LoadingSpinner size="lg" message="Đang tải danh mục..." />
           </div>
         ) : categories?.length === 0 ? (
-          <section className="bg-surface-container-low border-2 border-dashed border-outline-variant/40 rounded-[2.5rem] p-12 text-center space-y-4">
-             <div className="w-16 h-16 bg-surface-container-high rounded-full flex items-center justify-center mx-auto">
-               <Inbox className="w-8 h-8 text-outline-variant" />
+          <section className="glass rounded-[2.5rem] p-12 text-center space-y-4 glass-border dark:shadow-glass-dark">
+             <div className="w-16 h-16 glass rounded-full flex items-center justify-center mx-auto transform hover:scale-110 transition-all group-hover:shadow-glow-primary dark:shadow-glass-dark">
+               <Inbox className="w-8 h-8 text-primary opacity-70" />
              </div>
              <div className="space-y-1">
                <h3 className="font-headline font-bold text-xl text-on-surface">No Categories Found</h3>
-               <p className="text-sm text-outline font-medium">Start by adding your first spending or income category below.</p>
+               <p className="text-sm text-on-surface-variant font-medium">Start by adding your first spending or income category below.</p>
              </div>
           </section>
         ) : (
@@ -82,7 +82,7 @@ const Categories: React.FC = () => {
         <div className="mt-8">
            <Link 
             to="/settings/categories/add"
-            className="w-full h-16 bg-primary text-on-primary rounded-3xl font-headline font-black text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-2xl shadow-primary/30 border border-primary/20"
+            className="w-full h-16 glass text-primary rounded-3xl font-headline font-black text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all dark:shadow-glow-primary transform hover:scale-102 smooth-transition dark:shadow-glass-dark"
           >
             <PlusCircle className="w-6 h-6" />
             Add Category
@@ -90,8 +90,8 @@ const Categories: React.FC = () => {
         </div>
 
         {/* 💡 Hint Section */}
-        <section className="mt-12 p-6 bg-surface-container rounded-3xl flex items-start gap-4 border border-outline-variant/10">
-          <Info className="w-6 h-6 text-primary mt-0.5 flex-shrink-0" />
+        <section className="mt-12 glass p-6 rounded-3xl flex items-start gap-4 dark:shadow-glass-dark">
+          <Info className="w-6 h-6 text-primary mt-0.5 flex-shrink-0 glow" />
           <p className="text-on-surface-variant text-sm leading-relaxed font-semibold italic opacity-85">
             Long press on any category card to access the edit and delete options. You can also reorder them by dragging.
           </p>
