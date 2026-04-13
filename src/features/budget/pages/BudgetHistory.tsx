@@ -68,8 +68,8 @@ const BudgetHistory: React.FC = () => {
                     const isLatest = index === 0;
 
                     return (
-                       <div key={plan.id} className={cn(
-                          "bg-surface-container-lowest p-6 rounded-3xl border shadow-sm transition-all relative overflow-hidden",
+                       <div key={plan.id} onClick={() => navigate(`/settings/budget-history/${plan.id}`)} className={cn(
+                          "bg-surface-container-lowest p-6 rounded-3xl border shadow-sm transition-all relative overflow-hidden cursor-pointer hover:bg-surface-container-low active:scale-[0.98]",
                           isLatest ? "border-primary/20 bg-primary/5" : "border-outline-variant/10"
                        )}>
                           {isLatest && <div className="absolute top-0 right-0 bg-primary text-on-primary font-bold text-[10px] uppercase px-3 py-1 rounded-bl-xl tracking-widest">Hiện tại</div>}

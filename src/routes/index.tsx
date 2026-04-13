@@ -23,6 +23,7 @@ const EditGoal = lazy(() => import('@/features/goals/pages/EditGoal'))
 const AISettings = lazy(() => import('@/pages/AISettings'))
 const BudgetPlanner = lazy(() => import('@/features/budget/pages/BudgetPlanner'))
 const BudgetHistory = lazy(() => import('@/features/budget/pages/BudgetHistory'))
+const BudgetHistoryDetail = lazy(() => import('@/features/budget/pages/BudgetHistoryDetail'))
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center bg-white dark:bg-neutral-950">
@@ -185,6 +186,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
              <BudgetHistory />
+          </Suspense>
+        )
+      },
+      {
+        path: 'settings/budget-history/:id',
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+             <BudgetHistoryDetail />
           </Suspense>
         )
       }
