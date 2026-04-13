@@ -101,30 +101,24 @@ const MainLayout: React.FC = () => {
 
         {/* 📱 MOBILE BOTTOM NAV */}
         <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#f7f9ff]/85 dark:bg-slate-950/85 backdrop-blur-xl rounded-t-[24px] shadow-[0_-4px_24px_rgba(9,29,46,0.06)] md:hidden border-t border-white/20">
-          <Link to="/" className={cn("flex flex-col items-center justify-center rounded-2xl p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/') ? "bg-primary text-on-primary shadow-md" : "text-on-surface-variant hover:text-primary")}>
-             <span className="material-symbols-outlined text-[24px]">home</span>
-             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Home</span>
-          </Link>
-          <Link to="/goals" className={cn("flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/goals') ? "bg-primary text-on-primary shadow-md rounded-2xl" : "text-on-surface-variant hover:text-primary")}>
-             <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: isActive('/goals') ? "'FILL' 1" : "'FILL' 0" }}>track_changes</span>
-             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Goals</span>
-          </Link>
-          <Link to="/ledger" className={cn("flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/ledger') ? "bg-primary text-on-primary shadow-md rounded-2xl" : "text-on-surface-variant hover:text-primary")}>
-             <span className="material-symbols-outlined text-[24px]">receipt_long</span>
-             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Ledger</span>
-          </Link>
-          <Link to="/stats" className={cn("flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/stats') ? "bg-primary text-on-primary shadow-md rounded-2xl" : "text-on-surface-variant hover:text-primary")}>
-             <span className="material-symbols-outlined text-[24px]">insights</span>
-             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Stats</span>
-          </Link>
-          <Link to="/wallet" className={cn("flex flex-col items-center justify-center rounded-2xl p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/wallet') ? "bg-primary text-on-primary shadow-md" : "text-on-surface-variant hover:text-primary")}>
-             <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Wallet</span>
-          </Link>
-          <Link to="/settings" className={cn("flex flex-col items-center justify-center rounded-2xl p-2 min-w-[64px] active:scale-90 transition-all duration-150", isActive('/settings') ? "bg-primary text-on-primary shadow-md" : "text-on-surface-variant hover:text-primary")}>
-             <span className="material-symbols-outlined text-[24px]">settings</span>
-             <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">Settings</span>
-          </Link>
+          {navLinksDesktop.map((link) => (
+            <Link 
+              key={link.path}
+              to={link.path} 
+              className={cn(
+                "relative flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", 
+                isActive(link.path) ? "text-primary" : "text-on-surface-variant hover:text-primary"
+              )}
+            >
+               <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: isActive(link.path) ? "'FILL' 1" : "'FILL' 0" }}>
+                 {link.icon}
+               </span>
+               <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">{link.name}</span>
+               {isActive(link.path) && (
+                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" />
+               )}
+            </Link>
+          ))}
         </nav>
 
         {/* 📱 MOBILE SIDEBAR */}
