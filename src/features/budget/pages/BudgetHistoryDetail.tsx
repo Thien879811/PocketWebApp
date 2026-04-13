@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/utils/format'
+import { LoadingScreen, LoadingSpinner } from '@/components/Loading'
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Calendar, Loader2, Info } from 'lucide-react'
@@ -23,11 +24,7 @@ const BudgetHistoryDetail: React.FC = () => {
   const plan = plans?.find(p => p.id === id)
 
   if (plansLoading || txLoading || catLoading) {
-    return (
-       <div className="min-h-screen bg-surface flex flex-col items-center justify-center">
-          <Loader2 className="w-10 h-10 animate-spin text-primary opacity-50" />
-       </div>
-    )
+    return <LoadingScreen message="Đang tải chi tiết ngân sách..." />
   }
 
   if (!plan) {

@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/utils/format'
+import { LoadingScreen, LoadingSpinner } from '@/components/Loading'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, History, Loader2, Calendar, Target, CheckCircle2, TrendingUp } from 'lucide-react'
@@ -18,11 +19,7 @@ const BudgetHistory: React.FC = () => {
   const { data: transactions, isLoading: txLoading } = useTransactions()
 
   if (plansLoading || txLoading) {
-    return (
-       <div className="min-h-screen bg-surface flex flex-col items-center justify-center">
-          <Loader2 className="w-10 h-10 animate-spin text-primary opacity-50" />
-       </div>
-    )
+     return <LoadingScreen message="Đang tải lịch sử ngân sách..." />
   }
 
   return (

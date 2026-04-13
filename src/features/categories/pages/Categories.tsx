@@ -1,5 +1,6 @@
 import React from 'react'
-import { PlusCircle, Info, ChevronLeft, Loader2, Inbox } from 'lucide-react'
+import { PlusCircle, Info, ChevronLeft, Inbox } from 'lucide-react'
+import { LoadingSpinner } from '@/components/Loading'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCategories } from '../hooks/useCategories'
 
@@ -49,9 +50,8 @@ const Categories: React.FC = () => {
         </p>
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
-            <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            <p className="font-headline font-bold">Synchronizing workspace...</p>
+          <div className="py-20 flex justify-center">
+            <LoadingSpinner size="lg" message="Đang tải danh mục..." />
           </div>
         ) : categories?.length === 0 ? (
           <section className="bg-surface-container-low border-2 border-dashed border-outline-variant/40 rounded-[2.5rem] p-12 text-center space-y-4">

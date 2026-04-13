@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/utils/format'
+import { LoadingScreen, LoadingSpinner } from '@/components/Loading'
 import React from 'react'
 import { Plus, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -15,12 +16,7 @@ const Goals: React.FC = () => {
   const { data: goals, isLoading } = useGoals()
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-40 gap-4 opacity-50">
-        <Loader2 className="w-12 h-12 animate-spin text-primary" strokeWidth={3} />
-        <p className="font-headline font-black text-xl tracking-tight">Loading goals...</p>
-      </div>
-    )
+    return <LoadingScreen message="Đang tải danh sách mục tiêu..." />
   }
 
   const activeGoals = goals || []

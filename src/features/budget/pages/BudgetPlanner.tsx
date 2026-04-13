@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/utils/format'
+import { LoadingScreen, LoadingSpinner } from '@/components/Loading'
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Target, Calendar, TrendingUp, AlertTriangle, CheckCircle2, TrendingDown, PiggyBank, Edit3, X, Loader2 } from 'lucide-react'
@@ -66,11 +67,7 @@ const BudgetPlanner: React.FC = () => {
     : 0
 
   if (planLoading) {
-    return (
-       <div className="min-h-screen bg-surface flex flex-col items-center justify-center">
-          <Loader2 className="w-10 h-10 animate-spin text-primary opacity-50" />
-       </div>
-    )
+    return <LoadingScreen message="Đang tải dữ liệu ngân sách..." />
   }
 
   const isFormView = !currentPlan || isEditing

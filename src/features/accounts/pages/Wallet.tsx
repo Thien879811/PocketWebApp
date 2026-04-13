@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { accountSchema, type AccountFormValues } from '../types/account.schema'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { LoadingSpinner } from '@/components/Loading'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -76,9 +77,8 @@ const Wallet: React.FC = () => {
 
       {/* 💳 Account Cards */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 opacity-40 gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-primary" strokeWidth={3} />
-          <p className="font-headline font-bold">Đồng bộ két sắt...</p>
+        <div className="py-20">
+          <LoadingSpinner size="xl" message="Đồng bộ két sắt..." />
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 px-2">

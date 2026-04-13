@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/utils/format'
+import { LoadingScreen, LoadingSpinner } from '@/components/Loading'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
@@ -69,12 +70,7 @@ const Stats: React.FC = () => {
   }) || []
 
   if (txLoading || catLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-40 gap-4 opacity-50">
-        <Loader2 className="w-12 h-12 animate-spin text-primary" strokeWidth={3} />
-        <p className="font-headline font-black text-xl tracking-tight text-on-surface">Đang phân tích ngân sách...</p>
-      </div>
-    )
+    return <LoadingScreen message="Đang phân tích thống kê..." />
   }
 
   // 📈 Budget Calculations
