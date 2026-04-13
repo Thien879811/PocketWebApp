@@ -1,5 +1,5 @@
 import { formatCurrency } from '@/utils/format'
-import { LoadingScreen, LoadingSpinner } from '@/components/Loading'
+import { LoadingScreen } from '@/components/Loading'
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Target, Calendar, TrendingUp, AlertTriangle, CheckCircle2, TrendingDown, PiggyBank, Edit3, X, Loader2 } from 'lucide-react'
@@ -228,7 +228,7 @@ const BudgetPlanner: React.FC = () => {
                           />
                         </div>
                         <div className="flex justify-between text-[10px] font-bold opacity-80">
-                          <span>Đã tiêu {todayStatus?.formatCurrency(totalSpent)} đ</span>
+                          <span>Đã tiêu {formatCurrency(todayStatus?.totalSpent)} đ</span>
                           <span>{progressPercentage.toFixed(1)}%</span>
                         </div>
                       </div>

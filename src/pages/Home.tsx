@@ -4,7 +4,6 @@ import React from 'react'
 import { 
   Plus, 
   ChevronRight, 
-  Loader2, 
   Inbox, 
   ArrowUpRight, 
   ArrowDownLeft, 

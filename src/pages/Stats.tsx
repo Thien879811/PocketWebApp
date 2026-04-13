@@ -1,9 +1,8 @@
 import { formatCurrency } from '@/utils/format'
-import { LoadingScreen, LoadingSpinner } from '@/components/Loading'
+import { LoadingScreen } from '@/components/Loading'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
-  Loader2,
   Inbox,
   Calendar,
   Wallet,

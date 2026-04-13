@@ -1,8 +1,7 @@
 import { formatCurrency } from '@/utils/format'
-import { LoadingScreen, LoadingSpinner } from '@/components/Loading'
+import { LoadingScreen } from '@/components/Loading'
 import React, { useState } from 'react'
 import { 
-  Loader2, 
   Inbox, 
   Search,
   Filter,
