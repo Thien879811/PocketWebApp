@@ -2,7 +2,6 @@ import React from 'react'
 import { 
   Bell, 
   ShieldCheck, 
-  Palette, 
   HelpCircle, 
   LogOut, 
   ChevronRight, 
@@ -13,10 +12,13 @@ import {
   LayoutGrid,
   Sparkles,
   History,
-  Target
+  Target,
+  Moon,
+  Sun
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useThemeStore } from '@/store/useThemeStore'
 
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -29,6 +31,7 @@ const Settings: React.FC = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
+  const { isDarkMode, toggleTheme } = useThemeStore()
 
   const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || user?.email || 'User')}&background=005da7&color=fff`
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
@@ -38,9 +41,14 @@ const Settings: React.FC = () => {
       title: 'Preferences',
       items: [
         { icon: LayoutGrid, label: 'Categories', path: '/settings/categories', color: 'bg-primary/10 text-primary' },
-        { icon: Target, label: 'Mục tiêu tích lũy', path: '/goals', color: 'bg-success/10 text-success' },
+        { icon: Target, label: 'Mục tiêu tích lũy', path: '/goals', color: 'bg-green-600/10 text-green-600' },
         { icon: History, label: 'Lịch sử ngân sách', path: '/settings/budget-history', color: 'bg-secondary/10 text-secondary' },
-        { icon: Palette, label: 'Appearance', path: '#', color: 'bg-tertiary/10 text-tertiary' },
+        { 
+          icon: isDarkMode ? Sun : Moon, 
+          label: isDarkMode ? 'Light Mode' : 'Dark Mode', 
+          onClick: toggleTheme, 
+          color: isDarkMode ? 'bg-amber-400/10 text-amber-600' : 'bg-slate-700/10 text-slate-800 dark:text-slate-200' 
+        },
         { icon: Bell, label: 'Notifications', path: '#', color: 'bg-error/10 text-error' },
         { icon: Globe, label: 'Language', path: '#', color: 'bg-primary/10 text-primary' },
       ]
@@ -71,7 +79,7 @@ const Settings: React.FC = () => {
         
         <div className="bg-surface-container-lowest p-8 rounded-[3rem] border border-outline-variant/10 shadow-xl shadow-on-surface/[0.02] flex flex-col items-center gap-6 relative overflow-hidden group">
            <div className="relative">
-              <div className="w-28 h-28 rounded-[2.5rem] bg-surface-container-high flex items-center justify-center overflow-hidden border-4 border-white shadow-2xl relative z-10">
+              <div className="w-28 h-28 rounded-[2.5rem] bg-surface-container-high flex items-center justify-center overflow-hidden border-4 border-surface shadow-2xl relative z-10">
                  <img alt="Profile" className="w-full h-full object-cover" src={avatarUrl} />
               </div>
               <button className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg z-20 active:scale-90 transition-transform">
@@ -99,7 +107,13 @@ const Settings: React.FC = () => {
               {group.items.map((item, iIdx) => (
                 <button
                   key={iIdx}
-                  onClick={() => item.path && item.path !== '#' && navigate(item.path)}
+                  onClick={() => {
+                    if ((item as any).onClick) {
+                      (item as any).onClick();
+                    } else if (item.path && item.path !== '#') {
+                      navigate(item.path);
+                    }
+                  }}
                   className={cn(
                     "w-full flex items-center justify-between p-6 active:bg-primary/5 transition-all group border-b border-outline-variant/10 last:border-0",
                   )}

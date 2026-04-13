@@ -77,7 +77,7 @@ const MainLayout: React.FC = () => {
       <div className="flex flex-1 flex-col overflow-hidden relative bg-surface">
         
         {/* Mobile Top Header */}
-        <header className="flex h-16 items-center justify-between px-6 bg-[#f7f9ff]/90 dark:bg-slate-950/90 backdrop-blur-md md:hidden sticky top-0 z-30 transition-all">
+        <header className="flex h-16 items-center justify-between px-6 bg-surface/90 backdrop-blur-md md:hidden sticky top-0 z-30 transition-all border-b border-outline-variant/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-surface-container-high flex flex-shrink-0 items-center justify-center overflow-hidden border border-outline-variant/10 shadow-sm" onClick={() => setIsSidebarOpen(true)}>
               <img alt="User" className="w-full h-full object-cover" src={avatarUrl}/>
@@ -99,7 +99,7 @@ const MainLayout: React.FC = () => {
         </main>
 
         {/* 📱 MOBILE BOTTOM NAV */}
-        <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#f7f9ff]/85 dark:bg-slate-950/85 backdrop-blur-xl rounded-t-[24px] shadow-[0_-4px_24px_rgba(9,29,46,0.06)] md:hidden border-t border-white/20">
+        <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-surface/85 backdrop-blur-xl rounded-t-[24px] shadow-[0_-4px_24px_rgba(9,29,46,0.06)] md:hidden border-t border-outline-variant/10">
           {navLinksDesktop.map((link) => (
             <Link 
               key={link.path}

@@ -3,14 +3,87 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --primary: #005da7;
+  --on-primary: #ffffff;
+  --primary-container: #2976c7;
+  --on-primary-container: #fdfcff;
+  
+  --secondary: #006d37;
+  --on-secondary: #ffffff;
+  --secondary-container: #7bf8a1;
+  --on-secondary-container: #007239;
+  
+  --tertiary: #80409b;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #9b59b6;
+  --on-tertiary-container: #fffbff;
+  
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  
+  --background: #f7f9ff;
+  --on-background: #091d2e;
+  
+  --surface: #f7f9ff;
+  --on-surface: #091d2e;
+  --surface-variant: #d1e4fb;
+  --on-surface-variant: #414751;
+  
+  --outline: #717783;
+  --outline-variant: #c1c7d3;
+  
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #edf4ff;
+  --surface-container: #e3efff;
+  --surface-container-high: #d9eaff;
+  --surface-container-highest: #d1e4fb;
+}
+
+.dark {
+  --primary: #a4c9ff;
+  --on-primary: #00315e;
+  --primary-container: #004883;
+  --on-primary-container: #d4e3ff;
+  
+  --secondary: #61de8a;
+  --on-secondary: #00391a;
+  --secondary-container: #005228;
+  --on-secondary-container: #7efba4;
+  
+  --tertiary: #ebb2ff;
+  --on-tertiary: #4e0d69;
+  --tertiary-container: #692984;
+  --on-tertiary-container: #f8d8ff;
+  
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+  
+  --background: #091d2e;
+  --on-background: #e1e2e1;
+  
+  --surface: #0f2942;
+  --on-surface: #e1e2e1;
+  --surface-variant: #414751;
+  --on-surface-variant: #c1c7d3;
+  
+  --outline: #8b919d;
+  --outline-variant: #414751;
+  
+  --surface-container-lowest: #0c1c2e;
+  --surface-container-low: #11283d;
+  --surface-container: #1b354e;
+  --surface-container-high: #243f5a;
+  --surface-container-highest: #2e4a66;
+}
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  background-color: #ffffff;
-  color: #1a1a1a;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -22,15 +95,17 @@ body {
   display: flex;
   min-width: 320px;
   min-height: 100vh;
+  @apply bg-background text-on-surface transition-colors duration-300;
 }
 
 #root {
   width: 100%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    background-color: #0c0c0c;
-    color: #f3f3f3;
-  }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

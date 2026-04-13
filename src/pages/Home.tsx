@@ -71,7 +71,7 @@ const Home: React.FC = () => {
       <div className="md:hidden fixed bottom-28 right-6 z-40">
         <Link 
            to="/add" 
-           className="w-16 h-16 bg-primary text-on-primary rounded-[1.5rem] shadow-2xl flex items-center justify-center active:scale-95 transition-all border-4 border-white/20 shadow-primary/30"
+           className="w-16 h-16 bg-primary text-on-primary rounded-[1.5rem] shadow-2xl flex items-center justify-center active:scale-95 transition-all border-4 border-surface-container shadow-primary/30"
         >
            <Plus size={32} strokeWidth={3} />
         </Link>
@@ -87,7 +87,7 @@ const HeaderSection = () => (
         <p className="font-label text-xs uppercase tracking-[0.2em] font-black text-on-surface-variant opacity-60 mb-2">Xin chào</p>
         <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none italic">Chào buổi sáng!</h2>
      </div>
-     <div className="w-14 h-14 rounded-[1.5rem] bg-surface-container-high border-4 border-white shadow-xl overflow-hidden active:scale-95 transition-all">
+     <div className="w-14 h-14 rounded-[1.5rem] bg-surface-container-high border-4 border-surface shadow-xl overflow-hidden active:scale-95 transition-all">
         <img 
            alt="User" 
            className="w-full h-full object-cover" 
