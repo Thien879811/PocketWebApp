@@ -4,6 +4,34 @@ import { useAuthStore } from '@/store/useAuthStore'
 import { type TransactionFormValues } from '../types/transaction.schema'
 import { useNavigate } from 'react-router-dom'
 
+/**
+ * Fetch all accounts for a user and snapshot their balances into daily_balance_logs.
+ * Uses upsert – safe to call multiple times per day.
+ */
+async function snapshotDailyBalances(userId: string, logDate?: string) {
+  const date = logDate ?? new Date().toISOString().split('T')[0]
+
+  // Fetch latest balances
+  const { data: accounts, error } = await supabase
+    .from('accounts')
+    .select('id, balance')
+    .eq('user_id', userId)
+
+  if (error || !accounts?.length) return
+
+  const rows = accounts.map((acc) => ({
+    user_id: userId,
+    log_date: date,
+    account_id: acc.id,
+    balance: acc.balance ?? 0,
+    updated_at: new Date().toISOString(),
+  }))
+
+  await supabase
+    .from('daily_balance_logs')
+    .upsert(rows, { onConflict: 'user_id,log_date,account_id' })
+}
+
 export const useCreateTransaction = () => {
   const queryClient = useQueryClient()
   const user = useAuthStore((state) => state.user)
@@ -66,9 +94,11 @@ export const useCreateTransaction = () => {
 
       return transaction
     },
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
+      if (user) await snapshotDailyBalances(user.id, variables.date)
+      queryClient.invalidateQueries({ queryKey: ['daily_balance_logs'] })
       navigate('/')
     },
   })
@@ -186,9 +216,11 @@ export const useUpdateTransaction = () => {
 
       return transaction
     },
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
+      if (user) await snapshotDailyBalances(user.id, variables.data.date)
+      queryClient.invalidateQueries({ queryKey: ['daily_balance_logs'] })
       navigate('/')
     },
   })
@@ -260,9 +292,11 @@ export const useDeleteTransaction = () => {
 
       if (deleteError) throw new Error(deleteError.message)
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
+      if (user) await snapshotDailyBalances(user.id)
+      queryClient.invalidateQueries({ queryKey: ['daily_balance_logs'] })
     },
   })
 }
