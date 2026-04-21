@@ -157,15 +157,20 @@ const Transactions: React.FC = () => {
   })
 
   // Group transactions by date (formatted vi-VN)
-  const groupedTransactions: Record<string, { items: any[]; isoDate: string }> = {}
+  const groupedTransactions: Record<string, { items: any[]; isoDate: string; totalIncome: number; totalExpense: number }> = {}
   filteredTransactions?.forEach(tx => {
     const dtObj = new Date(tx.date)
     const isoDate = tx.date.slice(0, 10)          // 'YYYY-MM-DD'
     const dateStr = dtObj.toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })
     if (!groupedTransactions[dateStr]) {
-      groupedTransactions[dateStr] = { items: [], isoDate }
+      groupedTransactions[dateStr] = { items: [], isoDate, totalIncome: 0, totalExpense: 0 }
     }
     groupedTransactions[dateStr].items.push(tx)
+    if (tx.type === 'income') {
+      groupedTransactions[dateStr].totalIncome += tx.amount
+    } else if (tx.type === 'expense') {
+      groupedTransactions[dateStr].totalExpense += tx.amount
+    }
   })
 
   // Balance logs indexed by iso date string
@@ -327,11 +332,26 @@ const Transactions: React.FC = () => {
                </button>
             </div>
          ) : (
-            Object.entries(groupedTransactions).map(([date, { items, isoDate }]) => (
+            Object.entries(groupedTransactions).map(([date, { items, isoDate, totalIncome, totalExpense }]) => (
                <div key={date} className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
                   {/* Date Header */}
                   <div className="flex items-center justify-between px-4 mb-4">
-                     <h3 className="font-headline font-black text-xs text-on-surface-variant opacity-60 uppercase tracking-[0.2em]">{date}</h3>
+                     <div className="flex flex-col gap-1">
+                        <h3 className="font-headline font-black text-[10px] text-on-surface-variant opacity-40 uppercase tracking-[0.2em]">{date}</h3>
+                        <div className="flex items-center gap-2">
+                           {totalIncome > 0 && (
+                              <span className="font-headline font-black text-xs text-secondary italic tracking-tighter">
+                                +{formatCurrency(totalIncome)}
+                              </span>
+                           )}
+                           {totalIncome > 0 && totalExpense > 0 && <span className="w-1 h-1 rounded-full bg-outline-variant/30" />}
+                           {totalExpense > 0 && (
+                              <span className="font-headline font-black text-xs text-on-surface-variant opacity-70 italic tracking-tighter">
+                                -{formatCurrency(totalExpense)}
+                              </span>
+                           )}
+                        </div>
+                     </div>
                      <div className="h-[1px] flex-1 bg-outline-variant/10 ml-6"></div>
                   </div>
                   
