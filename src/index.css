@@ -224,6 +224,24 @@ dialog::backdrop {
                 inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
+  .shadow-glass-dark {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .shadow-glass-dark {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  }
+
+  .shadow-glow-primary {
+    box-shadow: 0 4px 16px rgba(75, 168, 244, 0.2);
+  }
+
+  .dark .shadow-glow-primary {
+    box-shadow: 0 0 20px rgba(94, 184, 255, 0.4),
+                0 0 40px rgba(94, 184, 255, 0.1);
+  }
+
   /* Smooth Transitions */
   .smooth-transition {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

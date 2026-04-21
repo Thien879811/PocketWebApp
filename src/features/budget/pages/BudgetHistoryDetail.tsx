@@ -47,52 +47,55 @@ const BudgetHistoryDetail: React.FC = () => {
   const progress = Math.min(100, Math.max(0, (totalSpent / plan.total_budget) * 100))
 
   return (
-    <div className="min-h-screen bg-surface pb-24 md:p-8">
-      <div className="w-full max-w-2xl mx-auto bg-surface relative flex flex-col md:rounded-[3rem] md:shadow-2xl min-h-screen md:min-h-[800px] overflow-hidden">
+    <div className="min-h-screen bg-surface dark:bg-background pb-24 md:p-8">
+      <div className="w-full max-w-2xl mx-auto bg-surface dark:bg-surface-container-lowest relative flex flex-col md:rounded-[3rem] md:shadow-2xl dark:md:shadow-dark min-h-screen md:min-h-[800px] overflow-hidden">
         
         {/* HEADER */}
-        <header className="sticky top-0 w-full z-20 flex items-center justify-between px-6 h-16 bg-surface/80 backdrop-blur-md border-b border-outline-variant/10">
+        <header className="sticky top-0 w-full z-20 flex items-center justify-between px-6 h-16 bg-surface/80 dark:bg-surface/60 backdrop-blur-md border-b border-outline-variant/10">
           <div className="flex items-center gap-4">
              <button
                onClick={() => navigate(-1)}
-               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors active:scale-95"
+               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors active:scale-95 duration-200"
              >
                <ChevronLeft className="w-6 h-6 text-on-surface" />
              </button>
-             <h1 className="font-headline font-bold text-lg tracking-tight text-on-surface">Chi tiết kỳ kế hoạch</h1>
+             <h1 className="font-headline font-bold text-lg tracking-tight text-on-surface dark:glow">Chi tiết kỳ kế hoạch</h1>
           </div>
         </header>
 
         <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 space-y-8 no-scrollbar">
           
           {/* SUMMARY CARD */}
-          <div className="bg-primary text-on-primary rounded-[2.5rem] p-6 relative overflow-hidden shadow-xl shadow-primary/20">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="bg-primary text-on-primary rounded-[2.5rem] p-6 relative overflow-hidden shadow-xl shadow-primary/20 dark:shadow-glow-primary group transition-all duration-500">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-700" />
             <div className="relative z-10 space-y-4">
                <div>
-                  <p className="font-label text-xs uppercase tracking-wider font-bold opacity-80 mb-1">Thời gian áp dụng</p>
-                  <p className="font-headline font-bold text-xl flex items-center gap-2">
-                     <Calendar size={18} />
-                     {plan.start_date.slice(5)} tới {plan.end_date.slice(5)}
+                  <p className="font-label text-[10px] uppercase tracking-widest font-black opacity-70 mb-1">Thời gian áp dụng</p>
+                  <p className="font-headline font-black text-xl flex items-center gap-2 glow">
+                     <Calendar size={20} className="text-white/80" />
+                     {plan.start_date.split('-').slice(1).reverse().join('/')} — {plan.end_date.split('-').slice(1).reverse().join('/')}
                   </p>
                </div>
                
-               <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm space-y-3">
+               <div className="bg-black/10 dark:bg-white/5 rounded-2xl p-5 backdrop-blur-md border border-white/10 space-y-4">
                   <div className="flex justify-between items-end">
                      <div>
-                        <p className="text-[10px] font-bold uppercase opacity-80 mb-1">Tổng thiết lập ngân sách</p>
-                        <p className="font-headline font-black text-2xl">{formatCurrency(plan.total_budget)}</p>
+                        <p className="text-[10px] font-black uppercase opacity-60 mb-1 tracking-wider">Tổng ngân sách</p>
+                        <p className="font-headline font-black text-3xl tracking-tight leading-none">{formatCurrency(plan.total_budget)}<span className="text-sm opacity-60 ml-1">đ</span></p>
                      </div>
                   </div>
-                  <div>
-                    <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden">
+                  <div className="space-y-2">
+                    <div className="h-3 w-full bg-black/20 dark:bg-black/30 rounded-full overflow-hidden border border-white/5">
                       <div 
-                         className={cn("h-full rounded-full transition-all duration-1000", isExceeded ? "bg-red-400" : "bg-white")} 
+                         className={cn("h-full rounded-full transition-all duration-1000", isExceeded ? "bg-red-400" : "bg-white dark:bg-primary-container")} 
                          style={{ width: `${progress}%` }} 
                       />
                     </div>
-                    <div className="flex justify-between mt-2 text-xs font-bold opacity-90">
-                      <span>Đã tiêu {formatCurrency(totalSpent)}</span>
+                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-wider opacity-80">
+                      <span className="flex items-center gap-1.5">
+                        <div className={cn("w-1.5 h-1.5 rounded-full", isExceeded ? "bg-red-400 animate-pulse" : "bg-white")} />
+                        Đã tiêu {formatCurrency(totalSpent)}
+                      </span>
                       <span>{progress.toFixed(1)}%</span>
                     </div>
                   </div>
@@ -108,38 +111,47 @@ const BudgetHistoryDetail: React.FC = () => {
              </h2>
 
              {planTransactions.length === 0 ? (
-                <div className="text-center p-8 border border-dashed border-outline-variant/30 rounded-3xl">
-                   <p className="text-sm font-bold text-on-surface-variant">Không có chi tiêu nào trong kỳ này.</p>
+                <div className="text-center p-12 border-2 border-dashed border-outline-variant/20 rounded-[2.5rem] bg-surface-container-low/30 backdrop-blur-sm">
+                   <div className="w-16 h-16 bg-surface-container-high rounded-full flex items-center justify-center mx-auto mb-4 opacity-40">
+                      <Info size={32} />
+                   </div>
+                   <p className="text-sm font-bold text-on-surface-variant max-w-[180px] mx-auto opacity-60">Không có giao dịch nào được ghi nhận trong kỳ.</p>
                 </div>
              ) : (
-                <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/10 overflow-hidden shadow-sm">
+                <div className="bg-surface-container-lowest dark:bg-surface-container/30 dark:backdrop-blur-md rounded-[2rem] border border-outline-variant/10 overflow-hidden shadow-sm dark:shadow-dark">
                    {planTransactions.map((tx, idx) => {
                       const category = categories?.find(c => c.id === tx.category_id)
                       const isExpense = tx.type === 'expense'
 
                       return (
                          <div key={tx.id} className={cn(
-                            "p-4 flex items-center justify-between transition-colors",
+                            "p-5 flex items-center justify-between transition-all hover:bg-primary/5 active:scale-[0.98] duration-200 cursor-pointer group",
                             idx !== planTransactions.length - 1 ? "border-b border-outline-variant/10" : ""
                          )}>
                             <div className="flex items-center gap-4">
                                <div className={cn(
-                                  "w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-surface-container-highest"
+                                  "w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-surface-container-high group-hover:scale-110 transition-transform duration-300 shadow-sm",
+                                  isExpense ? "opacity-90" : "text-primary opacity-100"
                                )}>
                                   {category?.icon || '🛒'}
                                </div>
                                <div>
-                                  <h4 className="font-headline font-bold text-base text-on-surface">{tx.note || category?.name || 'Chưa phân loại'}</h4>
-                                  <p className="text-xs font-bold text-on-surface-variant flex items-center gap-1 opacity-80">
-                                     <Calendar size={10} /> {tx.date}
+                                  <h4 className="font-headline font-bold text-base text-on-surface line-clamp-1">{tx.note || category?.name || 'Chưa phân loại'}</h4>
+                                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest flex items-center gap-1 opacity-50 mt-0.5">
+                                     <Calendar size={10} /> {tx.date.split('-').reverse().join('/')}
                                   </p>
                                </div>
                             </div>
                             <div className={cn(
-                               "font-headline font-black text-base flex items-center gap-1",
-                               isExpense ? "text-on-surface" : "text-primary"
+                               "font-headline font-black text-base flex flex-col items-end",
+                               isExpense ? "text-on-surface" : "text-primary dark:glow"
                             )}>
-                               {isExpense ? '-' : '+'} {formatCurrency(tx.amount)}đ
+                               <span className="flex items-center gap-0.5">
+                                 {isExpense ? '−' : '+'} {formatCurrency(tx.amount)}<span className="text-[10px] opacity-60 ml-0.5">đ</span>
+                               </span>
+                               {isExpense && (
+                                 <span className="text-[8px] font-black uppercase opacity-30 mt-0.5 tracking-tighter">Giao dịch chi</span>
+                               )}
                             </div>
                          </div>
                       )
