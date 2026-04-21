@@ -7,7 +7,6 @@ import {
   Inbox, 
   ArrowUpRight, 
   ArrowDownLeft, 
-  LayoutGrid,
   Target
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -189,8 +188,13 @@ const ActivitySection = ({ transactions, categories, selectedDate, onNavigate }:
                   className="p-6 flex items-center justify-between group active:bg-primary/5 cursor-pointer transition-all duration-300 border-b border-outline-variant/10 last:border-0"
                 >
                    <div className="flex items-center gap-5">
-                      <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex flex-shrink-0 items-center justify-center shadow-inner group-hover:bg-primary/5 transition-all dark:bg-surface-container">
-                         <LayoutGrid size={24} className="text-primary opacity-60" />
+                      <div className={cn(
+                        "w-14 h-14 rounded-2xl flex flex-shrink-0 items-center justify-center shadow-inner transition-all group-hover:scale-110 duration-500",
+                        categories?.find((c: any) => c.id === tx.category_id)?.color || "bg-surface-container-high"
+                      )}>
+                         <span className="material-symbols-outlined text-2xl text-white">
+                            {categories?.find((c: any) => c.id === tx.category_id)?.icon || 'payments'}
+                         </span>
                       </div>
                       <div>
                          <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5 italic">

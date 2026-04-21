@@ -130,10 +130,12 @@ const BudgetHistoryDetail: React.FC = () => {
                          )}>
                             <div className="flex items-center gap-4">
                                <div className={cn(
-                                  "w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-surface-container-high group-hover:scale-110 transition-transform duration-300 shadow-sm",
+                                  "w-12 h-12 rounded-2xl flex items-center justify-center bg-surface-container-high group-hover:scale-110 transition-transform duration-300 shadow-sm",
                                   isExpense ? "opacity-90" : "text-primary opacity-100"
                                )}>
-                                  {category?.icon || '🛒'}
+                                  <span className="material-symbols-outlined text-2xl">
+                                    {category?.icon || 'help_outline'}
+                                  </span>
                                </div>
                                <div>
                                   <h4 className="font-headline font-bold text-base text-on-surface line-clamp-1">{tx.note || category?.name || 'Chưa phân loại'}</h4>
