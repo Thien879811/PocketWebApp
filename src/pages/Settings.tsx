@@ -14,7 +14,8 @@ import {
   History,
   Target,
   Moon,
-  Sun
+  Sun,
+  TrendingUp
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -43,6 +44,7 @@ const Settings: React.FC = () => {
         { icon: LayoutGrid, label: 'Categories', path: '/settings/categories', color: 'bg-primary/10 text-primary' },
         { icon: Target, label: 'Mục tiêu tích lũy', path: '/goals', color: 'bg-green-600/10 text-green-600' },
         { icon: History, label: 'Lịch sử ngân sách', path: '/settings/budget-history', color: 'bg-secondary/10 text-secondary' },
+        { icon: TrendingUp, label: 'Biến động số dư', path: '/settings/balance-history', color: 'bg-primary/10 text-primary' },
         { 
           icon: isDarkMode ? Sun : Moon, 
           label: isDarkMode ? 'Light Mode' : 'Dark Mode', 

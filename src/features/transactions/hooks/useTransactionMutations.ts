@@ -9,27 +9,40 @@ import { useNavigate } from 'react-router-dom'
  * Uses upsert – safe to call multiple times per day.
  */
 async function snapshotDailyBalances(userId: string, logDate?: string) {
-  const date = logDate ?? new Date().toISOString().split('T')[0]
+  try {
+    const date = logDate ?? new Date().toISOString().split('T')[0]
 
-  // Fetch latest balances
-  const { data: accounts, error } = await supabase
-    .from('accounts')
-    .select('id, balance')
-    .eq('user_id', userId)
+    // Fetch latest balances
+    const { data: accounts, error } = await supabase
+      .from('accounts')
+      .select('id, balance')
+      .eq('user_id', userId)
 
-  if (error || !accounts?.length) return
+    if (error) {
+      console.error('Error fetching accounts for snapshot:', error)
+      return
+    }
 
-  const rows = accounts.map((acc) => ({
-    user_id: userId,
-    log_date: date,
-    account_id: acc.id,
-    balance: acc.balance ?? 0,
-    updated_at: new Date().toISOString(),
-  }))
+    if (!accounts || accounts.length === 0) return
 
-  await supabase
-    .from('daily_balance_logs')
-    .upsert(rows, { onConflict: 'user_id,log_date,account_id' })
+    const rows = accounts.map((acc) => ({
+      user_id: userId,
+      log_date: date,
+      account_id: acc.id,
+      balance: acc.balance ?? 0,
+      updated_at: new Date().toISOString(),
+    }))
+
+    const { error: upsertError } = await supabase
+      .from('daily_balance_logs')
+      .upsert(rows, { onConflict: 'user_id,log_date,account_id' })
+
+    if (upsertError) {
+      console.error('Error upserting daily balance logs:', upsertError)
+    }
+  } catch (err) {
+    console.error('Snapshot failed:', err)
+  }
 }
 
 export const useCreateTransaction = () => {

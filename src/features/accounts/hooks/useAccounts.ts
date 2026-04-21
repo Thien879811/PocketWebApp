@@ -60,3 +60,30 @@ export const useDeleteAccount = () => {
     },
   })
 }
+
+export const useBalanceHistory = () => {
+  const user = useAuthStore((state) => state.user)
+
+  return useQuery({
+    queryKey: ['balance_history', user?.id],
+    queryFn: async () => {
+      if (!user) return []
+      
+      const { data, error } = await supabase
+        .from('daily_balance_logs')
+        .select(`
+          *,
+          accounts (
+            name,
+            color
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('log_date', { ascending: false })
+
+      if (error) throw new Error(error.message)
+      return data || []
+    },
+    enabled: !!user,
+  })
+}
