@@ -94,21 +94,21 @@ const Stats: React.FC = () => {
       {/* 🏔️ Header */}
       <section className="mb-6 flex justify-between items-center px-2">
         <div className="flex items-center gap-3">
-           <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden border border-outline-variant/10 shadow-sm">
-              <span className="material-symbols-outlined text-primary">analytics</span>
+           <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center overflow-hidden border border-outline-variant/10 shadow-sm dark:shadow-dark">
+              <span className="material-symbols-outlined text-primary dark:glow">analytics</span>
            </div>
-           <h2 className="font-headline font-black text-2xl text-on-surface tracking-tight leading-none italic">PocketFlow Budget</h2>
+           <h2 className="font-headline font-black text-2xl text-on-surface tracking-tight leading-none italic dark:glow">PocketFlow Budget</h2>
         </div>
-        <button className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-primary hover:bg-white transition-all shadow-sm">
-           <span className="material-symbols-outlined">notifications</span>
+        <button className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container text-primary hover:bg-surface-container-high transition-all shadow-sm dark:shadow-dark">
+           <span className="material-symbols-outlined dark:glow">notifications</span>
         </button>
       </section>
 
       {/* 🗓️ Month Selector */}
-      <section className="mb-8 bg-surface-container-low p-5 rounded-[2.5rem] border border-outline-variant/10 shadow-sm flex items-center justify-between mx-2">
+      <section className="mb-8 bg-surface-container-low p-5 rounded-[2.5rem] border border-outline-variant/10 shadow-sm dark:shadow-dark flex items-center justify-between mx-2">
           <button 
             onClick={handlePrevMonth}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface hover:bg-white transition-all shadow-sm active:scale-90"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container hover:bg-surface-container-high transition-all shadow-sm active:scale-90"
           >
             <ChevronLeft size={20} className="text-on-surface-variant" />
           </button>
@@ -118,19 +118,19 @@ const Stats: React.FC = () => {
             className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
           >
               <div className="flex items-center gap-2 mb-0.5">
-                <Calendar size={14} className="text-primary" />
-                <span className="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary opacity-60">
+                <Calendar size={14} className="text-primary dark:glow" />
+                <span className="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-primary-container opacity-60">
                   {selectedDate.getFullYear()}
                 </span>
               </div>
-              <h3 className="font-headline font-black text-xl text-on-surface tracking-tight uppercase">
+              <h3 className="font-headline font-black text-xl text-on-surface tracking-tight uppercase italic dark:glow">
                 Tháng {selectedDate.getMonth() + 1}
               </h3>
           </div>
 
           <button 
             onClick={handleNextMonth}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface hover:bg-white transition-all shadow-sm active:scale-90"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container hover:bg-surface-container-high transition-all shadow-sm active:scale-90"
           >
             <ChevronRight size={20} className="text-on-surface-variant" />
           </button>
@@ -138,12 +138,12 @@ const Stats: React.FC = () => {
 
       {/* 🚀 Stats Type Toggle (Income/Expense) */}
       <section className="mb-8 px-2">
-        <div className="bg-surface-container-low p-1.5 rounded-[2rem] border border-outline-variant/10 shadow-inner flex gap-2">
+        <div className="bg-surface-container-low p-1.5 rounded-[2rem] border border-outline-variant/10 shadow-inner flex gap-2 dark:shadow-dark">
           <button 
             onClick={() => setStatsType('expense')}
             className={cn(
               "flex-1 py-4 rounded-[1.5rem] font-headline font-black text-xs uppercase tracking-widest transition-all",
-              statsType === 'expense' ? "bg-primary text-white shadow-lg" : "text-on-surface-variant hover:bg-surface-container-high"
+              statsType === 'expense' ? "bg-primary text-on-primary shadow-lg dark:shadow-glow-primary" : "text-on-surface-variant hover:bg-surface-container-high"
             )}
           >
             Chi tiêu
@@ -152,7 +152,7 @@ const Stats: React.FC = () => {
             onClick={() => setStatsType('income')}
             className={cn(
               "flex-1 py-4 rounded-[1.5rem] font-headline font-black text-xs uppercase tracking-widest transition-all",
-              statsType === 'income' ? "bg-green-600 text-white shadow-lg" : "text-on-surface-variant hover:bg-surface-container-high"
+              statsType === 'income' ? "bg-secondary text-on-secondary shadow-lg dark:shadow-glow-secondary" : "text-on-surface-variant hover:bg-surface-container-high"
             )}
           >
             Thu nhập
@@ -176,7 +176,7 @@ const Stats: React.FC = () => {
         <>
           {/* 💳 Monthly Budget Hero Card */}
           <section className="mb-8">
-            <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-primary to-primary-container text-white shadow-[0_24px_48px_rgba(0,93,167,0.2)] relative overflow-hidden group">
+            <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-primary via-primary to-primary-container text-on-primary shadow-[0_24px_48px_rgba(0,93,167,0.2)] dark:shadow-glow-primary relative overflow-hidden group border border-white/10">
               <div className="absolute -right-16 -top-16 w-48 h-48 bg-white/10 rounded-full blur-3xl transform group-hover:scale-125 transition-transform duration-1000"></div>
               
               <div className="flex justify-between items-start mb-8 relative z-10">
@@ -188,19 +188,19 @@ const Stats: React.FC = () => {
                     {formatCurrency(displayTotal)}
                   </h1>
                 </div>
-                <div className="bg-white/20 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/20">
-                  <span className="font-label text-[10px] font-black uppercase tracking-widest">
+                <div className="bg-white/20 dark:bg-black/20 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/20">
+                  <span className="font-label text-[10px] font-black uppercase tracking-widest leading-none">
                     {selectedDate.toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' })}
                   </span>
                 </div>
               </div>
 
-              <div className="space-y-4 mb-8 relative z-10">
+              <div className="space-y-4 mb-4 relative z-10">
                 <div className="flex justify-between items-end text-sm">
                   <span className="font-black italic text-xs tracking-wider opacity-90">{Math.round(progress)}% ngân sách</span>
                   <span className="opacity-60 text-[10px] uppercase font-black tracking-widest">Mục tiêu: {formatCurrency(totalBudget)}</span>
                 </div>
-                <div className="h-4 w-full bg-white/20 rounded-full overflow-hidden p-1">
+                <div className="h-4 w-full bg-white/20 dark:bg-black/30 rounded-full overflow-hidden p-1">
                   <div 
                     className="h-full bg-white rounded-full transition-all duration-1000 shadow-[0_0_12px_rgba(255,255,255,0.5)]" 
                     style={{ width: `${progress}%` }}
@@ -209,7 +209,7 @@ const Stats: React.FC = () => {
               </div>
 
               {isCurrentMonth && progress > 80 && (
-                <div className="flex items-center gap-3 bg-secondary-container text-on-secondary-container p-4 rounded-2xl relative z-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div className="flex items-center gap-3 bg-error-container text-on-error-container dark:bg-error/20 dark:text-error p-4 rounded-2xl relative z-10 animate-in fade-in slide-in-from-bottom-2 duration-500 border border-error/10">
                   <AlertCircle size={20} className="flex-shrink-0 animate-pulse" />
                   <p className="text-[11px] font-black tracking-tight leading-tight uppercase italic">
                     Sắp đạt giới hạn tháng. Hãy chi tiêu cẩn thận hơn!
@@ -221,29 +221,29 @@ const Stats: React.FC = () => {
 
           {/* 🧩 Bento Grid Insights */}
           <section className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-surface-container-lowest p-6 rounded-[2.5rem] flex flex-col justify-between h-40 shadow-sm border border-outline-variant/10 group hover:shadow-xl hover:shadow-primary/5 transition-all">
-              <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center text-primary transition-transform group-hover:rotate-12 duration-500">
+            <div className="bg-surface-container-lowest p-6 rounded-[2.5rem] flex flex-col justify-between h-40 shadow-sm border border-outline-variant/10 group hover:shadow-xl dark:shadow-dark hover:shadow-primary/5 transition-all">
+              <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center text-primary dark:glow transition-transform group-hover:rotate-12 duration-500">
                 <Calendar size={20} strokeWidth={3} />
               </div>
               <div>
                 <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-40 mb-1">
                   {isCurrentMonth ? 'Thời gian còn lại' : 'Số ngày trong tháng'}
                 </p>
-                <p className="font-headline font-black text-3xl text-on-surface tracking-tighter italic">
+                <p className="font-headline font-black text-3xl text-on-surface tracking-tighter italic dark:glow">
                   {isCurrentMonth ? `${daysLeft} Ngày` : `${lastDay} Ngày`}
                 </p>
               </div>
             </div>
             
-            <div className="bg-surface-container-lowest p-6 rounded-[2.5rem] flex flex-col justify-between h-40 shadow-sm border border-outline-variant/10 group hover:shadow-xl hover:shadow-secondary/5 transition-all">
-              <div className="w-10 h-10 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary transition-transform group-hover:-rotate-12 duration-500">
+            <div className="bg-surface-container-lowest p-6 rounded-[2.5rem] flex flex-col justify-between h-40 shadow-sm border border-outline-variant/10 group hover:shadow-xl dark:shadow-dark hover:shadow-secondary/5 transition-all">
+              <div className="w-10 h-10 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary dark:glow transition-transform group-hover:-rotate-12 duration-500">
                 <Wallet size={20} strokeWidth={3} />
               </div>
               <div>
                 <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-40 mb-1">
                   {isCurrentMonth ? 'Hạn mức / Ngày' : 'Trung bình / Ngày'}
                 </p>
-                <p className="font-headline font-black text-2xl text-on-surface tracking-tighter italic">
+                <p className="font-headline font-black text-2xl text-on-surface tracking-tighter italic dark:glow">
                   {formatCurrency(Math.round(isCurrentMonth ? dailyLimit : (displayTotal / lastDay)))}
                 </p>
               </div>
@@ -269,7 +269,7 @@ const Stats: React.FC = () => {
                 <div 
                   key={cat.id} 
                   onClick={() => handleCategoryClick(cat.id)}
-                  className="bg-surface-container-lowest p-5 rounded-[2.5rem] flex items-center gap-5 shadow-sm border border-outline-variant/5 hover:border-primary/20 transition-all group cursor-pointer hover:shadow-lg"
+                  className="bg-surface-container-lowest p-5 rounded-[2.5rem] flex items-center gap-5 shadow-sm dark:shadow-dark border border-outline-variant/5 hover:border-primary/20 transition-all group cursor-pointer hover:shadow-lg"
                 >
                   <div className={cn("w-14 h-14 rounded-2xl flex flex-shrink-0 items-center justify-center shadow-inner group-hover:scale-105 transition-transform duration-500", cat.color)}>
                     <span className="material-symbols-outlined text-2xl text-white">
@@ -294,12 +294,12 @@ const Stats: React.FC = () => {
                       ></div>
                     </div>
                     {cat.limit && cat.amount > cat.limit && statsType === 'expense' && (
-                       <p className="text-[9px] text-error font-black uppercase tracking-widest flex items-center gap-1 italic">
+                       <p className="text-[9px] text-error dark:text-error dark:glow font-black uppercase tracking-widest flex items-center gap-1 italic">
                          <AlertCircle size={10} /> Quá ngưỡng { formatCurrency(cat.amount - cat.limit) }
                        </p>
                     )}
                     {cat.limit && cat.amount >= cat.limit && statsType === 'income' && (
-                       <p className="text-[9px] text-green-600 font-black uppercase tracking-widest flex items-center gap-1 italic">
+                       <p className="text-[9px] text-secondary dark:text-secondary dark:glow font-black uppercase tracking-widest flex items-center gap-1 italic">
                          <span className="material-symbols-outlined text-[12px]">check_circle</span> Đã đạt mục tiêu
                        </p>
                     )}
@@ -312,12 +312,12 @@ const Stats: React.FC = () => {
           {/* 🚀 Adjust Budget Action */}
           <button 
             onClick={handleEditCategories}
-            className="w-full bg-surface-container-high py-6 rounded-[2.5rem] font-headline font-black text-primary flex items-center justify-center gap-3 hover:bg-white hover:shadow-xl transition-all active:scale-95 duration-200 border border-outline-variant/10 group mb-8"
+            className="w-full bg-surface-container p-6 rounded-[2.5rem] font-headline font-black text-primary flex items-center justify-center gap-3 hover:bg-surface-container-high hover:shadow-xl dark:shadow-dark transition-all active:scale-95 duration-200 border border-outline-variant/10 group mb-8"
           >
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:rotate-180 transition-transform duration-700">
-              <Settings2 size={18} strokeWidth={3} />
+              <Settings2 size={18} strokeWidth={3} className="dark:glow" />
             </div>
-            <span className="uppercase tracking-[0.2em] text-[10px]">Điều chỉnh hạn mức tổng</span>
+            <span className="uppercase tracking-[0.2em] text-[10px] dark:glow">Điều chỉnh hạn mức tổng</span>
           </button>
         </>
       )}

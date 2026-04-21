@@ -34,10 +34,10 @@ const MainLayout: React.FC = () => {
       {/* 🚀 DESKTOP SIDEBAR */}
       <aside className="hidden md:flex w-72 flex-col border-r border-outline-variant/20 bg-surface-container-lowest/80 backdrop-blur-xl z-10 transition-all">
         <div className="p-8 flex items-center gap-3 mt-2">
-          <div className="w-10 h-10 rounded-full bg-surface-container-high flex flex-shrink-0 items-center justify-center overflow-hidden border border-outline-variant/20 shadow-sm">
-             <img alt="User avatar" className="w-full h-full object-cover" src={avatarUrl} />
+          <div className="w-10 h-10 rounded-full bg-surface-container-high flex flex-shrink-0 items-center justify-center overflow-hidden border border-outline-variant/20 shadow-sm dark:shadow-dark">
+             <img alt="User avatar" className="w-full h-full object-cover dark:opacity-90" src={avatarUrl} />
           </div>
-          <h1 className="text-2xl font-headline font-extrabold tracking-tight text-primary italic">PocketFlow</h1>
+          <h1 className="text-2xl font-headline font-extrabold tracking-tight text-primary italic dark:glow">PocketFlow</h1>
         </div>
         
         <nav className="flex-1 space-y-2 px-6 pt-4">
@@ -48,7 +48,7 @@ const MainLayout: React.FC = () => {
               className={cn(
                 "flex items-center gap-4 rounded-2xl px-5 py-3.5 text-sm font-bold transition-all duration-300",
                 isActive(link.path) 
-                  ? "bg-primary text-on-primary shadow-lg shadow-primary/20 scale-[1.02]" 
+                  ? "bg-primary text-on-primary shadow-lg shadow-primary/20 dark:shadow-glow-primary scale-[1.02]" 
                   : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
               )}
             >
@@ -79,10 +79,10 @@ const MainLayout: React.FC = () => {
         {/* Mobile Top Header */}
         <header className="flex h-16 items-center justify-between px-6 bg-surface/90 backdrop-blur-md md:hidden sticky top-0 z-30 transition-all border-b border-outline-variant/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-surface-container-high flex flex-shrink-0 items-center justify-center overflow-hidden border border-outline-variant/10 shadow-sm" onClick={() => setIsSidebarOpen(true)}>
-              <img alt="User" className="w-full h-full object-cover" src={avatarUrl}/>
+            <div className="w-10 h-10 rounded-full bg-surface-container-high flex flex-shrink-0 items-center justify-center overflow-hidden border border-outline-variant/10 shadow-sm dark:shadow-dark active:scale-95 transition-transform" onClick={() => setIsSidebarOpen(true)}>
+              <img alt="User" className="w-full h-full object-cover dark:opacity-90" src={avatarUrl}/>
             </div>
-            <span className="font-headline font-bold text-xl tracking-tight text-primary italic">PocketFlow</span>
+            <span className="font-headline font-bold text-xl tracking-tight text-primary italic dark:glow">PocketFlow</span>
           </div>
           <div className="flex items-center gap-2">
             <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-200">
@@ -106,15 +106,15 @@ const MainLayout: React.FC = () => {
               to={link.path} 
               className={cn(
                 "relative flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", 
-                isActive(link.path) ? "text-primary" : "text-on-surface-variant hover:text-primary"
+                isActive(link.path) ? "text-primary dark:glow" : "text-on-surface-variant hover:text-primary"
               )}
             >
                <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: isActive(link.path) ? "'FILL' 1" : "'FILL' 0" }}>
                  {link.icon}
                </span>
-               <span className="font-label font-medium text-[10px] uppercase tracking-wider mt-1">{link.name}</span>
+               <span className={cn("font-label font-medium text-[10px] uppercase tracking-wider mt-1", isActive(link.path) ? "font-black" : "")}>{link.name}</span>
                {isActive(link.path) && (
-                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" />
+                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary shadow-glow-primary" />
                )}
             </Link>
           ))}

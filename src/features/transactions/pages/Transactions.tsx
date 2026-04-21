@@ -59,7 +59,7 @@ const DailyBalancePanel: React.FC<DailyBalancePanelProps> = ({ logs, dateLabel }
           </div>
           <div className="text-left">
             <p className="font-label font-black text-[10px] uppercase tracking-[0.18em] text-primary/70">Số dư ví • {dateLabel}</p>
-            <p className="font-headline font-black text-base text-on-surface leading-none mt-0.5">
+            <p className="font-headline font-black text-base text-on-surface leading-none mt-0.5 dark:glow">
               {formatCurrency(totalBalance)}
             </p>
           </div>
@@ -106,7 +106,7 @@ const DailyBalancePanel: React.FC<DailyBalancePanelProps> = ({ logs, dateLabel }
                 </div>
                 <p className={cn(
                   'font-headline font-black text-base italic tracking-tighter flex-shrink-0',
-                  (log.balance ?? 0) >= 0 ? 'text-secondary' : 'text-red-500',
+                  (log.balance ?? 0) >= 0 ? 'text-secondary dark:glow' : 'text-error',
                 )}>
                   {formatCurrency(log.balance ?? 0)}
                 </p>
@@ -218,7 +218,7 @@ const Transactions: React.FC = () => {
             </button>
             <div>
                <p className="font-label text-[10px] uppercase font-black text-on-surface-variant opacity-60 tracking-widest hidden md:block">PocketFlow Ledger</p>
-               <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none">Transactions</h2>
+               <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none italic dark:glow">Transactions</h2>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -254,7 +254,7 @@ const Transactions: React.FC = () => {
                     {selectedDate.getFullYear()}
                   </span>
                </div>
-               <h3 className="font-headline font-black text-xl text-on-surface tracking-tight uppercase">
+               <h3 className="font-headline font-black text-xl text-on-surface tracking-tight uppercase italic dark:glow">
                  Tháng {selectedDate.getMonth() + 1}
                </h3>
             </div>
@@ -359,12 +359,12 @@ const Transactions: React.FC = () => {
                               </div>
                            </div>
                            <div className="text-right">
-                              <p className={cn(
-                                 "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
-                                 tx.type === 'income' ? "text-secondary" : tx.type === 'expense' ? "text-on-surface" : "text-amber-600"
-                              )}>
-                                 {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                              </p>
+                               <p className={cn(
+                                  "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
+                                  tx.type === 'income' ? "text-secondary dark:glow" : tx.type === 'expense' ? "text-on-surface" : "text-amber-500"
+                               )}>
+                                  {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                               </p>
                            </div>
                         </div>
                      ))}

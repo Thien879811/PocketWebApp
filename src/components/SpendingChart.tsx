@@ -10,16 +10,16 @@ export const SpendingChart: React.FC<SpendingChartProps> = ({ data, totalSpent }
   const maxVal = Math.max(...data, 1000000) // Minimum scale of 1M
 
   return (
-    <div className="bg-surface-container-lowest p-6 rounded-[2.5rem] border border-outline-variant/10 shadow-sm mx-2">
+    <div className="bg-surface-container-lowest p-6 rounded-[2.5rem] border border-outline-variant/10 shadow-sm dark:shadow-dark mx-2">
       <div className="flex justify-between items-end mb-6">
         <div>
           <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-40 mb-1">Xu hướng tuần</p>
           <p className="font-headline font-black text-xl text-on-surface tracking-tighter italic">Biểu đồ chi tiêu</p>
         </div>
-        <div className="text-right">
-           <p className="font-headline font-black text-lg text-primary leading-none">{formatCurrency(totalSpent)}</p>
-           <p className="text-[10px] font-black uppercase tracking-tighter opacity-40">Tổng chi tiêu</p>
-        </div>
+         <div className="text-right">
+            <p className="font-headline font-black text-lg text-primary leading-none dark:glow">{formatCurrency(totalSpent)}</p>
+            <p className="text-[10px] font-black uppercase tracking-tighter opacity-40">Tổng chi tiêu</p>
+         </div>
       </div>
 
       <div className="flex items-end justify-between h-32 gap-3 px-2">
@@ -32,7 +32,7 @@ export const SpendingChart: React.FC<SpendingChartProps> = ({ data, totalSpent }
                 style={{ height: '100%' }}
               >
                 <div 
-                  className="w-full bg-primary rounded-t-xl transition-all duration-1000 shadow-[0_0_12px_rgba(var(--primary-rgb),0.3)]" 
+                  className="w-full bg-primary rounded-t-xl transition-all duration-1000 shadow-[0_0_12px_rgba(var(--primary-rgb),0.3)] dark:shadow-glow-primary" 
                   style={{ height: `${height}%` }}
                 >
                    {val > 0 && (

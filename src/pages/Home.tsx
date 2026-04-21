@@ -85,12 +85,12 @@ const HeaderSection = () => (
   <section className="px-2 flex justify-between items-center">
      <div>
         <p className="font-label text-xs uppercase tracking-[0.2em] font-black text-on-surface-variant opacity-60 mb-2">Xin chào</p>
-        <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none italic">Chào buổi sáng!</h2>
+        <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none italic dark:glow">Chào buổi sáng!</h2>
      </div>
-     <div className="w-14 h-14 rounded-[1.5rem] bg-surface-container-high border-4 border-surface shadow-xl overflow-hidden active:scale-95 transition-all">
+     <div className="w-14 h-14 rounded-[1.5rem] bg-surface-container-high border-4 border-surface shadow-xl dark:shadow-dark overflow-hidden active:scale-95 transition-all">
         <img 
            alt="User" 
-           className="w-full h-full object-cover" 
+           className="w-full h-full object-cover dark:opacity-90" 
            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFZtPLSa9uNH5lsdWsTZc1yZ7wmFZWqTxHZdDnUYWztIZ5z7-rs-NfBzYApuNLpZxKmdtKeRnTNCu3La1bzfWxq3NCAfpuJSlW1i6V3wvhDv0vrJ-wGNPk51afSCNgh30EXyUxAlEGUA638b-2yNgAoXumdNiB-K4wRw3AWtk-HzGLvOEwoysOuJZwzjnLuu58t9x7E7fv6aH4SrLpZhVQENBud62tFDA4ehY4TIKKERF0yfjkk9N1sY7WGYP223s36cahrMos5lc" 
         />
      </div>
@@ -99,27 +99,27 @@ const HeaderSection = () => (
 
 const BalanceHero = ({ balance, income, expense }: { balance: number, income: number, expense: number }) => (
   <section className="px-2">
-     <div className="bg-primary p-10 rounded-[3rem] text-on-primary shadow-2xl shadow-primary/30 relative overflow-hidden group">
+     <div className="bg-gradient-to-br from-primary via-primary to-primary-container p-10 rounded-[3rem] text-on-primary shadow-2xl shadow-primary/30 dark:shadow-glow-primary relative overflow-hidden group border border-white/10">
         <div className="relative z-10 space-y-2">
            <p className="font-label text-xs uppercase tracking-[0.2em] font-black opacity-60">Tổng số dư</p>
-           <h3 className="font-headline font-black text-4xl tracking-tighter">
+           <h3 className="font-headline font-black text-5xl tracking-tighter italic">
              {formatCurrency(balance)}
            </h3>
            <div className="flex items-center gap-2 mt-4">
-              <span className="text-secondary-fixed bg-white/10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/5">+240.000đ hôm nay</span>
+              <span className="text-secondary-fixed bg-white/10 dark:bg-black/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/5">+240.000đ hôm nay</span>
            </div>
         </div>
         
         <div className="mt-10 grid grid-cols-2 gap-4 relative z-10 pt-8 border-t border-white/10">
            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 opacity-60 text-secondary-fixed">
+              <div className="flex items-center gap-1.5 opacity-60 text-secondary-container dark:text-secondary-fixed">
                  <ArrowDownLeft size={16} strokeWidth={3} />
                  <span className="text-[10px] font-black uppercase tracking-widest">Thu nhập</span>
               </div>
               <p className="text-xl font-black italic tracking-tight">{formatCurrency(income) || '0'}</p>
            </div>
            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 opacity-60 text-tertiary-fixed">
+              <div className="flex items-center gap-1.5 opacity-60 text-error-container dark:text-tertiary-fixed">
                  <ArrowUpRight size={16} strokeWidth={3} />
                  <span className="text-[10px] font-black uppercase tracking-widest">Chi tiêu</span>
               </div>
@@ -127,24 +127,24 @@ const BalanceHero = ({ balance, income, expense }: { balance: number, income: nu
            </div>
         </div>
 
-        <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-[100px] pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
-        <div className="absolute -left-10 -top-10 w-40 h-40 bg-secondary/20 rounded-full blur-[80px] pointer-events-none"></div>
+        <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 dark:bg-primary/20 rounded-full blur-[100px] pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
+        <div className="absolute -left-10 -top-10 w-40 h-40 bg-secondary/20 dark:bg-secondary/10 rounded-full blur-[80px] pointer-events-none animate-pulse-glow"></div>
      </div>
   </section>
 )
 
 const ShortcutsSection = ({ onNavigate }: { onNavigate: (path: string) => void }) => (
   <section className="px-2 grid grid-cols-2 gap-4">
-      <button onClick={() => onNavigate('/budget')} className="bg-surface-container-lowest p-5 rounded-[2rem] border border-outline-variant/10 text-left hover:bg-surface-container-low transition-all active:scale-95 group shadow-sm">
-         <div className="w-12 h-12 bg-primary/10 text-primary rounded-[1rem] flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform">
+      <button onClick={() => onNavigate('/budget')} className="bg-surface-container p-6 rounded-[2.5rem] border border-outline-variant/10 text-left hover:bg-surface-container-high transition-all active:scale-95 group shadow-sm dark:shadow-dark">
+         <div className="w-12 h-12 bg-primary/10 dark:bg-primary/20 text-primary rounded-[1rem] flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform dark:shadow-glow-primary">
             <Target size={24} />
          </div>
          <h4 className="font-headline font-black text-lg text-on-surface leading-none mb-1">Kế hoạch<br/>chi tiêu</h4>
          <p className="font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest opacity-60">Ngân sách</p>
       </button>
       
-      <button onClick={() => onNavigate('/goals')} className="bg-surface-container-lowest p-5 rounded-[2rem] border border-outline-variant/10 text-left hover:bg-surface-container-low transition-all active:scale-95 group shadow-sm">
-         <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-[1rem] flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform">
+      <button onClick={() => onNavigate('/goals')} className="bg-surface-container p-6 rounded-[2.5rem] border border-outline-variant/10 text-left hover:bg-surface-container-high transition-all active:scale-95 group shadow-sm dark:shadow-dark">
+         <div className="w-12 h-12 bg-secondary/10 dark:bg-secondary/20 text-secondary rounded-[1rem] flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform dark:shadow-glow-secondary">
             <ArrowUpRight size={24} />
          </div>
          <h4 className="font-headline font-black text-lg text-on-surface leading-none mb-1">Mục tiêu<br/>tích lũy</h4>
@@ -165,7 +165,7 @@ const ActivitySection = ({ transactions, categories, selectedDate, onNavigate }:
   return (
     <section className="space-y-6 px-2 pb-10">
        <div className="flex justify-between items-center px-4">
-          <h3 className="font-headline font-black text-xl text-on-surface">Dòng tiền gần đây</h3>
+          <h3 className="font-headline font-black text-xl text-on-surface italic">Dòng tiền gần đây</h3>
           <button onClick={() => onNavigate('/stats')} className="text-primary text-xs font-black uppercase tracking-[0.15em] flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
              Chi tiết
              <ChevronRight size={14} />
@@ -173,7 +173,7 @@ const ActivitySection = ({ transactions, categories, selectedDate, onNavigate }:
        </div>
 
        {filteredTransactions.length === 0 ? (
-          <div className="bg-surface-container-low rounded-[2.5rem] p-12 text-center border-2 border-dashed border-outline-variant/30 space-y-4">
+          <div className="bg-surface-container-low rounded-[2.5rem] p-12 text-center border-2 border-dashed border-outline-variant/30 space-y-4 dark:bg-surface-container-lowest/50">
              <div className="w-16 h-16 bg-surface-container-high rounded-full flex items-center justify-center mx-auto opacity-40">
                 <Inbox className="w-8 h-8" />
              </div>
@@ -181,7 +181,7 @@ const ActivitySection = ({ transactions, categories, selectedDate, onNavigate }:
              <Link to="/add" className="text-primary font-black text-xs uppercase tracking-tighter hover:underline">Thêm giao dịch đầu tiên</Link>
           </div>
        ) : (
-          <div className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-outline-variant/10 shadow-xl shadow-on-surface/[0.02]">
+          <div className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-outline-variant/10 shadow-xl dark:shadow-dark">
               {filteredTransactions.slice(0, 5).map((tx: any) => (
                 <div 
                   key={tx.id} 
@@ -189,11 +189,11 @@ const ActivitySection = ({ transactions, categories, selectedDate, onNavigate }:
                   className="p-6 flex items-center justify-between group active:bg-primary/5 cursor-pointer transition-all duration-300 border-b border-outline-variant/10 last:border-0"
                 >
                    <div className="flex items-center gap-5">
-                      <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex flex-shrink-0 items-center justify-center shadow-inner group-hover:bg-white transition-all">
+                      <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex flex-shrink-0 items-center justify-center shadow-inner group-hover:bg-primary/5 transition-all dark:bg-surface-container">
                          <LayoutGrid size={24} className="text-primary opacity-60" />
                       </div>
                       <div>
-                         <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5">
+                         <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5 italic">
                             {categories?.find((c: any) => c.id === tx.category_id)?.name || 'Unknown'}
                          </p>
                          <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-tighter opacity-50">
@@ -204,7 +204,7 @@ const ActivitySection = ({ transactions, categories, selectedDate, onNavigate }:
                    <div className="text-right">
                       <p className={cn(
                          "font-headline font-black text-xl italic tracking-tighter",
-                         tx.type === 'income' ? "text-secondary" : "text-on-surface"
+                         tx.type === 'income' ? "text-secondary dark:glow" : "text-on-surface"
                       )}>
                          {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                       </p>

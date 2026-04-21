@@ -68,26 +68,26 @@ const Settings: React.FC = () => {
       
       {/* 🏔️ Profile Header Area */}
       <section className="mb-12 px-2">
-        <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight mb-10">Cài đặt</h2>
+        <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight mb-10 italic dark:glow">Cài đặt</h2>
         
-        <div className="bg-surface-container-lowest p-8 rounded-[3rem] border border-outline-variant/10 shadow-xl shadow-on-surface/[0.02] flex flex-col items-center gap-6 relative overflow-hidden group">
+        <div className="bg-surface-container-lowest p-8 rounded-[3rem] border border-outline-variant/10 shadow-xl dark:shadow-dark flex flex-col items-center gap-6 relative overflow-hidden group">
            <div className="relative">
-              <div className="w-28 h-28 rounded-[2.5rem] bg-surface-container-high flex items-center justify-center overflow-hidden border-4 border-surface shadow-2xl relative z-10">
-                 <img alt="Profile" className="w-full h-full object-cover" src={avatarUrl} />
+              <div className="w-28 h-28 rounded-[2.5rem] bg-surface-container-high flex items-center justify-center overflow-hidden border-4 border-surface shadow-2xl dark:shadow-dark relative z-10">
+                 <img alt="Profile" className="w-full h-full object-cover dark:opacity-90" src={avatarUrl} />
               </div>
               <button className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg z-20 active:scale-90 transition-transform">
                  <Camera size={18} strokeWidth={2.5} />
               </button>
            </div>
            
-           <div className="text-center space-y-1 relative z-10">
-              <h3 className="font-headline font-black text-2xl tracking-tight text-on-surface">{displayName}</h3>
-              <p className="font-label text-sm font-bold text-on-surface-variant opacity-60 px-4 py-1 bg-surface-container-high rounded-full inline-block">{user?.email}</p>
+           <div className="text-center space-y-2 relative z-10">
+              <h3 className="font-headline font-black text-2xl tracking-tight text-on-surface italic dark:glow">{displayName}</h3>
+              <p className="font-label text-[10px] font-black text-on-surface-variant opacity-60 uppercase tracking-widest px-4 py-1.5 bg-surface-container-high rounded-full inline-block">{user?.email}</p>
            </div>
 
            {/* Decorative Background */}
-           <div className="absolute top-[-20px] left-[-20px] w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-           <div className="absolute right-[-20px] bottom-[-20px] w-32 h-32 bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
+           <div className="absolute top-[-20px] left-[-20px] w-32 h-32 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl pointer-events-none group-hover:scale-150 transition-all duration-1000"></div>
+           <div className="absolute right-[-20px] bottom-[-20px] w-32 h-32 bg-secondary/10 dark:bg-secondary/20 rounded-full blur-3xl pointer-events-none group-hover:scale-150 transition-all duration-1000"></div>
         </div>
       </section>
 
@@ -96,7 +96,7 @@ const Settings: React.FC = () => {
         {settingsGroups.map((group, gIdx) => (
           <div key={gIdx} className="space-y-4">
             <h4 className="px-4 font-label text-[10px] uppercase font-black tracking-[0.2em] text-on-surface-variant opacity-40">{group.title}</h4>
-            <div className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-outline-variant/10 shadow-sm">
+            <div className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-outline-variant/10 shadow-sm dark:shadow-dark">
               {group.items.map((item, iIdx) => (
                 <button
                   key={iIdx}
@@ -113,9 +113,9 @@ const Settings: React.FC = () => {
                 >
                   <div className="flex items-center gap-5">
                     <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110", item.color)}>
-                      <item.icon size={26} strokeWidth={2.5} />
+                      <item.icon size={26} strokeWidth={2.5} className="dark:glow" />
                     </div>
-                    <span className="font-headline font-black text-lg text-on-surface text-left">{item.label}</span>
+                    <span className="font-headline font-black text-lg text-on-surface text-left italic">{item.label}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <ChevronRight className="text-outline-variant group-hover:translate-x-1 transition-transform" />

@@ -27,8 +27,8 @@ const BudgetHistoryDetail = lazy(() => import('@/features/budget/pages/BudgetHis
 const BalanceHistory = lazy(() => import('@/features/accounts/pages/BalanceHistory'))
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
-  <div className="flex min-h-screen items-center justify-center bg-white dark:bg-neutral-950">
-    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+  <div className="flex min-h-screen items-center justify-center bg-surface dark:bg-background">
+    <Loader2 className="h-8 w-8 animate-spin text-primary dark:glow" />
   </div>
 )
 
