@@ -67,32 +67,41 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     .filter(tx => tx.type === 'expense')
     .reduce((acc, curr) => acc + curr.amount, 0)
 
-  // 2. Category Breakdown
-  const categoryMap: Record<string, { amount: number, count: number }> = {}
-  thisMonthTx
-    .filter(tx => tx.type === 'expense' && tx.category_id)
-    .forEach(tx => {
-      const catId = tx.category_id!
-      if (!categoryMap[catId]) {
-        categoryMap[catId] = { amount: 0, count: 0 }
-      }
-      categoryMap[catId].amount += tx.amount
-      categoryMap[catId].count += 1
-    })
+  // 2. Category Breakdowns (Separated by Type)
+  const expenseMap: Record<string, { amount: number, count: number }> = {}
+  const incomeMap: Record<string, { amount: number, count: number }> = {}
 
-  const topCategories = Object.entries(categoryMap)
-    .map(([categoryId, data]) => {
-      const catInfo = categories.find(c => c.id === categoryId)
-      return { 
-        name: catInfo?.name || 'Unknown',
-        id: categoryId,
-        ...data, 
-        limit: catInfo?.limit || 0,
-        icon: catInfo?.icon || 'payments',
-        color: catInfo?.color || 'bg-primary'
-      }
-    })
-    .sort((a, b) => b.amount - a.amount)
+  thisMonthTx.forEach(tx => {
+    if (!tx.category_id) return
+    
+    if (tx.type === 'expense') {
+      if (!expenseMap[tx.category_id]) expenseMap[tx.category_id] = { amount: 0, count: 0 }
+      expenseMap[tx.category_id].amount += tx.amount
+      expenseMap[tx.category_id].count += 1
+    } else if (tx.type === 'income') {
+      if (!incomeMap[tx.category_id]) incomeMap[tx.category_id] = { amount: 0, count: 0 }
+      incomeMap[tx.category_id].amount += tx.amount
+      incomeMap[tx.category_id].count += 1
+    }
+  })
+
+  const mapToTopList = (map: Record<string, { amount: number, count: number }>) => 
+    Object.entries(map)
+      .map(([categoryId, data]) => {
+        const catInfo = categories.find(c => c.id === categoryId)
+        return { 
+          name: catInfo?.name || 'Unknown',
+          id: categoryId,
+          ...data, 
+          limit: catInfo?.limit || 0,
+          icon: catInfo?.icon || 'payments',
+          color: catInfo?.color || 'bg-primary'
+        }
+      })
+      .sort((a, b) => b.amount - a.amount)
+
+  const topCategories = mapToTopList(expenseMap)
+  const topIncomeCategories = mapToTopList(incomeMap)
 
   // 3. Weekly Trends
   const weeklyTrends = [0, 0, 0, 0, 0] // 5 weeks
@@ -108,6 +117,7 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     totalIncome,
     totalExpense,
     topCategories,
+    topIncomeCategories,
     weeklyTrends,
     thisMonthCount: thisMonthTx.filter(tx => tx.type !== 'withdrawal').length
   }

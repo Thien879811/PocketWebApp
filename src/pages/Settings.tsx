@@ -1,16 +1,9 @@
 import React from 'react'
 import { 
-  Bell, 
-  ShieldCheck, 
-  HelpCircle, 
   LogOut, 
   ChevronRight, 
   Camera,
-  Heart,
-  Zap,
-  Globe,
   LayoutGrid,
-  Sparkles,
   History,
   Target,
   Moon,
@@ -41,7 +34,7 @@ const Settings: React.FC = () => {
     {
       title: 'Preferences',
       items: [
-        { icon: LayoutGrid, label: 'Categories', path: '/settings/categories', color: 'bg-primary/10 text-primary' },
+        { icon: LayoutGrid, label: 'Danh mục chi tiêu', path: '/settings/categories', color: 'bg-primary/10 text-primary' },
         { icon: Target, label: 'Mục tiêu tích lũy', path: '/goals', color: 'bg-green-600/10 text-green-600' },
         { icon: History, label: 'Lịch sử ngân sách', path: '/settings/budget-history', color: 'bg-secondary/10 text-secondary' },
         { icon: TrendingUp, label: 'Biến động số dư', path: '/settings/balance-history', color: 'bg-primary/10 text-primary' },
@@ -51,25 +44,23 @@ const Settings: React.FC = () => {
           onClick: toggleTheme, 
           color: isDarkMode ? 'bg-amber-400/10 text-amber-600' : 'bg-slate-700/10 text-slate-800 dark:text-slate-200' 
         },
-        { icon: Bell, label: 'Notifications', path: '#', color: 'bg-error/10 text-error' },
-        { icon: Globe, label: 'Language', path: '#', color: 'bg-primary/10 text-primary' },
       ]
     },
-    {
-      title: 'Security & Integrations',
-      items: [
-        { icon: ShieldCheck, label: 'Privacy & Safety', path: '#', color: 'bg-primary/10 text-primary' },
-        { icon: Zap, label: 'Connected Apps', path: '#', color: 'bg-secondary/10 text-secondary' },
-        { icon: Sparkles, label: 'AI Assistant', path: '/settings/ai', color: 'bg-amber-600/10 text-amber-600' },
-      ]
-    },
-    {
-      title: 'About',
-      items: [
-        { icon: HelpCircle, label: 'Help Center', path: '#', color: 'bg-primary/10 text-primary' },
-        { icon: Heart, label: 'Support Us', path: '#', color: 'bg-error/10 text-error' },
-      ]
-    }
+    // {
+    //   title: 'Security & Integrations',
+    //   items: [
+    //     { icon: ShieldCheck, label: 'Privacy & Safety', path: '#', color: 'bg-primary/10 text-primary' },
+    //     { icon: Zap, label: 'Connected Apps', path: '#', color: 'bg-secondary/10 text-secondary' },
+    //     { icon: Sparkles, label: 'AI Assistant', path: '/settings/ai', color: 'bg-amber-600/10 text-amber-600' },
+    //   ]
+    // },
+    // {
+    //   title: 'About',
+    //   items: [
+    //     { icon: HelpCircle, label: 'Help Center', path: '#', color: 'bg-primary/10 text-primary' },
+    //     { icon: Heart, label: 'Support Us', path: '#', color: 'bg-error/10 text-error' },
+    //   ]
+    // }
   ]
 
   return (

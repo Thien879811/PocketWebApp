@@ -26,16 +26,17 @@ const Stats: React.FC = () => {
   const navigate = useNavigate()
   const { data: transactions, isLoading: txLoading } = useTransactions()
   const { data: categories, isLoading: catLoading } = useCategories()
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  const [selectedModalCategory, setSelectedModalCategory] = useState<Category | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [statsType, setStatsType] = useState<'expense' | 'income'>('expense')
   
   const stats = transactions && categories ? getTransactionStats(transactions, categories, selectedDate) : null
 
   const handleCategoryClick = (categoryId: string) => {
     const category = categories?.find((cat) => cat.id === categoryId)
     if (category) {
-      setSelectedCategory(category)
+      setSelectedModalCategory(category)
       setIsModalOpen(true)
     }
   }
@@ -56,17 +57,19 @@ const Stats: React.FC = () => {
     setSelectedDate(new Date())
   }
 
-  // 📊 Tạo danh sách tất cả các danh mục với dữ liệu chi tiêu
-  const allCategoriesWithData = categories?.map((cat) => {
-    const categoryStats = stats?.topCategories.find((sc) => sc.id === cat.id)
+  // 📊 Tạo danh sách các danh mục theo loại (Chi tiêu hoặc Thu nhập)
+  const filteredCategories = categories?.filter(cat => cat.type === statsType) || []
+
+  const allCategoriesWithData = filteredCategories.map((cat) => {
+    const categoryStats = (statsType === 'expense' ? stats?.topCategories : stats?.topIncomeCategories)?.find((sc) => sc.id === cat.id)
     return {
       ...cat,
       amount: categoryStats?.amount || 0,
       count: categoryStats?.count || 0,
-      color: categoryStats?.color || cat.color || 'bg-primary/10',
+      color: categoryStats?.color || cat.color || (statsType === 'expense' ? 'bg-primary/10' : 'bg-green-600/10'),
       icon: cat.icon || 'payments',
     }
-  }) || []
+  })
 
   if (txLoading || catLoading) {
     return <LoadingScreen message="Đang phân tích thống kê..." />
@@ -80,9 +83,9 @@ const Stats: React.FC = () => {
   const daysLeft = isCurrentMonth ? (lastDay - now.getDate() + 1) : 0
   
   const totalBudget = allCategoriesWithData.reduce((acc, cat) => acc + (cat.limit || 0), 0) || 10000000 // Default 10M
-  const totalSpent = stats?.totalExpense || 0
-  const progress = Math.min((totalSpent / totalBudget) * 100, 100)
-  const remainingBudget = Math.max(totalBudget - totalSpent, 0)
+  const displayTotal = statsType === 'expense' ? (stats?.totalExpense || 0) : (stats?.totalIncome || 0)
+  const progress = Math.min((displayTotal / totalBudget) * 100, 100)
+  const remainingBudget = Math.max(totalBudget - displayTotal, 0)
   const dailyLimit = daysLeft > 0 ? (remainingBudget / daysLeft) : 0
 
   return (
@@ -133,6 +136,30 @@ const Stats: React.FC = () => {
           </button>
       </section>
 
+      {/* 🚀 Stats Type Toggle (Income/Expense) */}
+      <section className="mb-8 px-2">
+        <div className="bg-surface-container-low p-1.5 rounded-[2rem] border border-outline-variant/10 shadow-inner flex gap-2">
+          <button 
+            onClick={() => setStatsType('expense')}
+            className={cn(
+              "flex-1 py-4 rounded-[1.5rem] font-headline font-black text-xs uppercase tracking-widest transition-all",
+              statsType === 'expense' ? "bg-primary text-white shadow-lg" : "text-on-surface-variant hover:bg-surface-container-high"
+            )}
+          >
+            Chi tiêu
+          </button>
+          <button 
+            onClick={() => setStatsType('income')}
+            className={cn(
+              "flex-1 py-4 rounded-[1.5rem] font-headline font-black text-xs uppercase tracking-widest transition-all",
+              statsType === 'income' ? "bg-green-600 text-white shadow-lg" : "text-on-surface-variant hover:bg-surface-container-high"
+            )}
+          >
+            Thu nhập
+          </button>
+        </div>
+      </section>
+
       {!stats || stats.thisMonthCount === 0 ? (
         <div className="max-w-lg mx-auto py-20 px-6 text-center space-y-8">
           <div className="w-24 h-24 bg-surface-container-high rounded-[2.5rem] flex items-center justify-center mx-auto shadow-inner border border-outline-variant/10">
@@ -154,9 +181,11 @@ const Stats: React.FC = () => {
               
               <div className="flex justify-between items-start mb-8 relative z-10">
                 <div>
-                  <p className="font-label text-xs uppercase tracking-[0.2em] font-black opacity-60 mb-2">Đã chi tiêu tháng này</p>
+                  <p className="font-label text-xs uppercase tracking-[0.2em] font-black opacity-60 mb-2">
+                    {statsType === 'expense' ? 'Đã chi tiêu tháng này' : 'Đã thu nhập tháng này'}
+                  </p>
                   <h1 className="font-headline font-black text-4xl tracking-tighter italic">
-                    {formatCurrency(totalSpent)}
+                    {formatCurrency(displayTotal)}
                   </h1>
                 </div>
                 <div className="bg-white/20 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/20">
@@ -215,7 +244,7 @@ const Stats: React.FC = () => {
                   {isCurrentMonth ? 'Hạn mức / Ngày' : 'Trung bình / Ngày'}
                 </p>
                 <p className="font-headline font-black text-2xl text-on-surface tracking-tighter italic">
-                  {formatCurrency(Math.round(isCurrentMonth ? dailyLimit : (totalSpent / lastDay)))}
+                  {formatCurrency(Math.round(isCurrentMonth ? dailyLimit : (displayTotal / lastDay)))}
                 </p>
               </div>
             </div>
@@ -224,7 +253,9 @@ const Stats: React.FC = () => {
           {/* 📂 Category Breakdown */}
           <section className="mb-10 px-1">
             <div className="flex justify-between items-center mb-8 px-4">
-              <h2 className="font-headline font-black text-xl text-on-surface tracking-tight italic">Hạn mức danh mục</h2>
+              <h2 className="font-headline font-black text-xl text-on-surface tracking-tight italic">
+                {statsType === 'expense' ? 'Hạn mức chi tiêu' : 'Kế hoạch thu nhập'}
+              </h2>
               <button 
                 onClick={handleEditCategories}
                 className="text-primary font-label text-[10px] font-black uppercase tracking-widest bg-primary/5 px-4 py-2 rounded-full border border-primary/10 hover:bg-primary hover:text-white transition-all shadow-sm shadow-primary/5"
@@ -259,12 +290,17 @@ const Stats: React.FC = () => {
                           cat.color,
                           cat.limit && cat.amount > cat.limit ? "bg-error animate-pulse" : ""
                         )} 
-                        style={{ width: `${cat.limit ? Math.min((cat.amount / cat.limit) * 100, 100) : (totalSpent > 0 ? (cat.amount / totalSpent * 100) : 0)}%` }}
+                        style={{ width: `${cat.limit ? Math.min((cat.amount / cat.limit) * 100, 100) : (displayTotal > 0 ? (cat.amount / displayTotal * 100) : 0)}%` }}
                       ></div>
                     </div>
-                    {cat.limit && cat.amount > cat.limit && (
+                    {cat.limit && cat.amount > cat.limit && statsType === 'expense' && (
                        <p className="text-[9px] text-error font-black uppercase tracking-widest flex items-center gap-1 italic">
                          <AlertCircle size={10} /> Quá ngưỡng { formatCurrency(cat.amount - cat.limit) }
+                       </p>
+                    )}
+                    {cat.limit && cat.amount >= cat.limit && statsType === 'income' && (
+                       <p className="text-[9px] text-green-600 font-black uppercase tracking-widest flex items-center gap-1 italic">
+                         <span className="material-symbols-outlined text-[12px]">check_circle</span> Đã đạt mục tiêu
                        </p>
                     )}
                   </div>
@@ -288,7 +324,7 @@ const Stats: React.FC = () => {
 
       {/* Modal */}
       <CategoryDetailModal
-        category={selectedCategory}
+        category={selectedModalCategory}
         transactions={transactions || []}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
