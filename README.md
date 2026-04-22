@@ -6,15 +6,15 @@ Pocket App là một ứng dụng web tiến tiến (Progressive Web App - PWA) 
 
 | Thành phần | Công nghệ | Mô tả |
 | :--- | :--- | :--- |
-| **Core** | React 18+ (Vite) | Hiệu suất cao, HMR cực nhanh. |
-| **Styling** | Tailwind CSS | Mobile-first breakpoints, Premium aesthetics. |
-| **Routing** | React Router v6 | Cấu trúc route phân cấp, Protected Routes, Lazy Loading. |
+| **Core** | React 19 (Vite 7) | Hiệu suất cao, hỗ trợ tốt nhất cho Concurrent features. |
+| **Backend** | Supabase | Database (PostgreSQL), Auth, Realtime & Edge Functions. |
+| **Styling** | Tailwind CSS v3 | Mobile-first breakpoints, Premium aesthetics. |
+| **Routing** | React Router v7 | Định tuyến linh hoạt, hỗ trợ tốt cho PWA và SSR. |
 | **Server State** | TanStack Query v5 | Quản lý cache API, Background refetching, Offline-first. |
 | **Client State** | Zustand | UI state & Auth persistence (LocalStorage). |
 | **Forms** | React Hook Form + Zod | Hiệu suất cao, Validation chặt chẽ, Hỗ trợ TypeScript. |
-| **HTTP Client** | Axios | Instance-based, Interceptors (Auth Token & 401 handling). |
 | **PWA** | vite-plugin-pwa | Service Worker (NetworkFirst), Full Manifest, Offline Support. |
-| **Utilities** | Lucide React, clsx | Icons hiện đại & dynamic class management. |
+| **Utilities** | Lucide & Material Symbols | Icons hiện đại & dynamic class management. |
 
 ---
 
