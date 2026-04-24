@@ -25,6 +25,19 @@ const BudgetPlanner = lazy(() => import('@/features/budget/pages/BudgetPlanner')
 const BudgetHistory = lazy(() => import('@/features/budget/pages/BudgetHistory'))
 const BudgetHistoryDetail = lazy(() => import('@/features/budget/pages/BudgetHistoryDetail'))
 const BalanceHistory = lazy(() => import('@/features/accounts/pages/BalanceHistory'))
+const ReloDashboard = lazy(() => import('@/apps/relo/pages/Dashboard'))
+const ReloLayout = lazy(() => import('@/apps/relo/layouts/ReloLayout'))
+const ReloContacts = lazy(() => import('@/apps/relo/pages/Contacts'))
+const ReloAnniversaries = lazy(() => import('@/apps/relo/pages/Anniversaries'))
+const ReloAppointments = lazy(() => import('@/apps/relo/pages/Appointments'))
+const ReloPreferences = lazy(() => import('@/apps/relo/pages/Preferences'))
+const ReloSettingsPage = lazy(() => import('@/apps/relo/pages/ReloSettings'))
+const ReloCreateAnniversary = lazy(() => import('@/apps/relo/pages/CreateAnniversary'))
+const ReloEditAnniversary = lazy(() => import('@/apps/relo/pages/EditAnniversary'))
+const ReloCreateEvent = lazy(() => import('@/apps/relo/pages/CreateEvent'))
+const ReloEditEvent = lazy(() => import('@/apps/relo/pages/EditEvent'))
+const ReloCreatePreference = lazy(() => import('@/apps/relo/pages/CreatePreference'))
+const ReloEditPreference = lazy(() => import('@/apps/relo/pages/EditPreference'))
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center bg-surface dark:bg-background">
@@ -206,6 +219,30 @@ const router = createBrowserRouter([
           </Suspense>
         )
       }
+    ]
+  },
+  {
+    path: '/relo',
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingScreen />}>
+          <ReloLayout />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Suspense fallback={<LoadingScreen />}><ReloDashboard /></Suspense> },
+      { path: 'contacts', element: <Suspense fallback={<LoadingScreen />}><ReloContacts /></Suspense> },
+      { path: 'anniversaries', element: <Suspense fallback={<LoadingScreen />}><ReloAnniversaries /></Suspense> },
+      { path: 'anniversaries/create', element: <Suspense fallback={<LoadingScreen />}><ReloCreateAnniversary /></Suspense> },
+      { path: 'anniversaries/edit/:id', element: <Suspense fallback={<LoadingScreen />}><ReloEditAnniversary /></Suspense> },
+      { path: 'appointments', element: <Suspense fallback={<LoadingScreen />}><ReloAppointments /></Suspense> },
+      { path: 'events/create', element: <Suspense fallback={<LoadingScreen />}><ReloCreateEvent /></Suspense> },
+      { path: 'events/edit/:id', element: <Suspense fallback={<LoadingScreen />}><ReloEditEvent /></Suspense> },
+      { path: 'preferences', element: <Suspense fallback={<LoadingScreen />}><ReloPreferences /></Suspense> },
+      { path: 'preferences/create', element: <Suspense fallback={<LoadingScreen />}><ReloCreatePreference /></Suspense> },
+      { path: 'preferences/edit/:id', element: <Suspense fallback={<LoadingScreen />}><ReloEditPreference /></Suspense> },
+      { path: 'settings', element: <Suspense fallback={<LoadingScreen />}><ReloSettingsPage /></Suspense> },
     ]
   },
   {

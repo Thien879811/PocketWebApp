@@ -8,7 +8,16 @@ import {
   Target,
   Moon,
   Sun,
-  TrendingUp
+  TrendingUp,
+  Home,
+  BookOpen,
+  BarChart3,
+  Wallet,
+  CalendarCheck,
+  Info,
+  ExternalLink,
+  ArrowLeft,
+  Heart
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -32,35 +41,47 @@ const Settings: React.FC = () => {
 
   const settingsGroups = [
     {
-      title: 'Preferences',
+      title: 'Liên kết nhanh',
+      icon: 'explore',
       items: [
-        { icon: LayoutGrid, label: 'Danh mục chi tiêu', path: '/settings/categories', color: 'bg-primary/10 text-primary' },
-        { icon: Target, label: 'Mục tiêu tích lũy', path: '/goals', color: 'bg-green-600/10 text-green-600' },
-        { icon: History, label: 'Lịch sử ngân sách', path: '/settings/budget-history', color: 'bg-secondary/10 text-secondary' },
-        { icon: TrendingUp, label: 'Biến động số dư', path: '/settings/balance-history', color: 'bg-primary/10 text-primary' },
+        { icon: Home, label: 'Trang chủ', path: '/', color: 'bg-blue-500/10 text-blue-500 dark:bg-blue-400/15 dark:text-blue-400', materialIcon: 'home' },
+        { icon: BookOpen, label: 'Sổ giao dịch', path: '/ledger', color: 'bg-indigo-500/10 text-indigo-500 dark:bg-indigo-400/15 dark:text-indigo-400', materialIcon: 'receipt_long' },
+        { icon: BarChart3, label: 'Thống kê', path: '/stats', color: 'bg-violet-500/10 text-violet-500 dark:bg-violet-400/15 dark:text-violet-400', materialIcon: 'insights' },
+        { icon: Wallet, label: 'Ví tiền', path: '/wallet', color: 'bg-emerald-500/10 text-emerald-500 dark:bg-emerald-400/15 dark:text-emerald-400', materialIcon: 'account_balance_wallet' },
+        { icon: CalendarCheck, label: 'Kế hoạch chi tiêu', path: '/budget', color: 'bg-amber-500/10 text-amber-500 dark:bg-amber-400/15 dark:text-amber-400', materialIcon: 'savings' },
+      ]
+    },
+    {
+      title: 'Tùy chỉnh',
+      icon: 'tune',
+      items: [
+        { icon: LayoutGrid, label: 'Danh mục chi tiêu', path: '/settings/categories', color: 'bg-primary/10 text-primary', materialIcon: 'category' },
+        { icon: Target, label: 'Mục tiêu tích lũy', path: '/goals', color: 'bg-green-600/10 text-green-600', materialIcon: 'flag' },
+        { icon: History, label: 'Lịch sử ngân sách', path: '/settings/budget-history', color: 'bg-secondary/10 text-secondary', materialIcon: 'history' },
+        { icon: TrendingUp, label: 'Biến động số dư', path: '/settings/balance-history', color: 'bg-primary/10 text-primary', materialIcon: 'trending_up' },
         { 
           icon: isDarkMode ? Sun : Moon, 
-          label: isDarkMode ? 'Light Mode' : 'Dark Mode', 
+          label: isDarkMode ? 'Chế độ sáng' : 'Chế độ tối', 
           onClick: toggleTheme, 
-          color: isDarkMode ? 'bg-amber-400/10 text-amber-600' : 'bg-slate-700/10 text-slate-800 dark:text-slate-200' 
+          color: isDarkMode ? 'bg-amber-400/10 text-amber-500' : 'bg-slate-700/10 text-slate-800 dark:text-slate-200',
+          materialIcon: isDarkMode ? 'light_mode' : 'dark_mode'
         },
       ]
     },
-    // {
-    //   title: 'Security & Integrations',
-    //   items: [
-    //     { icon: ShieldCheck, label: 'Privacy & Safety', path: '#', color: 'bg-primary/10 text-primary' },
-    //     { icon: Zap, label: 'Connected Apps', path: '#', color: 'bg-secondary/10 text-secondary' },
-    //     { icon: Sparkles, label: 'AI Assistant', path: '/settings/ai', color: 'bg-amber-600/10 text-amber-600' },
-    //   ]
-    // },
-    // {
-    //   title: 'About',
-    //   items: [
-    //     { icon: HelpCircle, label: 'Help Center', path: '#', color: 'bg-primary/10 text-primary' },
-    //     { icon: Heart, label: 'Support Us', path: '#', color: 'bg-error/10 text-error' },
-    //   ]
-    // }
+    {
+      title: 'Ứng dụng mở rộng',
+      icon: 'apps',
+      items: [
+        { icon: Heart, label: 'Relo', path: '/relo', color: 'bg-rose-500/10 text-rose-500 dark:bg-rose-400/15 dark:text-rose-400', materialIcon: 'diversity_1' },
+      ]
+    },
+    {
+      title: 'Hệ thống',
+      icon: 'settings',
+      items: [
+        { icon: Info, label: 'Về PocketWebApp', path: '/', color: 'bg-cyan-500/10 text-cyan-500 dark:bg-cyan-400/15 dark:text-cyan-400', materialIcon: 'info', isAbout: true },
+      ]
+    }
   ]
 
   return (
@@ -95,7 +116,10 @@ const Settings: React.FC = () => {
       <section className="space-y-10 px-2">
         {settingsGroups.map((group, gIdx) => (
           <div key={gIdx} className="space-y-4">
-            <h4 className="px-4 font-label text-[10px] uppercase font-black tracking-[0.2em] text-on-surface-variant opacity-40">{group.title}</h4>
+            <div className="px-4 flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[16px] text-on-surface-variant opacity-40">{group.icon}</span>
+              <h4 className="font-label text-[10px] uppercase font-black tracking-[0.2em] text-on-surface-variant opacity-40">{group.title}</h4>
+            </div>
             <div className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-outline-variant/10 shadow-sm dark:shadow-dark">
               {group.items.map((item, iIdx) => (
                 <button
@@ -103,22 +127,40 @@ const Settings: React.FC = () => {
                   onClick={() => {
                     if ((item as any).onClick) {
                       (item as any).onClick();
+                    } else if ((item as any).isAbout) {
+                      navigate('/');
                     } else if (item.path && item.path !== '#') {
                       navigate(item.path);
                     }
                   }}
                   className={cn(
-                    "w-full flex items-center justify-between p-6 active:bg-primary/5 transition-all group border-b border-outline-variant/10 last:border-0",
+                    "w-full flex items-center justify-between p-6 active:bg-primary/5 transition-all group/item border-b border-outline-variant/10 last:border-0 hover:bg-surface-container-low/50",
                   )}
                 >
                   <div className="flex items-center gap-5">
-                    <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110", item.color)}>
-                      <item.icon size={26} strokeWidth={2.5} className="dark:glow" />
+                    <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center transition-all group-hover/item:scale-110 group-hover/item:shadow-lg", item.color)}>
+                      <span className="material-symbols-outlined text-[26px]" style={{ fontVariationSettings: "'wght' 600" }}>
+                        {(item as any).materialIcon || 'link'}
+                      </span>
                     </div>
-                    <span className="font-headline font-black text-lg text-on-surface text-left italic">{item.label}</span>
+                    <div className="text-left">
+                      <span className="font-headline font-black text-lg text-on-surface italic block leading-tight">{item.label}</span>
+                      {(item as any).isAbout && (
+                        <span className="font-label text-[10px] text-on-surface-variant opacity-50 uppercase tracking-wider flex items-center gap-1 mt-1">
+                          <ArrowLeft size={10} strokeWidth={3} />
+                          Chuyển về trang chủ
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <ChevronRight className="text-outline-variant group-hover:translate-x-1 transition-transform" />
+                    {(item as any).isAbout ? (
+                      <div className="w-8 h-8 rounded-full bg-cyan-500/10 dark:bg-cyan-400/15 flex items-center justify-center">
+                        <ExternalLink size={14} className="text-cyan-500 dark:text-cyan-400" />
+                      </div>
+                    ) : (
+                      <ChevronRight className="text-outline-variant group-hover/item:translate-x-1 transition-transform" />
+                    )}
                   </div>
                 </button>
               ))}
@@ -138,7 +180,7 @@ const Settings: React.FC = () => {
            
            <div className="text-center space-y-2 opacity-30 pb-10">
               <p className="font-headline font-black italic text-lg text-primary">PocketFlow PWA</p>
-              <p className="font-label text-[10px] font-black uppercase tracking-widest">Version 1.0.4 (Build 2026)</p>
+              <p className="font-label text-[10px] font-black uppercase tracking-widest">Version 1.0.5 (Build 2026)</p>
            </div>
         </div>
       </section>
