@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Heart, Calendar, Gift, ChevronRight, Loader2 } from 'lucide-react'
 import { useAuthStore } from '@/store/useAuthStore'
-import { useReloAnniversaries, useReloAppointments, daysUntilAnniversary } from '../features/useReloData'
+import { useReloAnniversaries, useReloAppointments, useReloPreferences, daysUntilAnniversary } from '../features/useReloData'
 
 const getAvatarUrl = (name: string) =>
   `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e2dfff&color=3525cd&bold=true&size=128`
@@ -14,13 +14,14 @@ const Dashboard: React.FC = () => {
 
   const { data: anniversaries, isLoading: loadingAnni } = useReloAnniversaries()
   const { data: appointments, isLoading: loadingAppt } = useReloAppointments()
+  const { data: preferences, isLoading: loadingPref } = useReloPreferences()
 
   const nextAnniversary = anniversaries
     ?.filter((a) => daysUntilAnniversary(a.anniversary_date) <= 30)
     .sort((a, b) => daysUntilAnniversary(a.anniversary_date) - daysUntilAnniversary(b.anniversary_date))[0]
 
   const upcomingAppts = appointments?.filter((a) => a.status === 'upcoming').slice(0, 3) || []
-  const isLoading = loadingAnni || loadingAppt
+  const isLoading = loadingAnni || loadingAppt || loadingPref
 
   return (
     <div className="px-4 py-6 space-y-6">
@@ -95,7 +96,7 @@ const Dashboard: React.FC = () => {
         {[
           { label: 'Kỷ niệm', count: anniversaries?.length || 0, icon: Heart, path: '/relo/anniversaries' },
           { label: 'Lịch hẹn', count: upcomingAppts.length, icon: Calendar, path: '/relo/appointments' },
-          { label: 'Sở thích', count: 0, icon: Gift, path: '/relo/preferences' },
+          { label: 'Sở thích', count: preferences?.length || 0, icon: Gift, path: '/relo/preferences' },
         ].map((stat, i) => (
           <button
             key={i}
@@ -204,6 +205,40 @@ const Dashboard: React.FC = () => {
                 </div>
               )
             })}
+          </div>
+        </section>
+      )}
+
+      {/* ── PREFERENCES SECTION ── */}
+      {preferences && preferences.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold text-on-surface">Sở thích mới thêm</h2>
+            <button
+              onClick={() => navigate('/relo/preferences')}
+              className="text-xs font-medium text-primary px-3 py-1 !bg-primary-container/50 dark:!bg-primary/10 rounded-full hover:!bg-primary-container dark:hover:!bg-primary/20 transition-colors !border-0"
+            >
+              Xem tất cả
+            </button>
+          </div>
+          <div className="space-y-3">
+            {preferences.slice(0, 3).map((pref) => (
+              <div
+                key={pref.id}
+                className="bg-surface-container-lowest dark:bg-surface-container p-4 rounded-[16px] border border-outline-variant/20 dark:border-outline-variant/10 shadow-sm dark:shadow-dark flex flex-col gap-2 relative cursor-pointer active:scale-[0.98] transition-transform"
+                onClick={() => navigate('/relo/preferences')}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0 pr-8">
+                    <p className="text-sm font-semibold text-on-surface leading-tight truncate">{pref.item}</p>
+                    {pref.relo_contacts?.name && <p className="text-xs text-on-surface-variant font-medium mt-1">Dành cho: <span className="text-primary dark:text-primary-container">{pref.relo_contacts.name}</span></p>}
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-tertiary-container dark:bg-tertiary/15 flex items-center justify-center flex-shrink-0">
+                    <Gift size={14} className="text-tertiary" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       )}

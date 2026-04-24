@@ -38,6 +38,7 @@ const ReloCreateEvent = lazy(() => import('@/apps/relo/pages/CreateEvent'))
 const ReloEditEvent = lazy(() => import('@/apps/relo/pages/EditEvent'))
 const ReloCreatePreference = lazy(() => import('@/apps/relo/pages/CreatePreference'))
 const ReloEditPreference = lazy(() => import('@/apps/relo/pages/EditPreference'))
+const ReloEditContact = lazy(() => import('@/apps/relo/pages/EditContact'))
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center bg-surface dark:bg-background">
@@ -46,7 +47,7 @@ const LoadingScreen = () => (
 )
 
 // 🗺️ ROUTER DEFINITION
-const router = createBrowserRouter([
+export const router = createBrowserRouter([
   {
     path: '/login',
     element: (
@@ -233,6 +234,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Suspense fallback={<LoadingScreen />}><ReloDashboard /></Suspense> },
       { path: 'contacts', element: <Suspense fallback={<LoadingScreen />}><ReloContacts /></Suspense> },
+      { path: 'contacts/:id/edit', element: <Suspense fallback={<LoadingScreen />}><ReloEditContact /></Suspense> },
       { path: 'anniversaries', element: <Suspense fallback={<LoadingScreen />}><ReloAnniversaries /></Suspense> },
       { path: 'anniversaries/create', element: <Suspense fallback={<LoadingScreen />}><ReloCreateAnniversary /></Suspense> },
       { path: 'anniversaries/edit/:id', element: <Suspense fallback={<LoadingScreen />}><ReloEditAnniversary /></Suspense> },

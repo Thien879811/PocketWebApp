@@ -18,6 +18,8 @@ const hideNavPaths = [
   '/relo/events/edit/',
   '/relo/preferences/create',
   '/relo/preferences/edit/',
+  '/relo/contacts/create',
+  '/relo/contacts/edit/',
 ]
 
 const ReloLayout: React.FC = () => {

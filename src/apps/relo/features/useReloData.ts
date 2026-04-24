@@ -46,6 +46,21 @@ export const useCreateReloContact = () => {
   })
 }
 
+export const useUpdateReloContact = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, ...values }: Partial<ReloContactFormValues> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('relo_contacts')
+        .update({ ...values, updated_at: new Date().toISOString() })
+        .eq('id', id).select().single()
+      if (error) throw new Error(error.message)
+      return data
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['relo_contacts'] }),
+  })
+}
+
 export const useDeleteReloContact = () => {
   const queryClient = useQueryClient()
   return useMutation({

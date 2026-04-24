@@ -8,125 +8,17 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Calendar,
-  Wallet,
-  ChevronDown,
-  ChevronUp,
+  Calendar
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../../categories/hooks/useCategories'
-import { useDailyBalanceLogs, type DailyBalanceLog } from '../hooks/useDailyBalanceLogs'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
-
-// ─── Wallet Balance Log Panel ─────────────────────────────────────────────────
-
-const ACCOUNT_TYPE_ICON: Record<string, string> = {
-  cash: 'payments',
-  bank: 'account_balance',
-  credit: 'credit_card',
-}
-
-interface DailyBalancePanelProps {
-  /** Logs for a single day, may be an empty array */
-  logs: DailyBalanceLog[]
-  /** The date string key used for header, e.g. "18 tháng 4, 2026" */
-  dateLabel: string
-}
-
-const DailyBalancePanel: React.FC<DailyBalancePanelProps> = ({ logs, dateLabel }) => {
-  const [open, setOpen] = useState(false)
-
-  if (!logs.length) return null
-
-  const totalBalance = logs.reduce((sum, l) => sum + (l.balance ?? 0), 0)
-
-  return (
-    <div className="mt-4 rounded-[2rem] overflow-hidden bg-surface-container-high/60 border border-outline-variant/10 dark:bg-surface-container/40 dark:border-white/5 transition-all">
-      {/* Collapsed header */}
-      <button
-        onClick={() => setOpen((p) => !p)}
-        className="w-full flex items-center justify-between px-5 py-3.5 group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Wallet size={15} className="text-primary" strokeWidth={2.5} />
-          </div>
-          <div className="text-left">
-            <p className="font-label font-black text-[10px] uppercase tracking-[0.18em] text-primary/70">Số dư ví • {dateLabel}</p>
-            <p className="font-headline font-black text-base text-on-surface leading-none mt-0.5 dark:glow">
-              {formatCurrency(totalBalance)}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="font-label text-[10px] font-black uppercase tracking-widest text-on-surface-variant/50">
-            {logs.length} ví
-          </span>
-          {open
-            ? <ChevronUp size={16} className="text-primary opacity-60" />
-            : <ChevronDown size={16} className="text-primary opacity-60" />}
-        </div>
-      </button>
-
-      {/* Expanded rows */}
-      {open && (
-        <div className="border-t border-outline-variant/10 dark:border-white/5">
-          {logs.map((log, i) => {
-            const acc = log.account
-            const icon = ACCOUNT_TYPE_ICON[acc?.type ?? 'cash']
-            const provider = acc?.provider ?? acc?.name ?? '—'
-            return (
-              <div
-                key={log.id}
-                className={cn(
-                  'flex items-center justify-between px-5 py-3 gap-4',
-                  i < logs.length - 1 && 'border-b border-outline-variant/10 dark:border-white/5',
-                )}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-surface-container-highest flex items-center justify-center flex-shrink-0">
-                    <span className="material-symbols-outlined text-base text-primary opacity-70">{icon}</span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-headline font-black text-sm text-on-surface truncate leading-none">
-                      {acc?.name ?? 'Ví'}
-                    </p>
-                    {provider !== acc?.name && (
-                      <p className="font-label text-[10px] text-on-surface-variant/50 uppercase tracking-tighter truncate">
-                        {provider}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <p className={cn(
-                  'font-headline font-black text-base italic tracking-tighter flex-shrink-0',
-                  (log.balance ?? 0) >= 0 ? 'text-secondary dark:glow' : 'text-error',
-                )}>
-                  {formatCurrency(log.balance ?? 0)}
-                </p>
-              </div>
-            )
-          })}
-          {/* Optional note */}
-          {logs[0]?.note && (
-            <div className="px-5 py-2.5 border-t border-outline-variant/10 dark:border-white/5 bg-primary/5">
-              <p className="font-label text-[10px] text-on-surface-variant/60 uppercase tracking-widest">Ghi chú</p>
-              <p className="font-label text-xs text-on-surface-variant mt-0.5">{logs[0].note}</p>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
 
 const Transactions: React.FC = () => {
   const navigate = useNavigate()
@@ -137,7 +29,6 @@ const Transactions: React.FC = () => {
   
   const { data: transactions, isLoading: txLoading } = useTransactions()
   const { data: categories } = useCategories()
-  const { data: balanceLogs } = useDailyBalanceLogs()
 
   const filteredTransactions = transactions?.filter(tx => {
     // Filter by Month & Year
@@ -156,33 +47,15 @@ const Transactions: React.FC = () => {
     return matchesSearch && matchesTypeFilter && matchesCategoryFilter
   })
 
-  // Group transactions by date (formatted vi-VN)
-  const groupedTransactions: Record<string, { items: any[]; isoDate: string; totalIncome: number; totalExpense: number }> = {}
+  // Group by date
+  const groupedTransactions: Record<string, any[]> = {}
   filteredTransactions?.forEach(tx => {
-    const dtObj = new Date(tx.date)
-    const isoDate = tx.date.slice(0, 10)          // 'YYYY-MM-DD'
-    const dateStr = dtObj.toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })
+    const dateStr = new Date(tx.date).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })
     if (!groupedTransactions[dateStr]) {
-      groupedTransactions[dateStr] = { items: [], isoDate, totalIncome: 0, totalExpense: 0 }
+      groupedTransactions[dateStr] = []
     }
-    groupedTransactions[dateStr].items.push(tx)
-    if (tx.type === 'income') {
-      groupedTransactions[dateStr].totalIncome += tx.amount
-    } else if (tx.type === 'expense') {
-      groupedTransactions[dateStr].totalExpense += tx.amount
-    }
+    groupedTransactions[dateStr].push(tx)
   })
-
-  // Balance logs indexed by iso date string
-  const logsByDate = React.useMemo<Record<string, DailyBalanceLog[]>>(() => {
-    const map: Record<string, DailyBalanceLog[]> = {}
-    balanceLogs?.forEach(log => {
-      const key = log.log_date   // 'YYYY-MM-DD'
-      if (!map[key]) map[key] = []
-      map[key].push(log)
-    })
-    return map
-  }, [balanceLogs])
 
   // Helper to get category info from ID
   const getCategoryName = (categoryId?: string, type?: string) => {
@@ -223,7 +96,7 @@ const Transactions: React.FC = () => {
             </button>
             <div>
                <p className="font-label text-[10px] uppercase font-black text-on-surface-variant opacity-60 tracking-widest hidden md:block">PocketFlow Ledger</p>
-               <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none italic dark:glow">Transactions</h2>
+               <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none">Transactions</h2>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -259,7 +132,7 @@ const Transactions: React.FC = () => {
                     {selectedDate.getFullYear()}
                   </span>
                </div>
-               <h3 className="font-headline font-black text-xl text-on-surface tracking-tight uppercase italic dark:glow">
+               <h3 className="font-headline font-black text-xl text-on-surface tracking-tight uppercase">
                  Tháng {selectedDate.getMonth() + 1}
                </h3>
             </div>
@@ -332,30 +205,13 @@ const Transactions: React.FC = () => {
                </button>
             </div>
          ) : (
-            Object.entries(groupedTransactions).map(([date, { items, isoDate, totalIncome, totalExpense }]) => (
-               <div key={date} className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                  {/* Date Header */}
-                  <div className="flex items-center justify-between px-4 mb-4">
-                     <div className="flex flex-col gap-1">
-                        <h3 className="font-headline font-black text-[10px] text-on-surface-variant opacity-40 uppercase tracking-[0.2em]">{date}</h3>
-                        <div className="flex items-center gap-2">
-                           {totalIncome > 0 && (
-                              <span className="font-headline font-black text-xs text-secondary italic tracking-tighter">
-                                +{formatCurrency(totalIncome)}
-                              </span>
-                           )}
-                           {totalIncome > 0 && totalExpense > 0 && <span className="w-1 h-1 rounded-full bg-outline-variant/30" />}
-                           {totalExpense > 0 && (
-                              <span className="font-headline font-black text-xs text-on-surface-variant opacity-70 italic tracking-tighter">
-                                -{formatCurrency(totalExpense)}
-                              </span>
-                           )}
-                        </div>
-                     </div>
+            Object.entries(groupedTransactions).map(([date, items]) => (
+               <div key={date} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="flex items-center justify-between px-4">
+                     <h3 className="font-headline font-black text-xs text-on-surface-variant opacity-60 uppercase tracking-[0.2em]">{date}</h3>
                      <div className="h-[1px] flex-1 bg-outline-variant/10 ml-6"></div>
                   </div>
                   
-                  {/* Transaction list */}
                   <div className="glass rounded-[3rem] overflow-hidden dark:shadow-glass-dark">
                      {items.map((tx) => (
                         <div 
@@ -379,22 +235,16 @@ const Transactions: React.FC = () => {
                               </div>
                            </div>
                            <div className="text-right">
-                               <p className={cn(
-                                  "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
-                                  tx.type === 'income' ? "text-secondary dark:glow" : tx.type === 'expense' ? "text-on-surface" : "text-amber-500"
-                               )}>
-                                  {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                               </p>
+                              <p className={cn(
+                                 "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
+                                 tx.type === 'income' ? "text-secondary" : tx.type === 'expense' ? "text-on-surface" : "text-amber-600"
+                              )}>
+                                 {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                              </p>
                            </div>
                         </div>
                      ))}
                   </div>
-
-                  {/* 📊 Daily Wallet Balance Log */}
-                  <DailyBalancePanel
-                    logs={logsByDate[isoDate] ?? []}
-                    dateLabel={date}
-                  />
                </div>
             ))
          )}

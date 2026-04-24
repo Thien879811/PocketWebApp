@@ -5,6 +5,7 @@ import { queryClient } from './lib/queryClient'
 import RootRouter from './routes'
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
+import { RealtimeNotifications } from './features/notifications/RealtimeNotifications'
 
 // 👋 PWA REGISTER SCRIPT
 import { registerSW } from 'virtual:pwa-register'
@@ -34,6 +35,7 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <RootRouter />
+      <RealtimeNotifications />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )

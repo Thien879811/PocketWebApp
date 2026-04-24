@@ -85,20 +85,28 @@ const Preferences: React.FC = () => {
               <h2 className="text-sm font-semibold text-on-surface">{cfg.label}</h2>
               <span className="text-xs text-outline ml-auto">{items.length} mục</span>
             </div>
-            <div className="bg-surface-container-lowest dark:bg-surface-container rounded-[16px] border border-outline-variant/20 dark:border-outline-variant/10 shadow-sm dark:shadow-dark divide-y divide-outline-variant/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {items.map((pref) => (
-                <div key={pref.id} className="px-4 py-3 flex items-center justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-on-surface truncate">{pref.item}</p>
-                    {pref.relo_contacts?.name && <p className="text-xs text-on-surface-variant mt-0.5">— {pref.relo_contacts.name}</p>}
-                    {pref.notes && <p className="text-xs text-outline mt-0.5 truncate">{pref.notes}</p>}
+                <div key={pref.id} className="bg-surface-container-lowest dark:bg-surface-container rounded-[16px] border border-outline-variant/20 dark:border-outline-variant/10 shadow-sm dark:shadow-dark p-4 flex flex-col gap-3 relative">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0 pr-16">
+                      <p className="text-sm font-semibold text-on-surface leading-tight">{pref.item}</p>
+                      {pref.relo_contacts?.name && <p className="text-xs text-on-surface-variant font-medium mt-1">Dành cho: <span className="text-primary dark:text-primary-container">{pref.relo_contacts.name}</span></p>}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button onClick={() => navigate(`/relo/preferences/edit/${pref.id}`)} className="p-2 rounded-full hover:bg-primary-container/30 dark:hover:bg-primary/10 transition-colors !bg-transparent !border-0">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary opacity-60 hover:opacity-100 transition-opacity"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  
+                  {pref.notes && (
+                    <div className="bg-surface-container dark:bg-surface-container-low rounded-[10px] p-2.5">
+                      <p className="text-xs text-on-surface-variant italic leading-relaxed line-clamp-3">{pref.notes}</p>
+                    </div>
+                  )}
+
+                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-surface/50 dark:bg-surface-container-lowest/50 backdrop-blur-md rounded-full p-0.5 border border-outline-variant/10">
+                    <button onClick={() => navigate(`/relo/preferences/edit/${pref.id}`)} className="p-1.5 rounded-full hover:bg-primary-container/50 dark:hover:bg-primary/20 transition-colors !bg-transparent !border-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary opacity-70 hover:opacity-100 transition-opacity"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
-                    <button onClick={() => handleDelete(pref.id)} disabled={deletingId === pref.id} className="p-2 rounded-full hover:bg-error-container/30 dark:hover:bg-error/10 transition-colors !bg-transparent !border-0">
-                      {deletingId === pref.id ? <Loader2 size={14} className="animate-spin text-error" /> : <Trash2 size={14} className="text-error opacity-50 hover:opacity-100 transition-opacity" />}
+                    <button onClick={() => handleDelete(pref.id)} disabled={deletingId === pref.id} className="p-1.5 rounded-full hover:bg-error-container/50 dark:hover:bg-error/20 transition-colors !bg-transparent !border-0">
+                      {deletingId === pref.id ? <Loader2 size={13} className="animate-spin text-error" /> : <Trash2 size={13} className="text-error opacity-60 hover:opacity-100 transition-opacity" />}
                     </button>
                   </div>
                 </div>
