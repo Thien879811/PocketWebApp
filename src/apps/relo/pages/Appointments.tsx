@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Calendar, MapPin, Trash2, Loader2 } from 'lucide-react'
-import { useReloAppointments, useDeleteReloAppointment } from '../features/useReloData'
+import { Plus, Calendar, MapPin, Trash2, Loader2, Check, Clock, X } from 'lucide-react'
+import { useReloAppointments, useDeleteReloAppointment, useUpdateReloAppointment } from '../features/useReloData'
 
 const statusConfig = {
   upcoming: { label: 'Sắp tới', cls: 'bg-primary-container text-primary dark:bg-primary/20' },
@@ -13,7 +13,9 @@ const Appointments: React.FC = () => {
   const navigate = useNavigate()
   const { data: appointments, isLoading } = useReloAppointments()
   const deleteMutation = useDeleteReloAppointment()
+  const updateMutation = useUpdateReloAppointment()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed' | 'cancelled'>('upcoming')
 
   const filtered = appointments?.filter((a) => a.status === activeTab) ?? []
@@ -23,6 +25,27 @@ const Appointments: React.FC = () => {
     setDeletingId(id)
     try { await deleteMutation.mutateAsync(id) }
     finally { setDeletingId(null) }
+  }
+
+  const handleUpdateStatus = async (id: string, newStatus: 'upcoming' | 'completed' | 'cancelled') => {
+    const appt = appointments?.find(a => a.id === id)
+    if (!appt || appt.status === newStatus) return
+    
+    setUpdatingId(id)
+    try {
+      await updateMutation.mutateAsync({
+        id,
+        status: newStatus,
+        title: appt.title,
+        description: appt.description,
+        location: appt.location,
+        appointment_date: appt.appointment_date,
+        appointment_time: appt.appointment_time,
+        contact_id: appt.contact_id,
+      })
+    } finally {
+      setUpdatingId(null)
+    }
   }
 
   return (
@@ -101,13 +124,50 @@ const Appointments: React.FC = () => {
                   )}
                 </div>
               </div>
-              <div className="border-t border-outline-variant/15 dark:border-outline-variant/10 px-4 py-2 flex items-center justify-between">
-                <button onClick={() => handleDelete(appt.id)} disabled={deletingId === appt.id} className="flex items-center gap-1.5 text-xs text-error font-medium opacity-60 hover:opacity-100 transition-opacity !bg-transparent !border-0">
-                  {deletingId === appt.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
-                  Xóa
-                </button>
-                <button onClick={() => navigate(`/relo/events/edit/${appt.id}`)} className="flex items-center gap-1.5 text-xs text-primary font-medium opacity-70 hover:opacity-100 transition-opacity !bg-transparent !border-0">
-                  ✏️ Chỉnh sửa
+              <div className="border-t border-outline-variant/15 dark:border-outline-variant/10 px-4 py-2 flex items-center justify-between gap-2">
+                <div className="flex gap-1 flex-1">
+                  <button 
+                    onClick={() => handleUpdateStatus(appt.id, 'upcoming')}
+                    disabled={updatingId === appt.id || appt.status === 'upcoming'}
+                    className={`flex-1 py-1.5 px-2 rounded-[8px] text-xs font-medium transition-all flex items-center justify-center gap-1 !border-0 ${
+                      appt.status === 'upcoming'
+                        ? '!bg-primary-container text-primary dark:!bg-primary/20'
+                        : '!bg-surface-container dark:!bg-surface-container-high text-on-surface-variant hover:!bg-primary/10'
+                    }`}
+                    title="Đánh dấu sắp tới"
+                  >
+                    {updatingId === appt.id ? <Loader2 size={12} className="animate-spin" /> : <Clock size={12} />}
+                    <span className="hidden sm:inline">Sắp tới</span>
+                  </button>
+                  <button 
+                    onClick={() => handleUpdateStatus(appt.id, 'completed')}
+                    disabled={updatingId === appt.id || appt.status === 'completed'}
+                    className={`flex-1 py-1.5 px-2 rounded-[8px] text-xs font-medium transition-all flex items-center justify-center gap-1 !border-0 ${
+                      appt.status === 'completed'
+                        ? '!bg-secondary-container text-secondary dark:!bg-secondary/20'
+                        : '!bg-surface-container dark:!bg-surface-container-high text-on-surface-variant hover:!bg-secondary/10'
+                    }`}
+                    title="Đánh dấu đã xong"
+                  >
+                    {updatingId === appt.id ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                    <span className="hidden sm:inline">Xong</span>
+                  </button>
+                  <button 
+                    onClick={() => handleUpdateStatus(appt.id, 'cancelled')}
+                    disabled={updatingId === appt.id || appt.status === 'cancelled'}
+                    className={`flex-1 py-1.5 px-2 rounded-[8px] text-xs font-medium transition-all flex items-center justify-center gap-1 !border-0 ${
+                      appt.status === 'cancelled'
+                        ? '!bg-surface-container-high text-error dark:!bg-error/20'
+                        : '!bg-surface-container dark:!bg-surface-container-high text-on-surface-variant hover:!bg-error/10'
+                    }`}
+                    title="Đánh dấu đã huỷ"
+                  >
+                    {updatingId === appt.id ? <Loader2 size={12} className="animate-spin" /> : <X size={12} />}
+                    <span className="hidden sm:inline">Huỷ</span>
+                  </button>
+                </div>
+                <button onClick={() => handleDelete(appt.id)} disabled={deletingId === appt.id} className="p-1.5 rounded-full hover:bg-error-container/30 dark:hover:bg-error/10 transition-colors !bg-transparent !border-0" title="Xóa">
+                  {deletingId === appt.id ? <Loader2 size={14} className="animate-spin text-error" /> : <Trash2 size={14} className="text-error opacity-40 hover:opacity-100 transition-opacity" />}
                 </button>
               </div>
             </div>
