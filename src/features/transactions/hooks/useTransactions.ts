@@ -113,12 +113,38 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
       weeklyTrends[week] += tx.amount
     })
 
+  // 4. Monthly Trends (for the entire year)
+  const monthlyTrends = Array(12).fill(0)
+  const monthlyIncomeTrends = Array(12).fill(0)
+  transactions
+    .filter(tx => (tx.type === 'expense' || tx.type === 'income') && new Date(tx.date).getFullYear() === currentYear)
+    .forEach(tx => {
+      const d = new Date(tx.date)
+      if (tx.type === 'expense') monthlyTrends[d.getMonth()] += tx.amount
+      else if (tx.type === 'income') monthlyIncomeTrends[d.getMonth()] += tx.amount
+    })
+
+  // 5. Daily Trends (for the selected month)
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
+  const dailyTrends = Array(daysInMonth).fill(0)
+  const dailyIncomeTrends = Array(daysInMonth).fill(0)
+  thisMonthTx
+    .forEach(tx => {
+      const d = new Date(tx.date)
+      if (tx.type === 'expense') dailyTrends[d.getDate() - 1] += tx.amount
+      else if (tx.type === 'income') dailyIncomeTrends[d.getDate() - 1] += tx.amount
+    })
+
   return {
     totalIncome,
     totalExpense,
     topCategories,
     topIncomeCategories,
     weeklyTrends,
+    monthlyTrends,
+    monthlyIncomeTrends,
+    dailyTrends,
+    dailyIncomeTrends,
     thisMonthCount: thisMonthTx.filter(tx => tx.type !== 'withdrawal').length
   }
 }

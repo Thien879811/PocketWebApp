@@ -60,15 +60,23 @@ const BalanceHistory: React.FC = () => {
               <p className="text-on-surface-variant font-black text-sm uppercase opacity-40 tracking-widest">Chưa có dữ liệu biến động</p>
             </div>
           ) : (
-            sortedDates.map((date) => (
-              <section key={date} className="space-y-4">
-                <div className="flex items-center gap-3 px-2">
-                  <div className="h-px flex-1 bg-outline-variant/20"></div>
-                  <h2 className="font-label text-[10px] uppercase font-black tracking-[0.2em] text-on-surface-variant opacity-40">
-                    {new Date(date).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' })}
-                  </h2>
-                  <div className="h-px flex-1 bg-outline-variant/20"></div>
-                </div>
+            sortedDates.map((date) => {
+              const dailyTotal = groupedHistory[date].reduce((sum: number, log: any) => sum + (log.balance || 0), 0)
+              
+              return (
+                <section key={date} className="space-y-4">
+                  <div className="flex items-center gap-3 px-2">
+                    <div className="h-px flex-1 bg-outline-variant/20"></div>
+                    <div className="flex flex-col items-center">
+                      <h2 className="font-label text-[10px] uppercase font-black tracking-[0.2em] text-on-surface-variant opacity-40">
+                        {new Date(date).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' })}
+                      </h2>
+                      <p className="text-[11px] font-black text-primary mt-1">
+                        Tổng: {formatCurrency(dailyTotal)}
+                      </p>
+                    </div>
+                    <div className="h-px flex-1 bg-outline-variant/20"></div>
+                  </div>
 
                 <div className="grid gap-3">
                   {groupedHistory[date].map((log: any) => (
@@ -109,8 +117,9 @@ const BalanceHistory: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </section>
-            ))
+                </section>
+              )
+            })
           )}
 
           <div className="bg-primary/5 p-6 rounded-[2.5rem] border border-primary/10 space-y-3">

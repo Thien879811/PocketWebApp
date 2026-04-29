@@ -14,11 +14,12 @@ import { useTransactions, getTransactionStats } from '../features/transactions/h
 import { useAccounts } from '../features/accounts/hooks/useAccounts'
 import { useCategories } from '../features/categories/hooks/useCategories'
 import { MonthSelector } from '@/components/MonthSelector'
-import { SpendingChart } from '@/components/SpendingChart'
+import { Chart } from 'primereact/chart';
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [chartView, setChartView] = useState<'daily' | 'monthly'>('daily')
   
   const { data: transactions, isLoading: txLoading } = useTransactions()
   const { data: accounts, isLoading: accLoading } = useAccounts()
@@ -50,9 +51,119 @@ const Home: React.FC = () => {
         expense={stats?.totalExpense || 0} 
       />
 
-      {/* 📈 Insight Chart */}
-      {stats && stats.totalExpense > 0 && (
-         <SpendingChart data={stats.weeklyTrends} totalSpent={stats.totalExpense} />
+      {/* 📈 Insight Chart - Line Chart for Daily/Monthly Trends */}
+      {stats && (
+        <section className="px-2">
+          <div className="bg-surface-container-lowest p-6 rounded-[2.5rem] border border-outline-variant/10 shadow-sm dark:shadow-dark">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <div className="flex bg-surface-container-high p-1 rounded-xl mb-3 w-fit">
+                  <button 
+                    onClick={() => setChartView('daily')}
+                    className={cn(
+                      "px-3 py-1 rounded-lg text-[10px] font-black uppercase transition-all",
+                      chartView === 'daily' ? "bg-primary text-on-primary shadow-lg" : "text-on-surface-variant opacity-60"
+                    )}
+                  >
+                    Ngày
+                  </button>
+                  <button 
+                    onClick={() => setChartView('monthly')}
+                    className={cn(
+                      "px-3 py-1 rounded-lg text-[10px] font-black uppercase transition-all",
+                      chartView === 'monthly' ? "bg-primary text-on-primary shadow-lg" : "text-on-surface-variant opacity-60"
+                    )}
+                  >
+                    Tháng
+                  </button>
+                </div>
+                <h3 className="font-headline font-black text-xl text-on-surface tracking-tighter italic">
+                  {chartView === 'daily' ? 'Dòng tiền hằng ngày' : 'Dòng tiền hằng tháng'}
+                </h3>
+              </div>
+              <div className="text-right">
+                <div className="flex flex-col items-end">
+                   <p className="font-headline font-black text-lg text-primary leading-none dark:glow">
+                    -{chartView === 'daily' 
+                      ? formatCurrency(stats.totalExpense)
+                      : formatCurrency(stats.monthlyTrends.reduce((a, b) => a + b, 0))
+                    }
+                  </p>
+                  <p className="font-headline font-black text-sm text-secondary leading-none mt-1 opacity-80">
+                    +{chartView === 'daily' 
+                      ? formatCurrency(stats.totalIncome)
+                      : formatCurrency(stats.monthlyIncomeTrends.reduce((a, b) => a + b, 0))
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="h-48">
+              <Chart 
+                type="line" 
+                data={{
+                  labels: chartView === 'daily' 
+                    ? Array.from({ length: stats.dailyTrends.length }, (_, i) => (i + 1).toString())
+                    : ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                  datasets: [
+                    {
+                      label: 'Chi tiêu',
+                      data: chartView === 'daily' ? stats.dailyTrends : stats.monthlyTrends,
+                      fill: false,
+                      borderColor: '#4f46e5',
+                      tension: 0.4,
+                      pointRadius: chartView === 'daily' ? 2 : 0,
+                      pointBackgroundColor: '#4f46e5',
+                      borderWidth: 3
+                    },
+                    {
+                      label: 'Thu nhập',
+                      data: chartView === 'daily' ? stats.dailyIncomeTrends : stats.monthlyIncomeTrends,
+                      fill: false,
+                      borderColor: '#10b981',
+                      tension: 0.4,
+                      pointRadius: chartView === 'daily' ? 2 : 0,
+                      pointBackgroundColor: '#10b981',
+                      borderWidth: 3
+                    }
+                  ]
+                }} 
+                options={{
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      enabled: true,
+                      mode: 'index',
+                      intersect: false,
+                      callbacks: {
+                        label: (context: any) => `${context.dataset.label}: ${formatCurrency(context.raw)}`
+                      }
+                    }
+                  },
+                  scales: {
+                    x: {
+                      display: true,
+                      grid: { display: false },
+                      ticks: {
+                        color: 'rgba(var(--on-surface-variant-rgb), 0.5)',
+                        font: { size: 9, weight: 'bold' },
+                        maxRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: chartView === 'daily' ? 10 : 12
+                      }
+                    },
+                    y: {
+                      display: false,
+                      grid: { display: false }
+                    }
+                  }
+                }} 
+              />
+            </div>
+          </div>
+        </section>
       )}
 
       {/* 🎯 Dashboard Shortcuts */}
