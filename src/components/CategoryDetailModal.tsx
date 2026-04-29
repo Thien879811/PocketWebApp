@@ -77,7 +77,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
       />
 
       {/* Modal */}
-      <div className="fixed bottom-0 left-0 right-0 max-h-[90vh] bg-surface rounded-t-[2.5rem] shadow-2xl z-50 overflow-y-auto flex flex-col">
+      <div className="fixed inset-0 bg-surface z-50 overflow-y-auto flex flex-col animate-in slide-in-from-bottom duration-500 mb-20">
         {/* Header */}
         <div className="sticky top-0 bg-surface border-b border-outline-variant/10 px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">

@@ -89,7 +89,7 @@ const Stats: React.FC = () => {
   const dailyLimit = daysLeft > 0 ? (remainingBudget / daysLeft) : 0
 
   return (
-    <div className="max-w-lg mx-auto md:max-w-none pt-4 pb-24 scrollbar-hide px-2">
+    <div className="w-full pt-4 pb-24 scrollbar-hide px-2 md:px-8 max-w-[1400px] mx-auto">
       
       {/* 🏔️ Header */}
       <section className="mb-6 flex justify-between items-center px-2">

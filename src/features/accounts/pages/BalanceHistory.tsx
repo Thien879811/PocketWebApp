@@ -36,7 +36,7 @@ const BalanceHistory: React.FC = () => {
       <div className="w-full max-w-2xl mx-auto bg-surface relative flex flex-col md:rounded-[3rem] md:shadow-2xl md:min-h-[800px] overflow-hidden">
         
         {/* 🏔️ Header */}
-        <header className="sticky top-0 w-full z-20 flex items-center gap-4 px-6 h-16 bg-surface/80 backdrop-blur-md border-b border-outline-variant/10">
+        <header className="sticky top-0 w-full z-20 flex items-center gap-4 h-16 bg-surface/80 backdrop-blur-md border-b border-outline-variant/10">
           <button
             onClick={() => navigate(-1)}
             className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors active:scale-95"
