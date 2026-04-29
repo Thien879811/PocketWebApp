@@ -14,7 +14,6 @@ import {
   BarChart3,
   Wallet,
   CalendarCheck,
-  Info,
   ExternalLink,
   ArrowLeft,
   Heart
@@ -73,13 +72,6 @@ const Settings: React.FC = () => {
       icon: 'apps',
       items: [
         { icon: Heart, label: 'Relo', path: '/relo', color: 'bg-rose-500/10 text-rose-500 dark:bg-rose-400/15 dark:text-rose-400', materialIcon: 'diversity_1' },
-      ]
-    },
-    {
-      title: 'Hệ thống',
-      icon: 'settings',
-      items: [
-        { icon: Info, label: 'Về PocketWebApp', path: '/', color: 'bg-cyan-500/10 text-cyan-500 dark:bg-cyan-400/15 dark:text-cyan-400', materialIcon: 'info', isAbout: true },
       ]
     }
   ]

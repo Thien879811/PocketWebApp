@@ -96,7 +96,7 @@ const Transactions: React.FC = () => {
             </button>
             <div>
                <p className="font-label text-[10px] uppercase font-black text-on-surface-variant opacity-60 tracking-widest hidden md:block">PocketFlow Ledger</p>
-               <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none">Transactions</h2>
+               <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none">Giao dịch</h2>
             </div>
           </div>
           <div className="flex items-center gap-2">
