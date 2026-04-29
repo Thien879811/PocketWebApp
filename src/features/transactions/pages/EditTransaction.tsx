@@ -24,7 +24,7 @@ const EditTransaction: React.FC = () => {
   const { mutate: deleteTransaction, isPending: deletePending } = useDeleteTransaction()
   const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { data: accounts } = useAccounts()
-  
+
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'withdrawal'>('expense')
   const [showAccountSelector, setShowAccountSelector] = useState(false)
 
@@ -48,7 +48,7 @@ const EditTransaction: React.FC = () => {
   const currentAmount = watch('amount')
   const selectedCategoryId = watch('category_id')
   const selectedAccountId = watch('account_id')
-  
+
   const selectedAccount = accounts?.find(a => a.id === selectedAccountId)
 
   const handleQuickAdd = (val: number) => {
@@ -89,10 +89,10 @@ const EditTransaction: React.FC = () => {
     <div className="min-h-screen bg-surface md:flex md:items-center md:justify-center md:p-8">
       {/* 📱 Main Canvas Container */}
       <div className="w-full max-w-[393px] md:max-w-xl bg-surface relative overflow-hidden flex flex-col md:rounded-[3rem] md:shadow-2xl md:h-[852px]">
-        
+
         {/* 🏔️ Header */}
         <header className="sticky top-0 w-full z-20 flex justify-between items-center px-6 h-16 bg-surface/80 backdrop-blur-md">
-          <button 
+          <button
             type="button"
             onClick={() => navigate(-1)}
             className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors active:scale-95 duration-200"
@@ -100,7 +100,7 @@ const EditTransaction: React.FC = () => {
             <X className="w-6 h-6 text-on-surface" />
           </button>
           <h1 className="font-headline font-bold text-xl tracking-tight text-primary">Chỉnh sửa giao dịch</h1>
-          <button 
+          <button
             type="button"
             onClick={handleDelete}
             className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-error/10 text-error transition-colors active:scale-95 duration-200"
@@ -112,29 +112,29 @@ const EditTransaction: React.FC = () => {
         {/* 🎨 Main Content scrolled area */}
         <main className="flex-1 overflow-y-auto px-4 pb-40 no-scrollbar">
           <form id="transaction-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 pt-4">
-            
+
             {/* 💰 Hero Amount Section */}
             <section className="text-center">
               <div className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/10">
                 <div className="flex flex-col items-center gap-2">
-                   <span className="font-label text-label-sm uppercase tracking-widest text-on-surface-variant">Số tiền</span>
-                   <div className="flex items-baseline gap-1">
-                     <input 
-                       {...register('amount', { valueAsNumber: true })}
-                       className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px]"
-                       placeholder="0"
-                       type="number"
-                       step="1000"
-                     />
-                     <span className="text-headline-sm font-headline text-on-surface-variant">đ</span>
-                   </div>
-                   {errors.amount && <p className="text-xs text-error font-bold">{errors.amount.message}</p>}
+                  <span className="font-label text-label-sm uppercase tracking-widest text-on-surface-variant">Số tiền</span>
+                  <div className="flex items-baseline gap-1">
+                    <input
+                      {...register('amount', { valueAsNumber: true })}
+                      className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px]"
+                      placeholder="0"
+                      type="number"
+                      step="1000"
+                    />
+                    <span className="text-headline-sm font-headline text-on-surface-variant">đ</span>
+                  </div>
+                  {errors.amount && <p className="text-xs text-error font-bold">{errors.amount.message}</p>}
                 </div>
 
                 {/* Quick Amount Chips */}
-                <div className="flex justify-center gap-2 mt-6 overflow-x-auto no-scrollbar pb-2">
-                  {[10, 50, 100, 500].map(val => (
-                    <button 
+                <div className="flex flex-wrap mt-6 justify-center gap-2 pb-2">
+                  {[1, 2, 5, 10, 20, 50, 100, 200, 500].map(val => (
+                    <button
                       key={val}
                       type="button"
                       onClick={() => handleQuickAdd(val * 1000)}
@@ -150,7 +150,7 @@ const EditTransaction: React.FC = () => {
             {/* 🔄 Type Toggle */}
             <section>
               <div className="bg-surface-container-high p-1.5 rounded-full flex relative shadow-inner">
-                <button 
+                <button
                   type="button"
                   onClick={() => {
                     setTransactionType('income');
@@ -163,7 +163,7 @@ const EditTransaction: React.FC = () => {
                 >
                   Thu nhập
                 </button>
-                <button 
+                <button
                   type="button"
                   onClick={() => {
                     setTransactionType('expense');
@@ -176,7 +176,7 @@ const EditTransaction: React.FC = () => {
                 >
                   Chi tiêu
                 </button>
-                <button 
+                <button
                   type="button"
                   onClick={() => {
                     setTransactionType('withdrawal');
@@ -205,20 +205,20 @@ const EditTransaction: React.FC = () => {
                 </div>
               ) : filteredCategories.length === 0 ? (
                 <div className="bg-surface-container-low rounded-3xl p-8 text-center space-y-3 cursor-pointer hover:bg-surface-container-high transition-colors" onClick={() => navigate('/settings/categories/add')}>
-                   <Inbox className="w-8 h-8 text-outline-variant mx-auto" />
-                   <p className="text-xs text-outline font-bold uppercase tracking-tight">Trống danh mục {transactionType === 'income' ? 'thu nhập' : 'chi tiêu'}</p>
-                   <p className="text-[10px] text-primary font-bold">Thêm danh mục mới</p>
+                  <Inbox className="w-8 h-8 text-outline-variant mx-auto" />
+                  <p className="text-xs text-outline font-bold uppercase tracking-tight">Trống danh mục {transactionType === 'income' ? 'thu nhập' : 'chi tiêu'}</p>
+                  <p className="text-[10px] text-primary font-bold">Thêm danh mục mới</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-4 gap-3">
                   {filteredCategories.map(cat => (
-                    <button 
+                    <button
                       key={cat.id}
                       type="button"
                       onClick={() => setValue('category_id', cat.id)}
                       className={cn(
                         "flex flex-col items-center gap-2 p-3.5 rounded-2xl transition-all duration-200 active:scale-[0.9]",
-                        selectedCategoryId === cat.id 
+                        selectedCategoryId === cat.id
                           ? cn("shadow-xl ring-2", transactionType === 'income' ? "bg-secondary/10 text-secondary ring-secondary/30" : "bg-primary-fixed text-on-primary-fixed ring-primary/30")
                           : "bg-surface-container-low text-on-surface-variant/80 hover:bg-surface-container-high"
                       )}
@@ -235,9 +235,9 @@ const EditTransaction: React.FC = () => {
 
             {/* 📝 Form Details */}
             <section className="flex flex-col gap-4 mb-20">
-              
+
               {/* Wallet Selector */}
-              <div 
+              <div
                 className={cn(
                   "flex items-center gap-4 p-5 rounded-3xl border transition-all cursor-pointer group shadow-sm",
                   selectedAccountId ? "bg-primary/5 border-primary/20" : "bg-surface-container-lowest border-outline-variant/10 hover:bg-surface-container-low"
@@ -261,7 +261,7 @@ const EditTransaction: React.FC = () => {
                 <Calendar className="w-5 h-5 text-primary" />
                 <div className="flex-1">
                   <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-0.5">Ngày tháng</label>
-                  <input 
+                  <input
                     {...register('date')}
                     type="date"
                     className="w-full bg-transparent border-none p-0 text-body-md font-bold focus:ring-0 text-on-surface"
@@ -275,7 +275,7 @@ const EditTransaction: React.FC = () => {
                   <div className="flex-1">
                     <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-0.5">Phí rút tiền ném vào ngân hàng</label>
                     <div className="flex items-center gap-1">
-                      <input 
+                      <input
                         {...register('fee', { valueAsNumber: true })}
                         type="number"
                         placeholder="0"
@@ -290,7 +290,7 @@ const EditTransaction: React.FC = () => {
               {/* Notes */}
               <div className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/10 shadow-sm">
                 <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-3">Ghi chú</label>
-                <textarea 
+                <textarea
                   {...register('note')}
                   className="    w-full 
                       bg-transparent 
@@ -301,7 +301,7 @@ const EditTransaction: React.FC = () => {
                       text-on-surface
                       placeholder:text-outline-variant/50 
                       font-medium 
-                      leading-relaxed" 
+                      leading-relaxed"
                   placeholder="Bạn đã chi tiêu việc gì?..."
                 ></textarea>
               </div>
@@ -311,7 +311,7 @@ const EditTransaction: React.FC = () => {
 
         {/* 🚀 Footer Action */}
         <footer className="absolute bottom-0 w-full p-6 pt-2 bg-surface/80 backdrop-blur-3xl z-[30] border-t border-white/20">
-          <button 
+          <button
             type="submit"
             form="transaction-form"
             disabled={updatePending || deletePending}
@@ -324,43 +324,43 @@ const EditTransaction: React.FC = () => {
         {/* 🏦 ACCOUNT SELECTOR DRAWER */}
         {showAccountSelector && (
           <div className="fixed inset-0 z-[100] flex flex-col md:absolute">
-             <div className="absolute inset-0 bg-on-background/60 backdrop-blur-md animate-in fade-in" onClick={() => setShowAccountSelector(false)} />
-             <div className="mt-auto bg-surface rounded-t-[3rem] p-8 pb-12 relative z-10 animate-in slide-in-from-bottom duration-300 max-h-[80%] overflow-y-auto">
-                <div className="w-12 h-1.5 bg-outline-variant/40 rounded-full mx-auto mb-8"></div>
-                <div className="flex items-center justify-between mb-8">
-                   <h3 className="font-headline font-black text-2xl text-on-surface">Chọn tài khoản</h3>
-                   <button onClick={() => setShowAccountSelector(false)} className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
-                     <X size={20} />
-                   </button>
-                </div>
-                <div className="grid gap-4">
-                  {accounts?.map(acc => (
-                    <button
-                      key={acc.id}
-                      type="button"
-                      onClick={() => {
-                        setValue('account_id', acc.id);
-                        setShowAccountSelector(false);
-                      }}
-                      className={cn(
-                        "flex items-center gap-5 p-5 rounded-3xl transition-all active:scale-[0.97] border",
-                        selectedAccountId === acc.id ? "bg-primary text-on-primary shadow-lg border-primary" : "bg-surface-container-lowest text-on-surface border-outline-variant/10 hover:bg-surface-container-low"
-                      )}
-                    >
-                      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", selectedAccountId === acc.id ? "bg-white/20" : "bg-surface-container text-primary shadow-inner")}>
-                         <Wallet size={24} />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <p className="font-headline font-bold text-lg leading-tight">{acc.name}</p>
-                        <p className={cn("font-label text-xs font-bold opacity-60", selectedAccountId === acc.id ? "text-white" : "text-outline")}>
-                          Số dư: {formatCurrency(acc.balance)}
-                        </p>
-                      </div>
-                      {selectedAccountId === acc.id && <Check size={18} strokeWidth={3} />}
-                    </button>
-                  ))}
-                </div>
-             </div>
+            <div className="absolute inset-0 bg-on-background/60 backdrop-blur-md animate-in fade-in" onClick={() => setShowAccountSelector(false)} />
+            <div className="mt-auto bg-surface rounded-t-[3rem] p-8 pb-12 relative z-10 animate-in slide-in-from-bottom duration-300 max-h-[80%] overflow-y-auto">
+              <div className="w-12 h-1.5 bg-outline-variant/40 rounded-full mx-auto mb-8"></div>
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-headline font-black text-2xl text-on-surface">Chọn tài khoản</h3>
+                <button onClick={() => setShowAccountSelector(false)} className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="grid gap-4">
+                {accounts?.map(acc => (
+                  <button
+                    key={acc.id}
+                    type="button"
+                    onClick={() => {
+                      setValue('account_id', acc.id);
+                      setShowAccountSelector(false);
+                    }}
+                    className={cn(
+                      "flex items-center gap-5 p-5 rounded-3xl transition-all active:scale-[0.97] border",
+                      selectedAccountId === acc.id ? "bg-primary text-on-primary shadow-lg border-primary" : "bg-surface-container-lowest text-on-surface border-outline-variant/10 hover:bg-surface-container-low"
+                    )}
+                  >
+                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", selectedAccountId === acc.id ? "bg-white/20" : "bg-surface-container text-primary shadow-inner")}>
+                      <Wallet size={24} />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-headline font-bold text-lg leading-tight">{acc.name}</p>
+                      <p className={cn("font-label text-xs font-bold opacity-60", selectedAccountId === acc.id ? "text-white" : "text-outline")}>
+                        Số dư: {formatCurrency(acc.balance)}
+                      </p>
+                    </div>
+                    {selectedAccountId === acc.id && <Check size={18} strokeWidth={3} />}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -134,8 +134,8 @@ const AddTransaction: React.FC = () => {
                 </div>
 
                 {/* Quick Amount Chips */}
-                <div className="flex justify-center gap-2 mt-6 overflow-x-auto no-scrollbar pb-2">
-                  {[10, 50, 100, 500].map(val => (
+                <div className="flex flex-wrap mt-6 justify-center gap-2 pb-2">
+                  {[1,2,5,10,20,50,100,200,500].map(val => (
                     <button 
                       key={val}
                       type="button"
