@@ -1,9 +1,11 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, History, TrendingUp, Wallet, Info } from 'lucide-react'
-import { useBalanceHistory } from '../hooks/useAccounts'
+import { useAccounts } from '../hooks/useAccounts'
+import { useDailyBalanceLogs, useUpsertDailyBalanceLogs } from '../../transactions/hooks/useDailyBalanceLogs'
 import { formatCurrency } from '@/utils/format'
 import { LoadingScreen } from '@/components/Loading'
+import { RefreshCw } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -13,19 +15,38 @@ function cn(...inputs: ClassValue[]) {
 
 const BalanceHistory: React.FC = () => {
   const navigate = useNavigate()
-  const { data: history, isLoading } = useBalanceHistory()
+  const { data: history, isLoading, refetch } = useDailyBalanceLogs()
+  const { data: accounts } = useAccounts()
+  const { mutate: upsertLogs, isPending: isSyncing } = useUpsertDailyBalanceLogs()
+
+  // Auto-snapshot today's balances on load
+  React.useEffect(() => {
+    if (accounts && accounts.length > 0) {
+      upsertLogs({ accounts })
+    }
+  }, [accounts, upsertLogs])
+
+  const handleSync = () => {
+    if (accounts && accounts.length > 0) {
+      upsertLogs({ accounts }, {
+        onSuccess: () => refetch()
+      })
+    }
+  }
 
   if (isLoading) {
     return <LoadingScreen message="Đang tải lịch sử số dư..." />
   }
 
-  // Group history by date
+  // Group history by date, keeping only the latest entry per account per day
   const groupedHistory = history?.reduce((acc: any, log: any) => {
     const date = log.log_date
     if (!acc[date]) {
-      acc[date] = []
+      acc[date] = {}
     }
-    acc[date].push(log)
+    // Since history is ordered by log_date DESC and created_at ASC, 
+    // we want to ensure we have the most up-to-date entry if duplicates somehow exist
+    acc[date][log.account_id] = log
     return acc
   }, {})
 
@@ -43,11 +64,24 @@ const BalanceHistory: React.FC = () => {
           >
             <ChevronLeft className="w-6 h-6 text-on-surface" />
           </button>
-          <div>
-            <p className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant font-bold opacity-60">Cài đặt</p>
-            <h1 className="font-headline font-bold text-xl tracking-tight text-on-surface flex items-center gap-2">
-              Biến động số dư
-            </h1>
+          <div className="flex-1 flex items-center justify-between pr-4">
+            <div>
+              <p className="font-label text-[10px] uppercase tracking-[0.15em] text-on-surface-variant font-bold opacity-60">Cài đặt</p>
+              <h1 className="font-headline font-bold text-xl tracking-tight text-on-surface flex items-center gap-2">
+                Biến động số dư
+              </h1>
+            </div>
+            <button
+              onClick={handleSync}
+              disabled={isSyncing}
+              className={cn(
+                "w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary transition-all active:scale-90",
+                isSyncing && "animate-spin opacity-50"
+              )}
+              title="Cập nhật số dư hôm nay"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </button>
           </div>
         </header>
 
@@ -61,7 +95,8 @@ const BalanceHistory: React.FC = () => {
             </div>
           ) : (
             sortedDates.map((date) => {
-              const dailyTotal = groupedHistory[date].reduce((sum: number, log: any) => sum + (log.balance || 0), 0)
+              const dailyLogs = Object.values(groupedHistory[date]) as any[]
+              const dailyTotal = dailyLogs.reduce((sum: number, log: any) => sum + (log.balance || 0), 0)
               
               return (
                 <section key={date} className="space-y-4">
@@ -79,7 +114,7 @@ const BalanceHistory: React.FC = () => {
                   </div>
 
                 <div className="grid gap-3">
-                  {groupedHistory[date].map((log: any) => (
+                  {dailyLogs.map((log: any) => (
                     <div 
                       key={log.id} 
                       className="bg-surface-container-lowest p-5 rounded-[2rem] border border-outline-variant/10 shadow-sm flex items-center justify-between group hover:bg-primary/5 transition-colors"
@@ -87,12 +122,12 @@ const BalanceHistory: React.FC = () => {
                       <div className="flex items-center gap-4">
                         <div className={cn(
                           "w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-current/10",
-                          log.accounts?.color || 'bg-primary'
+                          log.account?.color || 'bg-primary'
                         )}>
                           <Wallet size={20} strokeWidth={2.5} />
                         </div>
                         <div>
-                          <h4 className="font-headline font-bold text-on-surface">{log.accounts?.name || 'Tài khoản ẩn'}</h4>
+                          <h4 className="font-headline font-bold text-on-surface">{log.account?.name || 'Tài khoản ẩn'}</h4>
                           {log.note && (
                             <p className="text-[11px] font-bold text-on-surface-variant opacity-60 flex items-center gap-1 mt-0.5 capitalize">
                               <Info size={10} />

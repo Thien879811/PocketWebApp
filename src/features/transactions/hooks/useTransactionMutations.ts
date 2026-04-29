@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
  */
 async function snapshotDailyBalances(userId: string, logDate?: string) {
   try {
-    const date = logDate ?? new Date().toISOString().split('T')[0]
+    const date = (logDate?.split('T')[0]) ?? new Date().toISOString().split('T')[0]
 
     // Fetch latest balances
     const { data: accounts, error } = await supabase

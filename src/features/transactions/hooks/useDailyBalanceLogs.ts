@@ -62,7 +62,7 @@ export const useUpsertDailyBalanceLogs = () => {
     }) => {
       if (!user) throw new Error('User not authenticated')
 
-      const date = logDate ?? new Date().toISOString().split('T')[0]
+      const date = (logDate?.split('T')[0]) ?? new Date().toISOString().split('T')[0]
 
       const rows = accounts.map((acc) => ({
         user_id: user.id,
