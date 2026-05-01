@@ -1,10 +1,11 @@
 import { formatCurrency } from '@/utils/format'
 import { LoadingScreen } from '@/components/Loading'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, History, Calendar, Target, CheckCircle2, TrendingUp } from 'lucide-react'
 import { useBudgetHistory } from '../hooks/useBudget'
 import { useTransactions } from '../../transactions/hooks/useTransactions'
+import { useCategories } from '../../categories/hooks/useCategories'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -17,8 +18,29 @@ const BudgetHistory: React.FC = () => {
   
   const { data: plans, isLoading: plansLoading } = useBudgetHistory()
   const { data: transactions, isLoading: txLoading } = useTransactions()
+  const { data: categories, isLoading: catLoading } = useCategories()
 
-  if (plansLoading || txLoading) {
+  const filteredTransactions = useMemo(() => {
+    if (!transactions || !categories) return transactions
+    
+    const excludedIds = categories
+      .filter(c => {
+        const name = c.name.toLowerCase()
+        return name.includes('grap chi') || name.includes('grab chi')
+      })
+      .map(c => c.id)
+
+    if (excludedIds.length === 0) return transactions
+    return transactions.filter(tx => {
+      // Chỉ giữ lại type 'expense'
+      if (tx.type !== 'expense') return false
+
+      // Loại bỏ danh mục Grap chi
+      return !tx.category_id || !excludedIds.includes(tx.category_id)
+    })
+  }, [transactions, categories])
+
+  if (plansLoading || txLoading || catLoading) {
      return <LoadingScreen message="Đang tải lịch sử ngân sách..." />
   }
 
@@ -53,7 +75,7 @@ const BudgetHistory: React.FC = () => {
            ) : (
               <div className="space-y-4">
                  {plans.map((plan, index) => {
-                    const planTransactions = transactions?.filter(tx => 
+                    const planTransactions = filteredTransactions?.filter(tx => 
                        tx.type === 'expense' && 
                        tx.date >= plan.start_date && 
                        tx.date <= plan.end_date

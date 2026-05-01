@@ -1,6 +1,6 @@
 import { formatCurrency } from '@/utils/format'
 import { LoadingScreen } from '@/components/Loading'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Calendar, Info } from 'lucide-react'
 import { useBudgetHistory } from '../hooks/useBudget'
@@ -37,7 +37,27 @@ const BudgetHistoryDetail: React.FC = () => {
      )
   }
 
-  const planTransactions = transactions
+  const filteredTransactions = useMemo(() => {
+    if (!transactions || !categories) return transactions
+    
+    const excludedIds = categories
+      .filter(c => {
+        const name = c.name.toLowerCase()
+        return name.includes('grap chi') || name.includes('grab chi')
+      })
+      .map(c => c.id)
+
+    if (excludedIds.length === 0) return transactions
+    return transactions.filter(tx => {
+      // Chỉ giữ lại type 'expense'
+      if (tx.type !== 'expense') return false
+
+      // Loại bỏ danh mục Grap chi
+      return !tx.category_id || !excludedIds.includes(tx.category_id)
+    })
+  }, [transactions, categories])
+
+  const planTransactions = filteredTransactions
     ?.filter(tx => tx.date >= plan.start_date && tx.date <= plan.end_date)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) || []
 
