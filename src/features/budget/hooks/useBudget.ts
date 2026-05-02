@@ -127,20 +127,29 @@ export const calculateDaysBetween = (start: string, end: string) => {
   return diffDays + 1
 }
 
-export const getDailyBudgetStatus = (plan: BudgetPlan, transactions: any[], targetDate: string) => {
+export const getDailyBudgetStatus = (plan: BudgetPlan, transactions: any[], targetDate: string, categories: any[] = []) => {
   if (targetDate < plan.start_date || targetDate > plan.end_date) {
      return null;
   }
+
+  // Find excluded category IDs (Grab/Grap chi)
+  const excludedIds = categories
+    .filter(c => {
+      const name = c.name?.toLowerCase() || ''
+      return name.includes('grap chi') || name.includes('grab chi')
+    })
+    .map(c => c.id)
 
   let spentBeforeTarget = 0;
   let spentOnTargetDay = 0;
   let totalSpentSoFar = 0;
 
-  // Compute expenses within the plan timeframe
+  // Compute expenses within the plan timeframe, ignoring excluded categories
   const planTransactions = transactions.filter(tx => 
      tx.type === 'expense' && 
      tx.date >= plan.start_date && 
-     tx.date <= plan.end_date
+     tx.date <= plan.end_date &&
+     (!tx.category_id || !excludedIds.includes(tx.category_id))
   );
 
   planTransactions.forEach(exp => {

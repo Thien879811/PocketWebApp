@@ -63,28 +63,7 @@ const BudgetPlanner: React.FC = () => {
 
   const todayStr = new Date().toISOString().split('T')[0]
 
-  const filteredTransactions = useMemo(() => {
-    if (!transactions || !categories) return transactions
-    
-    // Tìm ID của các danh mục liên quan đến Grab/Grap chi để loại khỏi kế hoạch
-    const excludedIds = categories
-      .filter(c => {
-        const name = c.name.toLowerCase()
-        return name.includes('grap chi') || name.includes('grab chi')
-      })
-      .map(c => c.id)
-
-    if (excludedIds.length === 0) return transactions
-    return transactions.filter(tx => {
-      // Chỉ giữ lại type 'expense'
-      if (tx.type !== 'expense') return false
-      
-      // Loại bỏ danh mục Grap chi
-      return !tx.category_id || !excludedIds.includes(tx.category_id)
-    })
-  }, [transactions, categories])
-
-  const todayStatus = (currentPlan && filteredTransactions) ? getDailyBudgetStatus(currentPlan, filteredTransactions, todayStr) : null
+  const todayStatus = (currentPlan && transactions) ? getDailyBudgetStatus(currentPlan, transactions, todayStr, categories || []) : null
 
   const progressPercentage = currentPlan && todayStatus
     ? Math.min(100, Math.max(0, (todayStatus.totalSpent / currentPlan.total_budget) * 100))
