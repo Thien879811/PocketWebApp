@@ -1,6 +1,6 @@
 import { formatCurrency } from '@/utils/format'
 import { LoadingScreen } from '@/components/Loading'
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Target, Calendar, TrendingUp, AlertTriangle, CheckCircle2, TrendingDown, PiggyBank, Edit3, X, Loader2 } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
