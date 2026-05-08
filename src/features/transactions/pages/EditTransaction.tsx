@@ -9,6 +9,7 @@ import { useUpdateTransaction, useDeleteTransaction } from '../hooks/useTransact
 import { useTransaction } from '../hooks/useTransactions'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { useAccounts } from '../../accounts/hooks/useAccounts'
+import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -25,7 +26,7 @@ const EditTransaction: React.FC = () => {
   const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { data: accounts } = useAccounts()
 
-  const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'withdrawal' | 'borrow' | 'lend'>('expense')
+  const [transactionType, setTransactionType] = useState<TransactionType>('expense')
   const [showAccountSelector, setShowAccountSelector] = useState(false)
 
   const { handleSubmit, register, setValue, watch, formState: { errors } } = useForm<TransactionFormValues>({
@@ -154,95 +155,64 @@ const EditTransaction: React.FC = () => {
 
             {/* 🔄 Type Toggle */}
             <section>
-              <div className="bg-surface-container-high p-1.5 rounded-full flex relative shadow-inner">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTransactionType('income');
-                    setValue('type', 'income');
-                  }}
-                  className={cn(
-                    "flex-1 py-3 rounded-full font-label text-[10px] sm:text-xs font-black transition-all duration-300",
-                    transactionType === 'income' ? "bg-secondary text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
-                  )}
-                >
-                  Thu nhập
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTransactionType('expense');
-                    setValue('type', 'expense');
-                  }}
-                  className={cn(
-                    "flex-1 py-3 rounded-full font-label text-[10px] sm:text-xs font-black transition-all duration-300",
-                    transactionType === 'expense' ? "bg-primary text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
-                  )}
-                >
-                  Chi tiêu
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTransactionType('withdrawal');
-                    setValue('type', 'withdrawal');
-                    setValue('category_id', ''); // Clear category for withdrawal
-                  }}
-                  className={cn(
-                    "flex-1 py-3 rounded-full font-label text-[10px] sm:text-xs font-black transition-all duration-300",
-                    transactionType === 'withdrawal' ? "bg-amber-600 text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
-                  )}
-                >
-                  Rút tiền
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => {
-                    setTransactionType('borrow');
-                    setValue('type', 'borrow');
-                  }}
-                  className={cn(
-                    "flex-1 py-3 rounded-full font-label text-[10px] sm:text-xs font-black transition-all duration-300",
-                    (transactionType === 'borrow' || transactionType === 'lend') ? "bg-indigo-600 text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
-                  )}
-                >
-                  Mượn/Trả
-                </button>
+              <div className="bg-surface-container-high p-1.5 rounded-full flex relative shadow-inner overflow-x-auto no-scrollbar">
+                {(['income', 'expense', 'withdrawal', 'borrow'] as const).map(typeKey => {
+                  const meta = TRANSACTION_TYPES_METADATA[typeKey];
+                  const isActive = typeKey === 'borrow' 
+                    ? (transactionType === 'borrow' || transactionType === 'lend')
+                    : transactionType === typeKey;
+
+                  return (
+                    <button 
+                      key={typeKey}
+                      type="button"
+                      onClick={() => {
+                        const nextType = typeKey === 'borrow' ? 'borrow' : typeKey;
+                        setTransactionType(nextType);
+                        setValue('type', nextType);
+                        if (typeKey === 'withdrawal') setValue('category_id', '');
+                      }}
+                      className={cn(
+                        "flex-1 py-3 px-2 rounded-full font-label text-[10px] font-black transition-all duration-300 min-w-[70px]",
+                        isActive 
+                          ? `${meta.badge.split(' ')[0]} ${meta.color} shadow-lg scale-x-[1.02]` 
+                          : "text-on-surface-variant/60 hover:text-on-surface"
+                      )}
+                    >
+                      {typeKey === 'borrow' ? 'Mượn/Trả' : meta.label}
+                    </button>
+                  );
+                })}
               </div>
             </section>
 
             {/* ↕️ Lend/Borrow Sub-toggle */}
             {(transactionType === 'borrow' || transactionType === 'lend') && (
               <section className="animate-in fade-in slide-in-from-top-2">
-                <div className="bg-indigo-50 p-1 rounded-2xl flex border border-indigo-100">
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setTransactionType('borrow');
-                      setValue('type', 'borrow');
-                    }}
-                    className={cn(
-                      "flex-1 py-2.5 rounded-xl font-label text-[10px] font-black transition-all",
-                      transactionType === 'borrow' ? "bg-indigo-600 text-white shadow-sm" : "text-indigo-600/60 hover:text-indigo-600"
-                    )}
-                  >
-                    Vay / Thu nợ (+)
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setTransactionType('lend');
-                      setValue('type', 'lend');
-                    }}
-                    className={cn(
-                      "flex-1 py-2.5 rounded-xl font-label text-[10px] font-black transition-all",
-                      transactionType === 'lend' ? "bg-indigo-500 text-white shadow-sm" : "text-indigo-600/60 hover:text-indigo-600"
-                    )}
-                  >
-                    Cho vay / Trả nợ (-)
-                  </button>
+                <div className="bg-surface-container-high p-1 rounded-2xl flex border border-outline-variant/10">
+                  {(['borrow', 'lend'] as const).map(typeKey => {
+                    const meta = TRANSACTION_TYPES_METADATA[typeKey];
+                    return (
+                      <button 
+                        key={typeKey}
+                        type="button"
+                        onClick={() => {
+                          setTransactionType(typeKey);
+                          setValue('type', typeKey);
+                        }}
+                        className={cn(
+                          "flex-1 py-2.5 rounded-xl font-label text-[10px] font-black transition-all",
+                          transactionType === typeKey 
+                            ? `${meta.badge.split(' ')[0]} ${meta.color} shadow-sm` 
+                            : "text-on-surface-variant/60 hover:text-on-surface"
+                        )}
+                      >
+                        {meta.label} ({meta.prefix})
+                      </button>
+                    );
+                  })}
                 </div>
-                <p className="text-[9px] text-indigo-400 font-bold mt-2 px-2 italic text-center">
+                <p className="text-[9px] text-on-surface-variant/60 font-bold mt-2 px-2 italic text-center">
                   * Giao dịch này chỉ ảnh hưởng ví, không tính vào kế hoạch chi tiêu.
                 </p>
               </section>
