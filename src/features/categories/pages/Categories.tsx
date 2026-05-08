@@ -3,6 +3,7 @@ import { PlusCircle, Info, ChevronLeft, Inbox } from 'lucide-react'
 import { LoadingSpinner } from '@/components/Loading'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCategories } from '../hooks/useCategories'
+import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 
 const Categories: React.FC = () => {
   const navigate = useNavigate()
@@ -17,10 +18,9 @@ const Categories: React.FC = () => {
       <div>
         <span className="block font-headline font-bold text-lg text-on-surface truncate pr-2 group-hover:text-primary transition-colors">{name}</span>
         <span className={`inline-block px-3 py-1.5 mt-2 rounded-full text-xs font-bold uppercase tracking-wider glass transition-all group-hover:shadow-glow-primary dark:shadow-glass-dark ${
-          type === 'withdrawal' ? 'bg-amber-600/10 text-amber-600' :
-          type === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'
+          TRANSACTION_TYPES_METADATA[type as TransactionType]?.badge || 'bg-error/10 text-error'
         }`}>
-          {type === 'withdrawal' ? 'Rút tiền' : type}
+          {TRANSACTION_TYPES_METADATA[type as TransactionType]?.label || type}
         </span>
       </div>
     </div>

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Bell, ArrowDown, ArrowUp, Loader2 } from 'lucide-react'
+import { ChevronLeft, Bell, Loader2 } from 'lucide-react'
 import { categorySchema, type CategoryFormValues } from '../types/category.schema'
 import { useCreateCategory } from '../hooks/useCategories'
+import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -63,9 +64,9 @@ const AddCategory: React.FC = () => {
   const { mutate: createCategory, isPending } = useCreateCategory()
   const [selectedIcon, setSelectedIcon] = useState('home')
   const [selectedColor, setSelectedColor] = useState('bg-primary')
-  const [type, setType] = useState<'income' | 'expense' | 'withdrawal'>('expense')
+  const [type, setType] = useState<TransactionType>('expense')
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CategoryFormValues>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: '',
@@ -76,7 +77,6 @@ const AddCategory: React.FC = () => {
     }
   })
 
-  const categoryName = watch('name')
 
   const onSubmit = (data: CategoryFormValues) => {
     createCategory(data, {
@@ -131,40 +131,21 @@ const AddCategory: React.FC = () => {
           {/* Type Selector */}
           <section className="space-y-4">
             <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Transaction Type</span>
-            <div className="flex p-1.5 glass rounded-2xl gap-2 dark:shadow-glass-dark">
-              <button 
-                type="button"
-                onClick={() => setType('income')}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold smooth-transition active:scale-95 transform hover:scale-105",
-                  type === 'income' ? "glass dark:shadow-glow-primary text-secondary" : "bg-surface-container-highest text-on-surface-variant dark:hover:shadow-glass-dark"
-                )}
-              >
-                <ArrowDown className="w-4 h-4" />
-                <span>Income</span>
-              </button>
-              <button 
-                type="button"
-                onClick={() => setType('expense')}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold smooth-transition active:scale-95 transform hover:scale-105",
-                  type === 'expense' ? "glass dark:shadow-glow-primary text-error" : "bg-surface-container-highest text-on-surface-variant dark:hover:shadow-glass-dark"
-                )}
-              >
-                <ArrowUp className="w-4 h-4" />
-                <span>Expense</span>
-              </button>
-              <button 
-                type="button"
-                onClick={() => setType('withdrawal')}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold smooth-transition active:scale-95 transform hover:scale-105",
-                  type === 'withdrawal' ? "glass dark:shadow-glow-primary text-amber-600" : "bg-surface-container-highest text-on-surface-variant dark:hover:shadow-glass-dark"
-                )}
-              >
-                <ArrowUp className="w-4 h-4 opacity-0" />
-                <span>Withdrawal</span>
-              </button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 p-1.5 glass rounded-2xl gap-2 dark:shadow-glass-dark">
+              {(Object.entries(TRANSACTION_TYPES_METADATA) as [TransactionType, any][]).map(([key, meta]) => (
+                <button 
+                  key={key}
+                  type="button"
+                  onClick={() => setType(key)}
+                  className={cn(
+                    "flex items-center justify-center gap-2 py-3 px-2 rounded-xl font-bold smooth-transition active:scale-95 transform hover:scale-105",
+                    type === key ? "glass dark:shadow-glow-primary text-primary" : "bg-surface-container-highest text-on-surface-variant dark:hover:shadow-glass-dark"
+                  )}
+                >
+                  <span className="material-symbols-outlined text-base">{meta.icon}</span>
+                  <span className="text-[10px] sm:text-xs truncate">{meta.shortLabel}</span>
+                </button>
+              ))}
             </div>
           </section>
 
@@ -184,12 +165,10 @@ const AddCategory: React.FC = () => {
                     "aspect-square flex items-center justify-center rounded-2xl smooth-transition active:scale-90 transform hover:scale-110",
                     selectedIcon === icon 
                       ? "glass dark:shadow-glow-primary text-primary" 
-                      : "glass text-on-surface-variant dark:hover:shadow-glass-dark hover:bg-surface-container/50"
+                      : "bg-surface-container-highest text-on-surface-variant/60"
                   )}
                 >
-                  <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: selectedIcon === icon ? "'FILL' 1" : "'FILL' 0" }}>
-                    {icon}
-                  </span>
+                  <span className="material-symbols-outlined text-2xl">{icon}</span>
                 </button>
               ))}
             </div>
@@ -197,77 +176,53 @@ const AddCategory: React.FC = () => {
 
           {/* Color Section */}
           <section className="space-y-6">
-            <span className="font-label text-xs uppercase tracking-widest text-outline font-bold px-1">Theme Color</span>
-            <div className="flex flex-wrap gap-4 px-1">
+            <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Category Color</span>
+            <div className="grid grid-cols-5 gap-4">
               {COLORS.map(color => (
                 <button 
-                  key={color.class}
+                  key={color.name}
                   type="button"
                   onClick={() => setSelectedColor(color.class)}
                   className={cn(
-                    "w-10 h-10 rounded-full transition-transform hover:scale-110 active:scale-90",
+                    "aspect-square rounded-2xl border-4 transition-all duration-300 transform hover:scale-110 active:scale-90",
                     color.class,
-                    selectedColor === color.class ? "ring-4 ring-offset-2 ring-primary/30" : ""
+                    selectedColor === color.class ? "border-white shadow-xl scale-110" : "border-transparent opacity-80"
                   )}
-                ></button>
+                />
               ))}
             </div>
           </section>
 
-          {/* Monthly Limit Section */}
-          <section className={cn("space-y-4 smooth-transition duration-300", type === 'income' || type === 'withdrawal' ? "opacity-0 h-0 overflow-hidden" : "opacity-100")}>
-            <label className="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
-              Giới hạn tháng
-              <span className="text-[10px] glass text-secondary px-2 py-0.5 rounded-full uppercase tracking-widest font-black dark:shadow-glass-dark">Budgeting</span>
-            </label>
-            <div className="glass p-1.5 rounded-2xl relative group dark:shadow-glass-dark">
-              <span className="absolute left-6 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant group-focus-within:text-primary smooth-transition">
-                payments
-              </span>
+          {/* Limit Section (Optional) */}
+          <section className="space-y-4">
+            <div className="flex justify-between items-center px-1">
+              <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Monthly Limit</span>
+              <span className="text-[10px] text-on-surface-variant/60 italic font-medium">Optional</span>
+            </div>
+            <div className="glass rounded-2xl p-1.5 dark:shadow-glass-dark">
               <input 
                 {...register('limit', { valueAsNumber: true })}
-                className="w-full glass border-none rounded-xl pl-14 pr-6 py-4 text-lg font-body focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/50 font-black italic dark:shadow-glass-dark smooth-transition" 
-                placeholder="Đặt giới hạn (VNĐ)" 
+                className="w-full glass border-none rounded-xl px-6 py-4 text-lg font-headline font-bold focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/30 dark:shadow-glass-dark" 
+                placeholder="0.00" 
                 type="number"
-                step="10000"
               />
             </div>
-            <p className="text-[10px] text-on-surface-variant font-medium px-2 italic">Hệ thống sẽ cảnh báo khi bạn chi tiêu vượt ngưỡng này.</p>
-            {errors.limit && <p className="text-xs text-error font-bold px-2">{errors.limit.message}</p>}
           </section>
 
-          {/* Preview Card */}
-          <section className="pt-4">
-            <div className="glass rounded-3xl p-6 flex items-center justify-between glass-border dark:shadow-glass-dark">
-              <div className="flex items-center gap-4">
-                <div className={cn("w-14 h-14 glass rounded-2xl flex items-center justify-center text-primary transform hover:rotate-12 hover:scale-110 transition-all duration-300 dark:shadow-glass-dark", selectedColor)}>
-                  <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>{selectedIcon}</span>
-                </div>
-                <div>
-                  <p className="font-headline font-bold text-on-surface text-lg leading-tight">{categoryName || 'New Category'}</p>
-                  <p className="font-body text-xs text-on-surface-variant font-semibold tracking-wide uppercase opacity-70">
-                    {type === 'income' ? 'Revenue Stream' : type === 'expense' ? 'Expense Center' : 'Account Transfer'}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="font-headline font-black text-on-surface text-xl glow">¥0.00</p>
-              </div>
-            </div>
-          </section>
         </main>
 
-        {/* 🚀 Save Action */}
-        <footer className="absolute bottom-0 left-0 w-full p-6 glass/80 backdrop-blur-xl border-t border-white/20 z-50 dark:shadow-glass-dark">
+        {/* 🚀 Action Bar */}
+        <div className="absolute bottom-0 w-full p-6 bg-gradient-to-t from-surface via-surface to-transparent">
           <button 
-            type="button"
+            type="submit"
+            form="transaction-form"
             onClick={handleSubmit(onSubmit)}
             disabled={isPending}
-            className="w-full glass text-primary font-headline font-extra-bold text-lg py-5 rounded-2xl dark:shadow-glow-primary smooth-transition active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 transform hover:scale-102"
+            className="w-full h-16 bg-primary text-on-primary rounded-3xl font-headline font-black text-lg shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all transform hover:scale-102 dark:shadow-glow-primary"
           >
-            {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Save Category'}
+            {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Create Category'}
           </button>
-        </footer>
+        </div>
 
       </div>
     </div>

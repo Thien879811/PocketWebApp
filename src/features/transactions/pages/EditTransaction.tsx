@@ -77,7 +77,7 @@ const EditTransaction: React.FC = () => {
   // Filter categories by selected type
   const filteredCategories = categories?.filter(cat => {
     if (transactionType === 'borrow' || transactionType === 'lend') {
-      return cat.type === 'income' || cat.type === 'expense'
+      return cat.type === transactionType || cat.type === 'income' || cat.type === 'expense'
     }
     return cat.type === transactionType
   }) || []

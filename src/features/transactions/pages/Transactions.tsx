@@ -15,6 +15,7 @@ import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -58,18 +59,24 @@ const Transactions: React.FC = () => {
   })
 
   // Helper to get category info from ID
-  const getCategoryName = (categoryId?: string, type?: string) => {
-    if (type === 'withdrawal') return 'Rút tiền'
-    if (type === 'borrow') return 'Mượn / Thu nợ'
-    if (type === 'lend') return 'Cho mượn / Trả nợ'
-    return categories?.find(c => c.id === categoryId)?.name || 'Chưa phân loại'
+  const getCategoryName = (categoryId?: string, type?: TransactionType) => {
+    const cat = categories?.find(c => c.id === categoryId)
+    if (cat) return cat.name
+    
+    if (type) {
+      return TRANSACTION_TYPES_METADATA[type]?.label || 'Chưa phân loại'
+    }
+    return 'Chưa phân loại'
   }
 
-  const getCategoryIcon = (categoryId?: string, type?: string) => {
-    if (type === 'withdrawal') return 'payments'
-    if (type === 'borrow') return 'handshake'
-    if (type === 'lend') return 'volunteer_activism'
-    return categories?.find(c => c.id === categoryId)?.icon || 'help_outline'
+  const getCategoryIcon = (categoryId?: string, type?: TransactionType) => {
+    const cat = categories?.find(c => c.id === categoryId)
+    if (cat) return cat.icon
+
+    if (type) {
+      return TRANSACTION_TYPES_METADATA[type]?.icon || 'help_outline'
+    }
+    return 'help_outline'
   }
 
   const handlePrevMonth = () => {
@@ -234,16 +241,16 @@ const Transactions: React.FC = () => {
                                    {getCategoryName(tx.category_id, tx.type)}
                                  </p>
                                  <p className="font-label text-[10px] text-on-surface-variant font-black truncate w-40 opacity-50 uppercase tracking-tighter leading-none">
-                                    {tx.note || (tx.type === 'income' ? 'Thu nhập' : tx.type === 'expense' ? 'Chi tiêu' : 'Rút tiền mặt')}
+                                    {tx.note || TRANSACTION_TYPES_METADATA[tx.type as TransactionType]?.label || tx.type}
                                  </p>
                               </div>
                            </div>
                            <div className="text-right">
                               <p className={cn(
                                  "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
-                                 tx.type === 'income' || tx.type === 'borrow' ? "text-secondary" : tx.type === 'expense' ? "text-on-surface" : tx.type === 'withdrawal' ? "text-amber-600" : "text-indigo-600"
+                                 TRANSACTION_TYPES_METADATA[tx.type as TransactionType]?.color || "text-on-surface"
                               )}>
-                                 {tx.type === 'income' || tx.type === 'borrow' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                 {TRANSACTION_TYPES_METADATA[tx.type as TransactionType]?.prefix || '-'}{formatCurrency(tx.amount)}
                               </p>
                            </div>
                         </div>

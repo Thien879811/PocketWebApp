@@ -64,7 +64,8 @@ const AddTransaction: React.FC = () => {
   // Filter categories by selected type
   const filteredCategories = categories?.filter(cat => {
     if (transactionType === 'borrow' || transactionType === 'lend') {
-      return cat.type === 'income' || cat.type === 'expense' // Show both for lend/borrow for flexibility, or you can create a specific type
+      // Prioritize borrow/lend categories, but allow income/expense for backward compatibility or flexibility
+      return cat.type === transactionType || cat.type === 'income' || cat.type === 'expense'
     }
     return cat.type === transactionType
   }) || []

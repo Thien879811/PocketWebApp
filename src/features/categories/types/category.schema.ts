@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const categorySchema = z.object({
   name: z.string().min(1, 'Name is required').max(50),
   icon: z.string().min(1, 'Icon is required'),
-  type: z.enum(['income', 'expense', 'withdrawal']),
+  type: z.enum(['income', 'expense', 'withdrawal', 'borrow', 'lend']),
   color: z.string().optional(),
   limit: z.number()
     .or(z.nan())
@@ -14,13 +14,8 @@ export const categorySchema = z.object({
 
 export type CategoryFormValues = z.infer<typeof categorySchema>
 
-export interface Category {
+export interface Category extends CategoryFormValues {
   id: string
-  name: string
-  icon: string
-  type: 'income' | 'expense' | 'withdrawal'
-  color?: string
-  limit?: number | null
   user_id: string
   created_at: string
 }

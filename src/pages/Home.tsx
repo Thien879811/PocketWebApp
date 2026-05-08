@@ -15,6 +15,7 @@ import { useAccounts } from '../features/accounts/hooks/useAccounts'
 import { useCategories } from '../features/categories/hooks/useCategories'
 import { MonthSelector } from '@/components/MonthSelector'
 import { Chart } from 'primereact/chart';
+import { TRANSACTION_TYPES_METADATA, type TransactionType } from '../types/transaction.types'
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
@@ -292,40 +293,45 @@ const ActivitySection = ({ transactions, categories, selectedDate, onNavigate }:
           </div>
        ) : (
           <div className="bg-surface-container-lowest rounded-[3rem] overflow-hidden border border-outline-variant/10 shadow-xl dark:shadow-dark">
-              {filteredTransactions.slice(0, 5).map((tx: any) => (
-                <div 
-                  key={tx.id} 
-                  onClick={() => onNavigate(`/edit/${tx.id}`)}
-                  className="p-6 flex items-center justify-between group active:bg-primary/5 cursor-pointer transition-all duration-300 border-b border-outline-variant/10 last:border-0"
-                >
-                   <div className="flex items-center gap-5">
-                      <div className={cn(
-                        "w-14 h-14 rounded-2xl flex flex-shrink-0 items-center justify-center shadow-inner transition-all group-hover:scale-110 duration-500",
-                        categories?.find((c: any) => c.id === tx.category_id)?.color || "bg-surface-container-high"
-                      )}>
-                         <span className="material-symbols-outlined text-2xl text-white">
-                            {categories?.find((c: any) => c.id === tx.category_id)?.icon || 'payments'}
-                         </span>
-                      </div>
-                      <div>
-                         <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5 italic">
-                            {categories?.find((c: any) => c.id === tx.category_id)?.name || 'Unknown'}
-                         </p>
-                         <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-tighter opacity-50">
-                            {new Date(tx.date).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })} • {tx.type === 'income' ? 'Thu nhập' : 'Chi tiêu'}
-                         </p>
-                      </div>
-                   </div>
-                   <div className="text-right">
-                      <p className={cn(
-                         "font-headline font-black text-xl italic tracking-tighter",
-                         tx.type === 'income' ? "text-secondary dark:glow" : "text-on-surface"
-                      )}>
-                         {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                      </p>
-                   </div>
-                </div>
-             ))}
+              {filteredTransactions.slice(0, 5).map((tx: any) => {
+                const meta = TRANSACTION_TYPES_METADATA[tx.type as TransactionType];
+                const category = categories?.find((c: any) => c.id === tx.category_id);
+                
+                return (
+                  <div 
+                    key={tx.id} 
+                    onClick={() => onNavigate(`/edit/${tx.id}`)}
+                    className="p-6 flex items-center justify-between group active:bg-primary/5 cursor-pointer transition-all duration-300 border-b border-outline-variant/10 last:border-0"
+                  >
+                     <div className="flex items-center gap-5">
+                        <div className={cn(
+                          "w-14 h-14 rounded-2xl flex flex-shrink-0 items-center justify-center shadow-inner transition-all group-hover:scale-110 duration-500",
+                          category?.color || "bg-surface-container-high"
+                        )}>
+                           <span className="material-symbols-outlined text-2xl text-white">
+                              {category?.icon || meta?.icon || 'payments'}
+                           </span>
+                        </div>
+                        <div>
+                           <p className="font-headline font-black text-lg text-on-surface leading-none mb-1.5 italic">
+                              {category?.name || meta?.label || 'Unknown'}
+                           </p>
+                           <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-tighter opacity-50">
+                              {new Date(tx.date).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })} • {meta?.label || tx.type}
+                           </p>
+                        </div>
+                     </div>
+                     <div className="text-right">
+                        <p className={cn(
+                           "font-headline font-black text-xl italic tracking-tighter",
+                           meta?.color || "text-on-surface"
+                        )}>
+                           {meta?.prefix || '-'}{formatCurrency(tx.amount)}
+                        </p>
+                     </div>
+                  </div>
+                );
+              })}
           </div>
        )}
     </section>
