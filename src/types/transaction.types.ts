@@ -1,4 +1,4 @@
-export type TransactionType = 'income' | 'expense' | 'withdrawal' | 'borrow' | 'lend';
+export type TransactionType = 'income' | 'expense' | 'withdrawal' | 'borrow' | 'lend' | 'business';
 
 export interface TransactionTypeMetadata {
   label: string;
@@ -49,5 +49,13 @@ export const TRANSACTION_TYPES_METADATA: Record<TransactionType, TransactionType
     badge: 'bg-blue-600/10 text-blue-600',
     icon: 'volunteer_activism',
     prefix: '-'
+  },
+  business: {
+    label: 'Kinh doanh',
+    shortLabel: 'KD',
+    color: 'text-orange-600',
+    badge: 'bg-orange-600/10 text-orange-600',
+    icon: 'local_taxi',
+    prefix: '+'
   }
 };

@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const categorySchema = z.object({
   name: z.string().min(1, 'Name is required').max(50),
   icon: z.string().min(1, 'Icon is required'),
-  type: z.enum(['income', 'expense', 'withdrawal', 'borrow', 'lend']),
+  type: z.enum(['income', 'expense', 'withdrawal', 'borrow', 'lend', 'business']),
   color: z.string().optional(),
   limit: z.number()
     .or(z.nan())

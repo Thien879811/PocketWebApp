@@ -67,9 +67,20 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     .filter(tx => tx.type === 'expense')
     .reduce((acc, curr) => acc + curr.amount, 0)
 
+  const totalBorrow = thisMonthTx
+    .filter(tx => tx.type === 'borrow')
+    .reduce((acc, curr) => acc + curr.amount, 0)
+
+  const totalLend = thisMonthTx
+    .filter(tx => tx.type === 'lend')
+    .reduce((acc, curr) => acc + curr.amount, 0)
+
   // 2. Category Breakdowns (Separated by Type)
   const expenseMap: Record<string, { amount: number, count: number }> = {}
   const incomeMap: Record<string, { amount: number, count: number }> = {}
+  const borrowMap: Record<string, { amount: number, count: number }> = {}
+  const lendMap: Record<string, { amount: number, count: number }> = {}
+  const businessMap: Record<string, { amount: number, count: number }> = {}
 
   thisMonthTx.forEach(tx => {
     if (!tx.category_id) return
@@ -82,6 +93,18 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
       if (!incomeMap[tx.category_id]) incomeMap[tx.category_id] = { amount: 0, count: 0 }
       incomeMap[tx.category_id].amount += tx.amount
       incomeMap[tx.category_id].count += 1
+    } else if (tx.type === 'borrow') {
+      if (!borrowMap[tx.category_id]) borrowMap[tx.category_id] = { amount: 0, count: 0 }
+      borrowMap[tx.category_id].amount += tx.amount
+      borrowMap[tx.category_id].count += 1
+    } else if (tx.type === 'lend') {
+      if (!lendMap[tx.category_id]) lendMap[tx.category_id] = { amount: 0, count: 0 }
+      lendMap[tx.category_id].amount += tx.amount
+      lendMap[tx.category_id].count += 1
+    } else if (tx.type === 'business') {
+      if (!businessMap[tx.category_id]) businessMap[tx.category_id] = { amount: 0, count: 0 }
+      businessMap[tx.category_id].amount += tx.amount
+      businessMap[tx.category_id].count += 1
     }
   })
 
@@ -102,8 +125,27 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
 
   const topCategories = mapToTopList(expenseMap)
   const topIncomeCategories = mapToTopList(incomeMap)
+  const topBorrowCategories = mapToTopList(borrowMap)
+  const topLendCategories = mapToTopList(lendMap)
+  const topBusinessCategories = mapToTopList(businessMap)
+  
+  // 3. Business Analysis (Grab KD)
+  const businessTransactions = thisMonthTx.filter(tx => tx.type === 'business')
+  let businessIncomeTotal = 0
+  let businessExpenseTotal = 0
+  
+  businessTransactions.forEach(tx => {
+    const cat = categories.find(c => c.id === tx.category_id)
+    const name = cat?.name?.toLowerCase() || ''
+    if (name.includes('thu') || name.includes('income')) {
+      businessIncomeTotal += tx.amount
+    } else {
+      // Default to expense if not explicitly 'thu'
+      businessExpenseTotal += tx.amount
+    }
+  })
 
-  // 3. Weekly Trends
+  // 4. Weekly Trends
   const weeklyTrends = [0, 0, 0, 0, 0] // 5 weeks
   thisMonthTx
     .filter(tx => tx.type === 'expense')
@@ -128,23 +170,44 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
   const dailyTrends = Array(daysInMonth).fill(0)
   const dailyIncomeTrends = Array(daysInMonth).fill(0)
+  const dailyBusinessTrends = Array(daysInMonth).fill(0)
   thisMonthTx
     .forEach(tx => {
       const d = new Date(tx.date)
       if (tx.type === 'expense') dailyTrends[d.getDate() - 1] += tx.amount
       else if (tx.type === 'income') dailyIncomeTrends[d.getDate() - 1] += tx.amount
+      else if (tx.type === 'business') {
+        const cat = categories.find(c => c.id === tx.category_id)
+        const name = cat?.name?.toLowerCase() || ''
+        if (name.includes('thu') || name.includes('income')) {
+          dailyBusinessTrends[d.getDate() - 1] += tx.amount
+        } else {
+          dailyBusinessTrends[d.getDate() - 1] -= tx.amount
+        }
+      }
     })
 
   return {
     totalIncome,
     totalExpense,
+    totalBorrow,
+    totalLend,
     topCategories,
     topIncomeCategories,
+    topBorrowCategories,
+    topLendCategories,
+    topBusinessCategories,
     weeklyTrends,
     monthlyTrends,
     monthlyIncomeTrends,
     dailyTrends,
     dailyIncomeTrends,
-    thisMonthCount: thisMonthTx.filter(tx => !['withdrawal', 'borrow', 'lend'].includes(tx.type)).length
+    dailyBusinessTrends,
+    businessStats: {
+      income: businessIncomeTotal,
+      expense: businessExpenseTotal,
+      profit: businessIncomeTotal - businessExpenseTotal
+    },
+    thisMonthCount: thisMonthTx.filter(tx => !['withdrawal'].includes(tx.type)).length
   }
 }

@@ -15,6 +15,7 @@ import { useTransactions, getTransactionStats } from '../features/transactions/h
 import { useCategories } from '../features/categories/hooks/useCategories'
 import CategoryDetailModal from '../components/CategoryDetailModal'
 import { type Category } from '../features/categories/types/category.schema'
+import { TRANSACTION_TYPES_METADATA, type TransactionType } from '../types/transaction.types'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -29,7 +30,7 @@ const Stats: React.FC = () => {
   const [selectedModalCategory, setSelectedModalCategory] = useState<Category | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [statsType, setStatsType] = useState<'expense' | 'income'>('expense')
+  const [statsType, setStatsType] = useState<TransactionType>('expense')
   
   const stats = transactions && categories ? getTransactionStats(transactions, categories, selectedDate) : null
 
@@ -61,12 +62,18 @@ const Stats: React.FC = () => {
   const filteredCategories = categories?.filter(cat => cat.type === statsType) || []
 
   const allCategoriesWithData = filteredCategories.map((cat) => {
-    const categoryStats = (statsType === 'expense' ? stats?.topCategories : stats?.topIncomeCategories)?.find((sc) => sc.id === cat.id)
+    let categoryStats;
+    if (statsType === 'expense') categoryStats = stats?.topCategories?.find((sc) => sc.id === cat.id);
+    else if (statsType === 'income') categoryStats = stats?.topIncomeCategories?.find((sc) => sc.id === cat.id);
+    else if (statsType === 'borrow') categoryStats = stats?.topBorrowCategories?.find((sc) => sc.id === cat.id);
+    else if (statsType === 'lend') categoryStats = stats?.topLendCategories?.find((sc) => sc.id === cat.id);
+    else if (statsType === 'business') categoryStats = stats?.topBusinessCategories?.find((sc) => sc.id === cat.id);
+
     return {
       ...cat,
       amount: categoryStats?.amount || 0,
       count: categoryStats?.count || 0,
-      color: categoryStats?.color || cat.color || (statsType === 'expense' ? 'bg-primary/10' : 'bg-green-600/10'),
+      color: categoryStats?.color || cat.color || (TRANSACTION_TYPES_METADATA[statsType]?.color.replace('text-', 'bg-') + '/10' || 'bg-primary/10'),
       icon: cat.icon || 'payments',
     }
   })
@@ -83,7 +90,14 @@ const Stats: React.FC = () => {
   const daysLeft = isCurrentMonth ? (lastDay - now.getDate() + 1) : 0
   
   const totalBudget = allCategoriesWithData.reduce((acc, cat) => acc + (cat.limit || 0), 0) || 10000000 // Default 10M
-  const displayTotal = statsType === 'expense' ? (stats?.totalExpense || 0) : (stats?.totalIncome || 0)
+  
+  let displayTotal = 0;
+  if (statsType === 'expense') displayTotal = stats?.totalExpense || 0;
+  else if (statsType === 'income') displayTotal = stats?.totalIncome || 0;
+  else if (statsType === 'borrow') displayTotal = stats?.totalBorrow || 0;
+  else if (statsType === 'lend') displayTotal = stats?.totalLend || 0;
+  else if (statsType === 'business') displayTotal = stats?.businessStats?.profit || 0;
+
   const progress = Math.min((displayTotal / totalBudget) * 100, 100)
   const remainingBudget = Math.max(totalBudget - displayTotal, 0)
   const dailyLimit = daysLeft > 0 ? (remainingBudget / daysLeft) : 0
@@ -136,27 +150,28 @@ const Stats: React.FC = () => {
           </button>
       </section>
 
-      {/* 🚀 Stats Type Toggle (Income/Expense) */}
-      <section className="mb-8 px-2">
-        <div className="bg-surface-container-low p-1.5 rounded-[2rem] border border-outline-variant/10 shadow-inner flex gap-2 dark:shadow-dark">
-          <button 
-            onClick={() => setStatsType('expense')}
-            className={cn(
-              "flex-1 py-4 rounded-[1.5rem] font-headline font-black text-xs uppercase tracking-widest transition-all",
-              statsType === 'expense' ? "bg-primary text-on-primary shadow-lg dark:shadow-glow-primary" : "text-on-surface-variant hover:bg-surface-container-high"
-            )}
-          >
-            Chi tiêu
-          </button>
-          <button 
-            onClick={() => setStatsType('income')}
-            className={cn(
-              "flex-1 py-4 rounded-[1.5rem] font-headline font-black text-xs uppercase tracking-widest transition-all",
-              statsType === 'income' ? "bg-secondary text-on-secondary shadow-lg dark:shadow-glow-secondary" : "text-on-surface-variant hover:bg-surface-container-high"
-            )}
-          >
-            Thu nhập
-          </button>
+      {/* 🚀 Stats Type Toggle */}
+      <section className="mb-8 px-2 overflow-x-auto no-scrollbar">
+        <div className="bg-surface-container-low p-1.5 rounded-[2rem] border border-outline-variant/10 shadow-inner flex gap-2 dark:shadow-dark min-w-max">
+          {(['expense', 'income', 'borrow', 'lend'] as const).map(typeKey => {
+            const meta = TRANSACTION_TYPES_METADATA[typeKey];
+            const isActive = statsType === typeKey;
+            
+            return (
+              <button 
+                key={typeKey}
+                onClick={() => setStatsType(typeKey)}
+                className={cn(
+                  "px-6 py-4 rounded-[1.5rem] font-headline font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all",
+                  isActive 
+                    ? `${meta.badge.split(' ')[0]} ${meta.color} shadow-lg dark:shadow-glow-primary` 
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                )}
+              >
+                {meta.label}
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -182,7 +197,7 @@ const Stats: React.FC = () => {
               <div className="flex justify-between items-start mb-8 relative z-10">
                 <div>
                   <p className="font-label text-xs uppercase tracking-[0.2em] font-black opacity-60 mb-2">
-                    {statsType === 'expense' ? 'Đã chi tiêu tháng này' : 'Đã thu nhập tháng này'}
+                    Tổng {TRANSACTION_TYPES_METADATA[statsType]?.label.toLowerCase()} tháng này
                   </p>
                   <h1 className="font-headline font-black text-4xl tracking-tighter italic">
                     {formatCurrency(displayTotal)}
@@ -197,7 +212,7 @@ const Stats: React.FC = () => {
 
               <div className="space-y-4 mb-4 relative z-10">
                 <div className="flex justify-between items-end text-sm">
-                  <span className="font-black italic text-xs tracking-wider opacity-90">{Math.round(progress)}% ngân sách</span>
+                  <span className="font-black italic text-xs tracking-wider opacity-90">{Math.round(progress)}% {statsType === 'expense' ? 'ngân sách' : 'mục tiêu'}</span>
                   <span className="opacity-60 text-[10px] uppercase font-black tracking-widest">Mục tiêu: {formatCurrency(totalBudget)}</span>
                 </div>
                 <div className="h-4 w-full bg-white/20 dark:bg-black/30 rounded-full overflow-hidden p-1">
@@ -249,12 +264,56 @@ const Stats: React.FC = () => {
               </div>
             </div>
           </section>
+          
+          {/* 📈 Business Net Profit Summary (Grab KD) */}
+          {statsType === 'business' && stats?.businessStats && (
+            <section className="mb-8 px-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+               <div className="bg-surface-container-lowest p-8 rounded-[3rem] border border-outline-variant/10 shadow-xl dark:shadow-dark relative overflow-hidden group">
+                  <div className="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <span className="material-symbols-outlined text-8xl">local_taxi</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-end mb-8">
+                    <div>
+                      <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-40 mb-1 italic">Lợi nhuận ròng Grab</p>
+                      <h3 className={cn(
+                        "font-headline font-black text-3xl tracking-tighter italic",
+                        stats.businessStats.profit >= 0 ? "text-secondary dark:glow-secondary" : "text-error dark:glow-error"
+                      )}>
+                        {stats.businessStats.profit >= 0 ? '+' : ''}{formatCurrency(stats.businessStats.profit)}
+                      </h3>
+                    </div>
+                    <div className={cn(
+                      "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
+                      stats.businessStats.profit >= 0 ? "bg-secondary/10 text-secondary" : "bg-error/10 text-error"
+                    )}>
+                      {stats.businessStats.profit >= 0 ? 'Có lãi' : 'Đang lỗ'}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-surface-container-high p-4 rounded-2xl border border-outline-variant/5">
+                       <p className="font-label text-[9px] text-on-surface-variant font-black uppercase tracking-tight opacity-40 mb-1">Tổng doanh thu (+)</p>
+                       <p className="font-headline font-black text-lg text-secondary tracking-tighter italic">
+                         {formatCurrency(stats.businessStats.income)}
+                       </p>
+                    </div>
+                    <div className="bg-surface-container-high p-4 rounded-2xl border border-outline-variant/5">
+                       <p className="font-label text-[9px] text-on-surface-variant font-black uppercase tracking-tight opacity-40 mb-1">Tổng chi phí (-)</p>
+                       <p className="font-headline font-black text-lg text-on-surface tracking-tighter italic">
+                         {formatCurrency(stats.businessStats.expense)}
+                       </p>
+                    </div>
+                  </div>
+               </div>
+            </section>
+          )}
 
           {/* 📂 Category Breakdown */}
           <section className="mb-10 px-1">
             <div className="flex justify-between items-center mb-8 px-4">
               <h2 className="font-headline font-black text-xl text-on-surface tracking-tight italic">
-                {statsType === 'expense' ? 'Hạn mức chi tiêu' : 'Kế hoạch thu nhập'}
+                Phân tích theo {TRANSACTION_TYPES_METADATA[statsType]?.label.toLowerCase()}
               </h2>
               <button 
                 onClick={handleEditCategories}

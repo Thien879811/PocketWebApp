@@ -159,7 +159,7 @@ const AddTransaction: React.FC = () => {
             {/* 🔄 Type Toggle */}
             <section>
               <div className="bg-surface-container-high p-1.5 rounded-full flex relative shadow-inner overflow-x-auto no-scrollbar">
-                {(['income', 'expense', 'withdrawal', 'borrow'] as const).map(typeKey => {
+                {(['income', 'expense', 'withdrawal', 'borrow', 'business'] as const).map(typeKey => {
                   const meta = TRANSACTION_TYPES_METADATA[typeKey];
                   const isActive = typeKey === 'borrow' 
                     ? (transactionType === 'borrow' || transactionType === 'lend')

@@ -132,13 +132,8 @@ export const getDailyBudgetStatus = (plan: BudgetPlan, transactions: any[], targ
      return null;
   }
 
-  // Find excluded category IDs (Grab/Grap chi)
-  const excludedIds = categories
-    .filter(c => {
-      const name = c.name?.toLowerCase() || ''
-      return name.includes('grap chi') || name.includes('grab chi')
-    })
-    .map(c => c.id)
+  // Business transactions are excluded from the main budget
+  // Withdrawal, Borrow, and Lend are also excluded
 
   let spentBeforeTarget = 0;
   let spentOnTargetDay = 0;
@@ -148,8 +143,7 @@ export const getDailyBudgetStatus = (plan: BudgetPlan, transactions: any[], targ
   const planTransactions = transactions.filter(tx => 
      tx.type === 'expense' && 
      tx.date >= plan.start_date && 
-     tx.date <= plan.end_date &&
-     (!tx.category_id || !excludedIds.includes(tx.category_id))
+     tx.date <= plan.end_date
   );
 
   planTransactions.forEach(exp => {
