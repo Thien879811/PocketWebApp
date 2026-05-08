@@ -7,7 +7,6 @@ import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useActiveBudget, useBudgetMutations, getDailyBudgetStatus } from '../hooks/useBudget'
 import { useTransactions } from '../../transactions/hooks/useTransactions'
-import { useCategories } from '../../categories/hooks/useCategories'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -18,7 +17,6 @@ const BudgetPlanner: React.FC = () => {
   
   const { data: currentPlan, isLoading: planLoading } = useActiveBudget()
   const { data: transactions } = useTransactions()
-  const { data: categories } = useCategories()
   const { createBudget, updateBudget, deleteBudget } = useBudgetMutations()
 
   const [isEditing, setIsEditing] = useState(false)
@@ -63,7 +61,7 @@ const BudgetPlanner: React.FC = () => {
 
   const todayStr = new Date().toISOString().split('T')[0]
 
-  const todayStatus = (currentPlan && transactions) ? getDailyBudgetStatus(currentPlan, transactions, todayStr, categories || []) : null
+  const todayStatus = (currentPlan && transactions) ? getDailyBudgetStatus(currentPlan, transactions, todayStr) : null
 
   const progressPercentage = currentPlan && todayStatus
     ? Math.min(100, Math.max(0, (todayStatus.totalSpent / currentPlan.total_budget) * 100))

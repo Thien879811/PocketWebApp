@@ -188,8 +188,6 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     })
 
   return {
-    totalIncome,
-    totalExpense,
     totalBorrow,
     totalLend,
     topCategories,
@@ -208,6 +206,8 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
       expense: businessExpenseTotal,
       profit: businessIncomeTotal - businessExpenseTotal
     },
+    totalIncome: totalIncome + Math.max(0, businessIncomeTotal - businessExpenseTotal),
+    totalExpense: totalExpense + Math.max(0, businessExpenseTotal - businessIncomeTotal),
     thisMonthCount: thisMonthTx.filter(tx => !['withdrawal'].includes(tx.type)).length
   }
 }

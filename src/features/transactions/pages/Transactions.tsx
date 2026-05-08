@@ -24,7 +24,7 @@ function cn(...inputs: ClassValue[]) {
 const Transactions: React.FC = () => {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all')
+  const [filter, setFilter] = useState<TransactionType | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [selectedDate, setSelectedDate] = useState(new Date())
   
@@ -111,16 +111,20 @@ const Transactions: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-             <button 
-               onClick={() => setFilter(filter === 'all' ? 'expense' : filter === 'expense' ? 'income' : 'all')}
-               className={cn(
-                 "flex items-center gap-2 px-5 py-2.5 rounded-2xl font-label font-black text-[10px] uppercase tracking-widest transition-all border",
-                 filter === 'all' ? "bg-surface-container-high text-on-surface-variant border-outline-variant/10 shadow-sm" : "bg-primary text-on-primary border-primary shadow-lg shadow-primary/20 scale-105"
-               )}
-             >
-               <Filter size={14} strokeWidth={3} />
-               {filter === 'all' ? 'Tất cả' : filter === 'expense' ? 'Chi tiêu' : 'Thu nhập'}
-             </button>
+              <button 
+                onClick={() => {
+                  const types: (TransactionType | 'all')[] = ['all', 'expense', 'income', 'business', 'borrow', 'lend'];
+                  const nextIndex = (types.indexOf(filter) + 1) % types.length;
+                  setFilter(types[nextIndex]);
+                }}
+                className={cn(
+                  "flex items-center gap-2 px-5 py-2.5 rounded-2xl font-label font-black text-[10px] uppercase tracking-widest transition-all border whitespace-nowrap",
+                  filter === 'all' ? "bg-surface-container-high text-on-surface-variant border-outline-variant/10 shadow-sm" : "bg-primary text-on-primary border-primary shadow-lg shadow-primary/20 scale-105"
+                )}
+              >
+                <Filter size={14} strokeWidth={3} />
+                {filter === 'all' ? 'Tất cả' : TRANSACTION_TYPES_METADATA[filter as TransactionType]?.label}
+              </button>
           </div>
         </div>
 

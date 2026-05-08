@@ -127,7 +127,7 @@ export const calculateDaysBetween = (start: string, end: string) => {
   return diffDays + 1
 }
 
-export const getDailyBudgetStatus = (plan: BudgetPlan, transactions: any[], targetDate: string, categories: any[] = []) => {
+export const getDailyBudgetStatus = (plan: BudgetPlan, transactions: any[], targetDate: string) => {
   if (targetDate < plan.start_date || targetDate > plan.end_date) {
      return null;
   }

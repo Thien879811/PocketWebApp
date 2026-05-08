@@ -132,20 +132,23 @@ const AddCategory: React.FC = () => {
           <section className="space-y-4">
             <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Transaction Type</span>
             <div className="grid grid-cols-2 sm:grid-cols-3 p-1.5 glass rounded-2xl gap-2 dark:shadow-glass-dark">
-              {(Object.entries(TRANSACTION_TYPES_METADATA) as [TransactionType, any][]).map(([key, meta]) => (
-                <button 
-                  key={key}
-                  type="button"
-                  onClick={() => setType(key)}
-                  className={cn(
-                    "flex items-center justify-center gap-2 py-3 px-2 rounded-xl font-bold smooth-transition active:scale-95 transform hover:scale-105",
-                    type === key ? "glass dark:shadow-glow-primary text-primary" : "bg-surface-container-highest text-on-surface-variant dark:hover:shadow-glass-dark"
-                  )}
-                >
-                  <span className="material-symbols-outlined text-base">{meta.icon}</span>
-                  <span className="text-[10px] sm:text-xs truncate">{meta.shortLabel}</span>
-                </button>
-              ))}
+              {(['income', 'expense', 'business', 'withdrawal', 'borrow'] as const).map((key) => {
+                const meta = TRANSACTION_TYPES_METADATA[key];
+                return (
+                  <button 
+                    key={key}
+                    type="button"
+                    onClick={() => setType(key)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 py-3 px-2 rounded-xl font-bold smooth-transition active:scale-95 transform hover:scale-105",
+                      type === key ? "glass dark:shadow-glow-primary text-primary" : "bg-surface-container-highest text-on-surface-variant dark:hover:shadow-glass-dark"
+                    )}
+                  >
+                    <span className="material-symbols-outlined text-base">{meta.icon}</span>
+                    <span className="text-[10px] sm:text-xs truncate">{meta.shortLabel}</span>
+                  </button>
+                );
+              })}
             </div>
           </section>
 

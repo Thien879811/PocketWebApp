@@ -73,7 +73,7 @@ const AddTransaction: React.FC = () => {
 
   // Budget checks
   const dateStr = watch('date') || new Date().toISOString().split('T')[0]
-  const todayStatus = (currentPlan && transactions) ? getDailyBudgetStatus(currentPlan, transactions, dateStr, categories || []) : null
+  const todayStatus = (currentPlan && transactions) ? getDailyBudgetStatus(currentPlan, transactions, dateStr) : null
   
   const isBudgetEmpty = Boolean(currentPlan && todayStatus?.budgetEmpty && transactionType === 'expense')
   const targetRemaining = isBudgetEmpty ? 0 : (todayStatus?.remainingDaily || 0)
