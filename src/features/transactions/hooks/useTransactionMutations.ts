@@ -95,7 +95,8 @@ export const useCreateTransaction = () => {
             .eq('id', cashAccount.id)
         }
       } else {
-        const newBalance = data.type === 'income' 
+        const isPlus = data.type === 'income' || data.type === 'borrow'
+        const newBalance = isPlus 
           ? (account.balance || 0) + data.amount 
           : (account.balance || 0) - data.amount
 
@@ -166,7 +167,8 @@ export const useUpdateTransaction = () => {
             .eq('id', cashAccount.id)
         }
       } else {
-        const revertedOldBalance = oldTx.type === 'income'
+        const isPlus = oldTx.type === 'income' || oldTx.type === 'borrow'
+        const revertedOldBalance = isPlus
           ? (oldAccount.balance || 0) - oldTx.amount
           : (oldAccount.balance || 0) + oldTx.amount
 
@@ -217,7 +219,8 @@ export const useUpdateTransaction = () => {
             .eq('id', cashAccount.id)
         }
       } else {
-        const newBalance = data.type === 'income'
+        const isPlus = data.type === 'income' || data.type === 'borrow'
+        const newBalance = isPlus
           ? (newAccount.balance || 0) + data.amount
           : (newAccount.balance || 0) - data.amount
 
@@ -287,7 +290,8 @@ export const useDeleteTransaction = () => {
             .eq('id', cashAccount.id)
         }
       } else {
-        const revertedBalance = tx.type === 'income'
+        const isPlus = tx.type === 'income' || tx.type === 'borrow'
+        const revertedBalance = isPlus
           ? (account.balance || 0) - tx.amount
           : (account.balance || 0) + tx.amount
 

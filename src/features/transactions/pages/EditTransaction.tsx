@@ -25,7 +25,7 @@ const EditTransaction: React.FC = () => {
   const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { data: accounts } = useAccounts()
 
-  const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'withdrawal'>('expense')
+  const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'withdrawal' | 'borrow' | 'lend'>('expense')
   const [showAccountSelector, setShowAccountSelector] = useState(false)
 
   const { handleSubmit, register, setValue, watch, formState: { errors } } = useForm<TransactionFormValues>({
@@ -75,7 +75,12 @@ const EditTransaction: React.FC = () => {
   }
 
   // Filter categories by selected type
-  const filteredCategories = categories?.filter(cat => cat.type === transactionType) || []
+  const filteredCategories = categories?.filter(cat => {
+    if (transactionType === 'borrow' || transactionType === 'lend') {
+      return cat.type === 'income' || cat.type === 'expense'
+    }
+    return cat.type === transactionType
+  }) || []
 
   if (transactionLoading) {
     return (
@@ -190,8 +195,58 @@ const EditTransaction: React.FC = () => {
                 >
                   Rút tiền
                 </button>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setTransactionType('borrow');
+                    setValue('type', 'borrow');
+                  }}
+                  className={cn(
+                    "flex-1 py-3 rounded-full font-label text-[10px] sm:text-xs font-black transition-all duration-300",
+                    (transactionType === 'borrow' || transactionType === 'lend') ? "bg-indigo-600 text-white shadow-lg scale-x-[1.02]" : "text-on-surface-variant/60 hover:text-on-surface"
+                  )}
+                >
+                  Mượn/Trả
+                </button>
               </div>
             </section>
+
+            {/* ↕️ Lend/Borrow Sub-toggle */}
+            {(transactionType === 'borrow' || transactionType === 'lend') && (
+              <section className="animate-in fade-in slide-in-from-top-2">
+                <div className="bg-indigo-50 p-1 rounded-2xl flex border border-indigo-100">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setTransactionType('borrow');
+                      setValue('type', 'borrow');
+                    }}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl font-label text-[10px] font-black transition-all",
+                      transactionType === 'borrow' ? "bg-indigo-600 text-white shadow-sm" : "text-indigo-600/60 hover:text-indigo-600"
+                    )}
+                  >
+                    Vay / Thu nợ (+)
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setTransactionType('lend');
+                      setValue('type', 'lend');
+                    }}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl font-label text-[10px] font-black transition-all",
+                      transactionType === 'lend' ? "bg-indigo-500 text-white shadow-sm" : "text-indigo-600/60 hover:text-indigo-600"
+                    )}
+                  >
+                    Cho vay / Trả nợ (-)
+                  </button>
+                </div>
+                <p className="text-[9px] text-indigo-400 font-bold mt-2 px-2 italic text-center">
+                  * Giao dịch này chỉ ảnh hưởng ví, không tính vào kế hoạch chi tiêu.
+                </p>
+              </section>
+            )}
 
             {/* 📂 Category Grid */}
             <section>
@@ -206,7 +261,7 @@ const EditTransaction: React.FC = () => {
               ) : filteredCategories.length === 0 ? (
                 <div className="bg-surface-container-low rounded-3xl p-8 text-center space-y-3 cursor-pointer hover:bg-surface-container-high transition-colors" onClick={() => navigate('/settings/categories/add')}>
                   <Inbox className="w-8 h-8 text-outline-variant mx-auto" />
-                  <p className="text-xs text-outline font-bold uppercase tracking-tight">Trống danh mục {transactionType === 'income' ? 'thu nhập' : 'chi tiêu'}</p>
+                   <p className="text-xs text-outline font-bold uppercase tracking-tight">Trống danh mục {(transactionType === 'borrow' || transactionType === 'lend') ? 'mượn trả' : transactionType === 'income' ? 'thu nhập' : 'chi tiêu'}</p>
                   <p className="text-[10px] text-primary font-bold">Thêm danh mục mới</p>
                 </div>
               ) : (
@@ -219,7 +274,7 @@ const EditTransaction: React.FC = () => {
                       className={cn(
                         "flex flex-col items-center gap-2 p-3.5 rounded-2xl transition-all duration-200 active:scale-[0.9]",
                         selectedCategoryId === cat.id
-                          ? cn("shadow-xl ring-2", transactionType === 'income' ? "bg-secondary/10 text-secondary ring-secondary/30" : "bg-primary-fixed text-on-primary-fixed ring-primary/30")
+                          ? cn("shadow-xl ring-2", (transactionType === 'income' || transactionType === 'borrow') ? "bg-secondary/10 text-secondary ring-secondary/30" : "bg-primary-fixed text-on-primary-fixed ring-primary/30")
                           : "bg-surface-container-low text-on-surface-variant/80 hover:bg-surface-container-high"
                       )}
                     >

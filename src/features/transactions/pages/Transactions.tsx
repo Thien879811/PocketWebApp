@@ -60,11 +60,15 @@ const Transactions: React.FC = () => {
   // Helper to get category info from ID
   const getCategoryName = (categoryId?: string, type?: string) => {
     if (type === 'withdrawal') return 'Rút tiền'
+    if (type === 'borrow') return 'Mượn / Thu nợ'
+    if (type === 'lend') return 'Cho mượn / Trả nợ'
     return categories?.find(c => c.id === categoryId)?.name || 'Chưa phân loại'
   }
 
   const getCategoryIcon = (categoryId?: string, type?: string) => {
     if (type === 'withdrawal') return 'payments'
+    if (type === 'borrow') return 'handshake'
+    if (type === 'lend') return 'volunteer_activism'
     return categories?.find(c => c.id === categoryId)?.icon || 'help_outline'
   }
 
@@ -237,9 +241,9 @@ const Transactions: React.FC = () => {
                            <div className="text-right">
                               <p className={cn(
                                  "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
-                                 tx.type === 'income' ? "text-secondary" : tx.type === 'expense' ? "text-on-surface" : "text-amber-600"
+                                 tx.type === 'income' || tx.type === 'borrow' ? "text-secondary" : tx.type === 'expense' ? "text-on-surface" : tx.type === 'withdrawal' ? "text-amber-600" : "text-indigo-600"
                               )}>
-                                 {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                 {tx.type === 'income' || tx.type === 'borrow' ? '+' : '-'}{formatCurrency(tx.amount)}
                               </p>
                            </div>
                         </div>

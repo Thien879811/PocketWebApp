@@ -145,6 +145,6 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     monthlyIncomeTrends,
     dailyTrends,
     dailyIncomeTrends,
-    thisMonthCount: thisMonthTx.filter(tx => tx.type !== 'withdrawal').length
+    thisMonthCount: thisMonthTx.filter(tx => !['withdrawal', 'borrow', 'lend'].includes(tx.type)).length
   }
 }
