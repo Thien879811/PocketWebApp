@@ -129,7 +129,7 @@ const EditTransaction: React.FC = () => {
                       className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px]"
                       placeholder="0"
                       type="number"
-                      step="1000"
+                      step="any"
                     />
                     <span className="text-headline-sm font-headline text-on-surface-variant">đ</span>
                   </div>
@@ -333,6 +333,7 @@ const EditTransaction: React.FC = () => {
                       <input
                         {...register('fee', { valueAsNumber: true })}
                         type="number"
+                        step="any"
                         placeholder="0"
                         className="w-full bg-transparent border-none p-0 text-body-md font-bold focus:ring-0 text-on-surface"
                       />
