@@ -67,9 +67,19 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     .filter(tx => tx.type === 'expense')
     .reduce((acc, curr) => acc + curr.amount, 0)
 
+  const totalBorrow = thisMonthTx
+    .filter(tx => tx.type === 'borrow')
+    .reduce((acc, curr) => acc + curr.amount, 0)
+
+  const totalLend = thisMonthTx
+    .filter(tx => tx.type === 'lend')
+    .reduce((acc, curr) => acc + curr.amount, 0)
+
   // 2. Category Breakdowns (Separated by Type)
   const expenseMap: Record<string, { amount: number, count: number }> = {}
   const incomeMap: Record<string, { amount: number, count: number }> = {}
+  const borrowMap: Record<string, { amount: number, count: number }> = {}
+  const lendMap: Record<string, { amount: number, count: number }> = {}
 
   thisMonthTx.forEach(tx => {
     if (!tx.category_id) return
@@ -82,6 +92,14 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
       if (!incomeMap[tx.category_id]) incomeMap[tx.category_id] = { amount: 0, count: 0 }
       incomeMap[tx.category_id].amount += tx.amount
       incomeMap[tx.category_id].count += 1
+    } else if (tx.type === 'borrow') {
+      if (!borrowMap[tx.category_id]) borrowMap[tx.category_id] = { amount: 0, count: 0 }
+      borrowMap[tx.category_id].amount += tx.amount
+      borrowMap[tx.category_id].count += 1
+    } else if (tx.type === 'lend') {
+      if (!lendMap[tx.category_id]) lendMap[tx.category_id] = { amount: 0, count: 0 }
+      lendMap[tx.category_id].amount += tx.amount
+      lendMap[tx.category_id].count += 1
     }
   })
 
@@ -102,6 +120,8 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
 
   const topCategories = mapToTopList(expenseMap)
   const topIncomeCategories = mapToTopList(incomeMap)
+  const topBorrowCategories = mapToTopList(borrowMap)
+  const topLendCategories = mapToTopList(lendMap)
 
   // 3. Weekly Trends
   const weeklyTrends = [0, 0, 0, 0, 0] // 5 weeks
@@ -138,13 +158,17 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
   return {
     totalIncome,
     totalExpense,
+    totalBorrow,
+    totalLend,
     topCategories,
     topIncomeCategories,
+    topBorrowCategories,
+    topLendCategories,
     weeklyTrends,
     monthlyTrends,
     monthlyIncomeTrends,
     dailyTrends,
     dailyIncomeTrends,
-    thisMonthCount: thisMonthTx.filter(tx => !['withdrawal', 'borrow', 'lend'].includes(tx.type)).length
+    thisMonthCount: thisMonthTx.filter(tx => !['withdrawal'].includes(tx.type)).length
   }
 }
