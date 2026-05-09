@@ -80,7 +80,6 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
   const incomeMap: Record<string, { amount: number, count: number }> = {}
   const borrowMap: Record<string, { amount: number, count: number }> = {}
   const lendMap: Record<string, { amount: number, count: number }> = {}
-  const businessMap: Record<string, { amount: number, count: number }> = {}
 
   thisMonthTx.forEach(tx => {
     if (!tx.category_id) return
@@ -101,10 +100,6 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
       if (!lendMap[tx.category_id]) lendMap[tx.category_id] = { amount: 0, count: 0 }
       lendMap[tx.category_id].amount += tx.amount
       lendMap[tx.category_id].count += 1
-    } else if (tx.type === 'business') {
-      if (!businessMap[tx.category_id]) businessMap[tx.category_id] = { amount: 0, count: 0 }
-      businessMap[tx.category_id].amount += tx.amount
-      businessMap[tx.category_id].count += 1
     }
   })
 
@@ -127,23 +122,6 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
   const topIncomeCategories = mapToTopList(incomeMap)
   const topBorrowCategories = mapToTopList(borrowMap)
   const topLendCategories = mapToTopList(lendMap)
-  const topBusinessCategories = mapToTopList(businessMap)
-  
-  // 3. Business Analysis (Grab KD)
-  const businessTransactions = thisMonthTx.filter(tx => tx.type === 'business')
-  let businessIncomeTotal = 0
-  let businessExpenseTotal = 0
-  
-  businessTransactions.forEach(tx => {
-    const cat = categories.find(c => c.id === tx.category_id)
-    const name = cat?.name?.toLowerCase() || ''
-    if (name.includes('thu') || name.includes('income')) {
-      businessIncomeTotal += tx.amount
-    } else {
-      // Default to expense if not explicitly 'thu'
-      businessExpenseTotal += tx.amount
-    }
-  })
 
   // 4. Weekly Trends
   const weeklyTrends = [0, 0, 0, 0, 0] // 5 weeks
@@ -188,26 +166,19 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     })
 
   return {
+    totalIncome,
+    totalExpense,
     totalBorrow,
     totalLend,
     topCategories,
     topIncomeCategories,
     topBorrowCategories,
     topLendCategories,
-    topBusinessCategories,
     weeklyTrends,
     monthlyTrends,
     monthlyIncomeTrends,
     dailyTrends,
     dailyIncomeTrends,
-    dailyBusinessTrends,
-    businessStats: {
-      income: businessIncomeTotal,
-      expense: businessExpenseTotal,
-      profit: businessIncomeTotal - businessExpenseTotal
-    },
-    totalIncome: totalIncome + Math.max(0, businessIncomeTotal - businessExpenseTotal),
-    totalExpense: totalExpense + Math.max(0, businessExpenseTotal - businessIncomeTotal),
     thisMonthCount: thisMonthTx.filter(tx => !['withdrawal'].includes(tx.type)).length
   }
 }
