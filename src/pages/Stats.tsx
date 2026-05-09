@@ -106,7 +106,6 @@ const Stats: React.FC = () => {
     switch (type) {
       case 'income': return 'from-secondary via-secondary to-secondary-container shadow-[0_24px_48px_rgba(var(--secondary-rgb),0.2)] dark:shadow-glow-secondary'
       case 'expense': return 'from-primary via-primary to-primary-container shadow-[0_24px_48px_rgba(0,93,167,0.2)] dark:shadow-glow-primary'
-      case 'business': return 'from-orange-500 via-orange-600 to-orange-700 shadow-[0_24px_48px_rgba(249,115,22,0.2)] dark:shadow-glow-orange'
       case 'borrow': return 'from-purple-600 via-purple-700 to-purple-800 shadow-[0_24px_48px_rgba(147,51,234,0.2)] dark:shadow-glow-purple'
       case 'lend': return 'from-blue-600 via-blue-700 to-blue-800 shadow-[0_24px_48px_rgba(37,99,235,0.2)] dark:shadow-glow-blue'
       default: return 'from-primary via-primary to-primary-container'
@@ -180,7 +179,7 @@ const Stats: React.FC = () => {
                   "px-6 py-4 rounded-[1.5rem] font-headline font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all",
                   isActive 
                     ? `${meta.badge.split(' ')[0]} ${meta.color} shadow-lg dark:shadow-glow-primary` 
-                    : "text-on-surface-variant hover:bg-surface-container-high"
+                    : "text-on-surface-variant/80 hover:bg-surface-container-high"
                 )}
               >
                 {meta.label}
@@ -214,15 +213,15 @@ const Stats: React.FC = () => {
               
               <div className="flex justify-between items-start mb-8 relative z-10">
                 <div>
-                  <p className="font-label text-xs uppercase tracking-[0.2em] font-black opacity-60 mb-2">
+                  <p className="font-label text-xs uppercase tracking-[0.2em] font-black opacity-80 text-white mb-2">
                     {getHeroLabel(statsType)} tháng này
                   </p>
-                  <h1 className="font-headline font-black text-4xl tracking-tighter italic">
+                  <h1 className="font-headline font-black text-4xl tracking-tighter italic text-white">
                     {formatCurrency(displayTotal)}
                   </h1>
                 </div>
-                <div className="bg-white/20 dark:bg-black/20 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/20">
-                  <span className="font-label text-[10px] font-black uppercase tracking-widest leading-none">
+                <div className="bg-white/20 dark:bg-white/10 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/20">
+                  <span className="font-label text-[10px] font-black uppercase tracking-widest leading-none text-white">
                     {selectedDate.toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' })}
                   </span>
                 </div>
@@ -230,10 +229,10 @@ const Stats: React.FC = () => {
 
               <div className="space-y-4 mb-4 relative z-10">
                 <div className="flex justify-between items-end text-sm">
-                  <span className="font-black italic text-xs tracking-wider opacity-90">{Math.round(progress)}% {statsType === 'expense' ? 'ngân sách' : 'mục tiêu'}</span>
-                  <span className="opacity-60 text-[10px] uppercase font-black tracking-widest">Mục tiêu: {formatCurrency(totalBudget)}</span>
+                  <span className="font-black italic text-xs tracking-wider text-white opacity-90">{Math.round(progress)}% {statsType === 'expense' ? 'ngân sách' : 'mục tiêu'}</span>
+                  <span className="text-white opacity-70 text-[10px] uppercase font-black tracking-widest">Mục tiêu: {formatCurrency(totalBudget)}</span>
                 </div>
-                <div className="h-4 w-full bg-white/20 dark:bg-black/30 rounded-full overflow-hidden p-1">
+                <div className="h-4 w-full bg-white/20 dark:bg-white/10 rounded-full overflow-hidden p-1">
                   <div 
                     className="h-full bg-white rounded-full transition-all duration-1000 shadow-[0_0_12px_rgba(255,255,255,0.5)]" 
                     style={{ width: `${progress}%` }}
@@ -259,7 +258,7 @@ const Stats: React.FC = () => {
                 <Calendar size={20} strokeWidth={3} />
               </div>
               <div>
-                <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-40 mb-1">
+                <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-60 mb-1">
                   {isCurrentMonth ? 'Thời gian còn lại' : 'Số ngày trong tháng'}
                 </p>
                 <p className="font-headline font-black text-3xl text-on-surface tracking-tighter italic dark:glow">
@@ -273,7 +272,7 @@ const Stats: React.FC = () => {
                 <Wallet size={20} strokeWidth={3} />
               </div>
               <div>
-                <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-40 mb-1">
+                <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-60 mb-1">
                   {isCurrentMonth ? 'Hạn mức / Ngày' : 'Trung bình / Ngày'}
                 </p>
                 <p className="font-headline font-black text-2xl text-on-surface tracking-tighter italic dark:glow">
