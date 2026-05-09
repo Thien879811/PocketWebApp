@@ -67,7 +67,6 @@ const Stats: React.FC = () => {
     else if (statsType === 'income') categoryStats = stats?.topIncomeCategories?.find((sc) => sc.id === cat.id);
     else if (statsType === 'borrow') categoryStats = stats?.topBorrowCategories?.find((sc) => sc.id === cat.id);
     else if (statsType === 'lend') categoryStats = stats?.topLendCategories?.find((sc) => sc.id === cat.id);
-    else if (statsType === 'business') categoryStats = stats?.topBusinessCategories?.find((sc) => sc.id === cat.id);
 
     return {
       ...cat,
@@ -96,7 +95,6 @@ const Stats: React.FC = () => {
   else if (statsType === 'income') displayTotal = stats?.totalIncome || 0;
   else if (statsType === 'borrow') displayTotal = stats?.totalBorrow || 0;
   else if (statsType === 'lend') displayTotal = stats?.totalLend || 0;
-  else if (statsType === 'business') displayTotal = stats?.businessStats?.profit || 0;
 
   const progress = Math.min((displayTotal / totalBudget) * 100, 100)
   const remainingBudget = Math.max(totalBudget - displayTotal, 0)
@@ -264,51 +262,6 @@ const Stats: React.FC = () => {
               </div>
             </div>
           </section>
-          
-          {/* 📈 Business Net Profit Summary (Grab KD) */}
-          {statsType === 'business' && stats?.businessStats && (
-            <section className="mb-8 px-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
-               <div className="bg-surface-container-lowest p-8 rounded-[3rem] border border-outline-variant/10 shadow-xl dark:shadow-dark relative overflow-hidden group">
-                  <div className="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <span className="material-symbols-outlined text-8xl">local_taxi</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-end mb-8">
-                    <div>
-                      <p className="font-label text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-40 mb-1 italic">Lợi nhuận ròng Grab</p>
-                      <h3 className={cn(
-                        "font-headline font-black text-3xl tracking-tighter italic",
-                        stats.businessStats.profit >= 0 ? "text-secondary dark:glow-secondary" : "text-error dark:glow-error"
-                      )}>
-                        {stats.businessStats.profit >= 0 ? '+' : ''}{formatCurrency(stats.businessStats.profit)}
-                      </h3>
-                    </div>
-                    <div className={cn(
-                      "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
-                      stats.businessStats.profit >= 0 ? "bg-secondary/10 text-secondary" : "bg-error/10 text-error"
-                    )}>
-                      {stats.businessStats.profit >= 0 ? 'Có lãi' : 'Đang lỗ'}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-surface-container-high p-4 rounded-2xl border border-outline-variant/5">
-                       <p className="font-label text-[9px] text-on-surface-variant font-black uppercase tracking-tight opacity-40 mb-1">Tổng doanh thu (+)</p>
-                       <p className="font-headline font-black text-lg text-secondary tracking-tighter italic">
-                         {formatCurrency(stats.businessStats.income)}
-                       </p>
-                    </div>
-                    <div className="bg-surface-container-high p-4 rounded-2xl border border-outline-variant/5">
-                       <p className="font-label text-[9px] text-on-surface-variant font-black uppercase tracking-tight opacity-40 mb-1">Tổng chi phí (-)</p>
-                       <p className="font-headline font-black text-lg text-on-surface tracking-tighter italic">
-                         {formatCurrency(stats.businessStats.expense)}
-                       </p>
-                    </div>
-                  </div>
-               </div>
-            </section>
-          )}
-
           {/* 📂 Category Breakdown */}
           <section className="mb-10 px-1">
             <div className="flex justify-between items-center mb-8 px-4">
