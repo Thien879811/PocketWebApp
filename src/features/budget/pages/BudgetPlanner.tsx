@@ -7,6 +7,7 @@ import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useActiveBudget, useBudgetMutations, getDailyBudgetStatus } from '../hooks/useBudget'
 import { useTransactions } from '../../transactions/hooks/useTransactions'
+import { useCategories } from '../../categories/hooks/useCategories'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -17,26 +18,29 @@ const BudgetPlanner: React.FC = () => {
   
   const { data: currentPlan, isLoading: planLoading } = useActiveBudget()
   const { data: transactions } = useTransactions()
+  const { data: categories } = useCategories()
   const { createBudget, updateBudget, deleteBudget } = useBudgetMutations()
 
   const [isEditing, setIsEditing] = useState(false)
   const [budgetAmount, setBudgetAmount] = useState<number | string>('')
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0])
   const [endDate, setEndDate] = useState<string>('')
+  const todayStr = new Date().toISOString().split('T')[0]
+  const isExpired = currentPlan && new Date(todayStr) > new Date(currentPlan.end_date)
 
   // Sync state when entering edit mode or new plan mode
   useEffect(() => {
-    if (currentPlan) {
+    if (currentPlan && !isExpired) {
       setBudgetAmount(currentPlan.total_budget)
       setStartDate(currentPlan.start_date)
       setEndDate(currentPlan.end_date)
     } else {
-      setBudgetAmount('')
+      setBudgetAmount(currentPlan?.total_budget || '')
       setStartDate(new Date().toISOString().split('T')[0])
       const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
       setEndDate(endOfMonth.toISOString().split('T')[0])
     }
-  }, [currentPlan, isEditing])
+  }, [currentPlan, isEditing, isExpired])
 
   const handleSavePlan = (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,12 +48,14 @@ const BudgetPlanner: React.FC = () => {
     if (amount <= 0) return alert('Vui lòng nhập ngân sách lớn hơn 0')
     if (new Date(startDate) > new Date(endDate)) return alert('Ngày bắt đầu phải trước ngày kết thúc')
     
-    if (isEditing && currentPlan) {
+    if (isEditing && currentPlan && !isExpired) {
       updateBudget.mutate({ id: currentPlan.id, total_budget: amount, start_date: startDate, end_date: endDate }, {
         onSuccess: () => setIsEditing(false)
       })
     } else {
-      createBudget.mutate({ total_budget: amount, start_date: startDate, end_date: endDate })
+      createBudget.mutate({ total_budget: amount, start_date: startDate, end_date: endDate }, {
+        onSuccess: () => setIsEditing(false)
+      })
     }
   }
 
@@ -59,9 +65,16 @@ const BudgetPlanner: React.FC = () => {
     }
   }
 
-  const todayStr = new Date().toISOString().split('T')[0]
 
-  const todayStatus = (currentPlan && transactions) ? getDailyBudgetStatus(currentPlan, transactions, todayStr) : null
+
+  const filteredTransactions = (transactions && categories) 
+    ? transactions.filter(tx => {
+        const cat = categories.find(c => c.id === tx.category_id)
+        return cat?.name?.toLowerCase() !== 'nhà'
+      })
+    : transactions
+
+  const todayStatus = (currentPlan && filteredTransactions) ? getDailyBudgetStatus(currentPlan, filteredTransactions, isExpired ? currentPlan.end_date : todayStr) : null
 
   const progressPercentage = currentPlan && todayStatus
     ? Math.min(100, Math.max(0, (todayStatus.totalSpent / currentPlan.total_budget) * 100))
@@ -110,10 +123,17 @@ const BudgetPlanner: React.FC = () => {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="glass rounded-3xl p-8 glass-border dark:shadow-glass-dark text-center mb-8">
                 <div className="w-16 h-16 glass rounded-full flex items-center justify-center mx-auto mb-4 transform hover:scale-110 transition-all dark:shadow-glass-dark group-hover:shadow-glow-primary">
-                  <PiggyBank className="w-8 h-8 text-primary" />
+                  {isExpired ? <Calendar className="w-8 h-8 text-orange-500 animate-pulse" /> : <PiggyBank className="w-8 h-8 text-primary" />}
                 </div>
-                <h2 className="font-headline font-black text-2xl text-on-surface mb-2">Thết lập lớp khiên!</h2>
-                <p className="text-on-surface-variant text-sm px-4">Kiểm soát chi tiêu, không lo rỗng túi cuối tháng với công thức Rollover thông minh.</p>
+                <h2 className="font-headline font-black text-2xl text-on-surface mb-2">
+                  {isExpired ? 'Kế hoạch đã kết thúc!' : 'Thết lập lớp khiên!'}
+                </h2>
+                <p className="text-on-surface-variant text-sm px-4">
+                  {isExpired 
+                    ? `Kế hoạch cũ (${currentPlan?.total_budget.toLocaleString()}đ) đã hết hạn. Hãy thiết lập một khởi đầu mới!` 
+                    : 'Kiểm soát chi tiêu, không lo rỗng túi cuối tháng với công thức Rollover thông minh.'
+                  }
+                </p>
               </div>
 
               <form onSubmit={handleSavePlan} className="space-y-6">
@@ -182,7 +202,7 @@ const BudgetPlanner: React.FC = () => {
                   className="w-full glass text-primary h-14 rounded-[1.5rem] font-headline font-black text-lg dark:shadow-glow-primary smooth-transition transform hover:scale-102 active:scale-95 mt-8 disabled:opacity-50 flex justify-center items-center gap-2"
                 >
                   {(createBudget.isPending || updateBudget.isPending) && <Loader2 className="w-5 h-5 animate-spin" />}
-                  {isEditing ? 'Lưu thay đổi' : 'Bắt đầu kế hoạch'}
+                  {isEditing ? 'Lưu thay đổi' : (isExpired ? 'Bắt đầu kỳ mới' : 'Bắt đầu kế hoạch')}
                 </button>
               </form>
             </div>
@@ -192,7 +212,18 @@ const BudgetPlanner: React.FC = () => {
             // ======================
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
               
-              {todayStatus?.budgetEmpty ? (
+              {isExpired ? (
+                <div className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-6 flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mb-4 text-orange-500">
+                    <Calendar size={32} />
+                  </div>
+                  <h3 className="font-headline font-black text-xl text-orange-500 mb-2">Kế hoạch đã kết thúc!</h3>
+                  <p className="text-on-surface-variant text-sm mb-6">Thời hạn kế hoạch chi tiêu của bạn đã hết. Hãy xem lại kết quả và bắt đầu một kỳ mới.</p>
+                  <button onClick={() => setIsEditing(true)} className="bg-orange-500 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-orange-500/30 active:scale-95 transition-transform">
+                    Thiết lập kế hoạch mới
+                  </button>
+                </div>
+              ) : todayStatus?.budgetEmpty ? (
                 <div className="bg-error/10 border border-error/20 rounded-3xl p-6 flex flex-col items-center text-center">
                   <div className="w-16 h-16 bg-error/20 rounded-full flex items-center justify-center mb-4 text-error">
                     <AlertTriangle size={32} />

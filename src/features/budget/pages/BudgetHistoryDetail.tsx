@@ -43,7 +43,7 @@ const BudgetHistoryDetail: React.FC = () => {
     const excludedIds = categories
       .filter(c => {
         const name = c.name.toLowerCase()
-        return name.includes('grap chi') || name.includes('grab chi')
+        return name.includes('grap chi') || name.includes('grab chi') || name === 'nhà'
       })
       .map(c => c.id)
 
