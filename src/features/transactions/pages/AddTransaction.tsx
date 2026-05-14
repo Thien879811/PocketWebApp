@@ -117,8 +117,7 @@ const AddTransaction: React.FC = () => {
                   <div className="flex items-baseline gap-1">
                     <input 
                       {...register('amount', { valueAsNumber: true })}
-                      disabled={isBudgetEmpty}
-                      className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px] disabled:opacity-50"
+                      className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px]"
                       placeholder="0"
                       type="number"
                       step="any"
@@ -130,13 +129,13 @@ const AddTransaction: React.FC = () => {
                   
                   {/* Budget Warnings UI */}
                   {isBudgetEmpty && (
-                    <div className="mt-2 text-xs font-bold text-error bg-error/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
-                       <X className="w-4 h-4" /> Hết ngân sách kế hoạch, không thể chi thêm!
+                    <div className="mt-2 text-xs font-bold text-secondary bg-secondary/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
+                       <X className="w-4 h-4" /> Ngân sách kế hoạch đã cạn, bạn vẫn có thể lưu giao dịch.
                     </div>
                   )}
                   {!isBudgetEmpty && willExceed && (
                     <div className="mt-2 text-[10px] font-bold text-error bg-error/10 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
-                       <AlertTriangle className="w-3.5 h-3.5" /> Vượt quá hạn mức {formatCurrency(targetRemaining)}/ngày!
+                       <AlertTriangle className="w-3.5 h-3.5" /> Giao dịch này sẽ vượt hạn mức {formatCurrency(targetRemaining)}/ngày.
                     </div>
                   )}
                 </div>
@@ -359,7 +358,7 @@ const AddTransaction: React.FC = () => {
           <button 
             type="submit"
             form="transaction-form"
-            disabled={isPending || isBudgetEmpty}
+            disabled={isPending}
             className="w-full bg-primary text-on-primary h-16 rounded-[1.5rem] font-headline font-black text-lg shadow-2xl shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:active:scale-100 disabled:hover:brightness-100 disabled:cursor-not-allowed"
           >
             {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Lưu giao dịch'}
