@@ -35,6 +35,31 @@ export const useActiveBudget = () => {
   })
 }
 
+export const useBudgetByDate = (date: string) => {
+  const user = useAuthStore((state) => state.user)
+
+  return useQuery<BudgetPlan | null>({
+    queryKey: ['budget-by-date', user?.id, date],
+    queryFn: async () => {
+      if (!user || !date) return null
+      
+      const { data, error } = await supabase
+        .from('budget_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .lte('start_date', date)
+        .gte('end_date', date)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (error) throw new Error(error.message)
+      return data
+    },
+    enabled: !!user && !!date,
+  })
+}
+
 export const useBudgetHistory = () => {
   const user = useAuthStore((state) => state.user)
 

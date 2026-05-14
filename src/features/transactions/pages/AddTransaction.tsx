@@ -8,7 +8,7 @@ import { transactionSchema, type TransactionFormValues } from '../types/transact
 import { useCreateTransaction } from '../hooks/useTransactionMutations'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { useAccounts } from '../../accounts/hooks/useAccounts'
-import { useActiveBudget, getDailyBudgetStatus } from '../../budget/hooks/useBudget'
+import { useBudgetByDate, getDailyBudgetStatus } from '../../budget/hooks/useBudget'
 import { useTransactions } from '../../transactions/hooks/useTransactions'
 import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 import { clsx, type ClassValue } from 'clsx'
@@ -23,8 +23,6 @@ const AddTransaction: React.FC = () => {
   const { mutate: createTransaction, isPending } = useCreateTransaction()
   const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { data: accounts } = useAccounts()
-  const { data: currentPlan } = useActiveBudget()
-  const { data: transactions } = useTransactions()
   
   const [transactionType, setTransactionType] = useState<TransactionType>('expense')
   const [showAccountSelector, setShowAccountSelector] = useState(false)
@@ -40,6 +38,10 @@ const AddTransaction: React.FC = () => {
       account_id: ''
     }
   })
+
+  const dateStr = watch('date') || new Date().toISOString().split('T')[0]
+  const { data: currentPlan } = useBudgetByDate(dateStr)
+  const { data: transactions } = useTransactions()
 
   const currentAmount = watch('amount')
   const selectedCategoryId = watch('category_id')
@@ -72,7 +74,6 @@ const AddTransaction: React.FC = () => {
   }) || []
 
   // Budget checks
-  const dateStr = watch('date') || new Date().toISOString().split('T')[0]
   const todayStatus = (currentPlan && transactions) ? getDailyBudgetStatus(currentPlan, transactions, dateStr) : null
   
   const isBudgetEmpty = Boolean(currentPlan && todayStatus?.budgetEmpty && transactionType === 'expense')
