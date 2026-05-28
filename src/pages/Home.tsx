@@ -281,7 +281,6 @@ const ActivitySection = ({ transactions, categories, selectedDate, onNavigate }:
              Chi tiết
              <ChevronRight size={14} />
           </button>
-          <a href="https://lyv.lacty.com.vn/">Downtime App</a>
        </div>
 
        {filteredTransactions.length === 0 ? (
