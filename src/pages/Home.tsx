@@ -281,6 +281,7 @@ const ActivitySection = ({ transactions, categories, selectedDate, onNavigate }:
              Chi tiết
              <ChevronRight size={14} />
           </button>
+          <a href="https://phone-shop-with-supabase.pages.dev/login">Chuyeent trsnggg</a>
        </div>
 
        {filteredTransactions.length === 0 ? (
