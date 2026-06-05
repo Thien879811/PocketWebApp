@@ -69,7 +69,7 @@ export const useDueDateScheduler = () => {
             title,
             message,
             link: `/ledger?tx=${tx.id}`,
-            read: false,
+            is_read: false,
           })
         }
       }

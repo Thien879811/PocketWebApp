@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X, ChevronRight, Calendar, Wallet, Trash2 } from 'lucide-react'
+import { Loader2, X, ChevronRight, Calendar, Wallet, Trash2, User, Clock } from 'lucide-react'
 import { transactionSchema, type TransactionFormValues } from '../types/transaction.schema'
 import { useUpdateTransaction, useDeleteTransaction } from '../hooks/useTransactionMutations'
 import { useTransaction } from '../hooks/useTransactions'
@@ -48,6 +48,8 @@ const EditTransaction: React.FC = () => {
       setValue('note', transaction.note || '')
       setValue('account_id', transaction.account_id)
       setValue('fee', transaction.fee || 0)
+      setValue('due_date', transaction.due_date || '')
+      setValue('person_name', transaction.person_name || '')
       setTransactionType(transaction.type)
     }
   }, [transaction, setValue, setTransactionType])
@@ -66,6 +68,23 @@ const EditTransaction: React.FC = () => {
       // @ts-ignore - Supabase accepts null for category_id
       submissionData.category_id = null
     }
+
+    if (transactionType === 'borrow' || transactionType === 'lend') {
+      if (!data.due_date || data.due_date.trim() === '') {
+        // @ts-ignore
+        submissionData.due_date = null
+      }
+      if (!data.person_name || data.person_name.trim() === '') {
+        // @ts-ignore
+        submissionData.person_name = null
+      }
+    } else {
+      // @ts-ignore
+      submissionData.due_date = null
+      // @ts-ignore
+      submissionData.person_name = null
+    }
+
     updateTransaction({ id, data: submissionData })
   }
 
@@ -224,6 +243,41 @@ const EditTransaction: React.FC = () => {
                       />
                       <span className="font-bold text-outline-variant">đ</span>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Person name for borrow/lend */}
+              {(transactionType === 'borrow' || transactionType === 'lend') && (
+                <div className="flex items-center gap-4 bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10 shadow-sm hover:bg-surface-container-low transition-colors">
+                  <User className="w-5 h-5 text-primary" />
+                  <div className="flex-1">
+                    <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-0.5">
+                      {transactionType === 'borrow' ? 'Người cho vay' : 'Người vay'}
+                    </label>
+                    <input
+                      {...register('person_name')}
+                      type="text"
+                      placeholder="Nhập tên..."
+                      className="w-full bg-transparent border-none p-0 text-body-md font-bold focus:ring-0 text-on-surface placeholder:text-outline-variant/40"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Due date for borrow/lend */}
+              {(transactionType === 'borrow' || transactionType === 'lend') && (
+                <div className="flex items-center gap-4 bg-amber-500/5 p-5 rounded-3xl border border-amber-500/20 shadow-sm transition-colors">
+                  <Clock className="w-5 h-5 text-amber-600" />
+                  <div className="flex-1">
+                    <label className="block font-label text-[10px] uppercase font-black text-amber-600/80 mb-0.5">
+                      Ngày đến hạn {transactionType === 'borrow' ? 'trả nợ' : 'thu hồi'}
+                    </label>
+                    <input
+                      {...register('due_date')}
+                      type="date"
+                      className="w-full bg-transparent border-none p-0 text-body-md font-bold focus:ring-0 text-on-surface"
+                    />
                   </div>
                 </div>
               )}

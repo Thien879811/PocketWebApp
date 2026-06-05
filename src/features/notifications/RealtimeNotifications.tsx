@@ -5,12 +5,14 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Bell } from 'lucide-react';
 import { router } from '@/routes';
 import { useDueDateScheduler } from './useDueDateScheduler';
+import { useCustomNotificationScheduler } from './useCustomNotificationScheduler';
 
 export const RealtimeNotifications: React.FC = () => {
   const user = useAuthStore((s) => s.user);
 
-  // Kích hoạt scheduler kiểm tra ngày trả nợ
+  // Kích hoạt scheduler kiểm tra ngày trả nợ và thông báo tự chọn
   useDueDateScheduler();
+  useCustomNotificationScheduler();
 
   useEffect(() => {
     if (!user?.id) return;

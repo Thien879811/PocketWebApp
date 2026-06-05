@@ -64,6 +64,23 @@ const AddTransaction: React.FC = () => {
       // @ts-ignore
       submissionData.category_id = null
     }
+    
+    if (transactionType === 'borrow' || transactionType === 'lend') {
+      if (!data.due_date || data.due_date.trim() === '') {
+        // @ts-ignore
+        submissionData.due_date = null
+      }
+      if (!data.person_name || data.person_name.trim() === '') {
+        // @ts-ignore
+        submissionData.person_name = null
+      }
+    } else {
+      // @ts-ignore
+      submissionData.due_date = null
+      // @ts-ignore
+      submissionData.person_name = null
+    }
+
     createTransaction(submissionData)
   }
 
