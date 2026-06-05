@@ -1,5 +1,4 @@
 import React from 'react'
-import { Loader2 } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -12,53 +11,65 @@ export const LoadingSpinner: React.FC<{
   className?: string
   message?: string
 }> = ({ size = 'md', className, message }) => {
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12',
-    xl: 'w-16 h-16',
-  }
+  const sizes = { sm: 'w-4 h-4', md: 'w-7 h-7', lg: 'w-10 h-10', xl: 'w-14 h-14' }
 
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-4 animate-in fade-in duration-500", className)}>
+    <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
       <div className="relative">
-        <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-        <Loader2 className={cn("animate-spin text-primary relative z-10", sizeClasses[size])} strokeWidth={2.5} />
+        <div className={cn("rounded-full border-2 border-primary/20 border-t-primary animate-spin", sizes[size])} />
       </div>
       {message && (
-        <p className="font-headline font-bold text-on-surface-variant opacity-80 mt-2 tracking-tight">
-          {message}
-        </p>
+        <p className="text-sm font-medium text-on-surface-variant">{message}</p>
       )}
     </div>
   )
 }
 
-export const LoadingScreen: React.FC<{ message?: string, fullScreen?: boolean }> = ({ message = 'Đang tải dữ liệu...', fullScreen = true }) => {
-  return (
-    <div className={cn(
-      "flex flex-col items-center justify-center bg-surface/80 backdrop-blur-md animate-in fade-in duration-300",
-      fullScreen ? "fixed inset-0 z-[100]" : "absolute inset-0 z-50 rounded-[inherit]"
-    )}>
-      <div className="bg-surface-container-low p-8 rounded-[3rem] shadow-2xl border border-outline-variant/10 flex flex-col items-center gap-6 transform transition-all hover:scale-105">
-        <div className="relative flex items-center justify-center w-20 h-20">
-          {/* Outer rotating dashed ring */}
-          <div className="absolute inset-0 border-4 border-dashed border-primary/30 rounded-full animate-[spin_3s_linear_infinite]" />
-          
-          {/* Inner pulsating glow */}
-          <div className="absolute inset-2 bg-primary/10 rounded-full animate-pulse" />
-          
-          {/* Core loader */}
-          <Loader2 className="w-10 h-10 animate-spin text-primary relative z-10" strokeWidth={3} />
-        </div>
-        
-        <div className="flex flex-col items-center gap-2 text-center max-w-[200px]">
-           <h3 className="font-headline font-black text-xl text-primary italic tracking-tight">PocketFlow</h3>
-           <p className="font-label font-bold text-sm text-on-surface-variant opacity-70 mt-1 uppercase tracking-widest leading-relaxed">
-             {message}
-           </p>
+export const LoadingScreen: React.FC<{
+  message?: string
+  fullScreen?: boolean
+}> = ({ message = 'Đang tải...', fullScreen = true }) => (
+  <div className={cn(
+    "flex flex-col items-center justify-center bg-surface/90 backdrop-blur-sm",
+    fullScreen ? "fixed inset-0 z-[100]" : "absolute inset-0 z-50 rounded-[inherit]"
+  )}>
+    <div className="flex flex-col items-center gap-5">
+      {/* Spinner */}
+      <div className="relative w-14 h-14 flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full border-2 border-primary/15 border-t-primary animate-spin" />
+        <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+          <span
+            className="material-symbols-outlined text-primary text-[20px]"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            account_balance_wallet
+          </span>
         </div>
       </div>
+
+      <div className="text-center">
+        <p className="text-sm font-semibold text-primary">PocketFlow</p>
+        <p className="text-xs text-on-surface-variant/70 mt-1">{message}</p>
+      </div>
     </div>
-  )
-}
+  </div>
+)
+
+/* Skeleton block for content placeholders */
+export const SkeletonLine: React.FC<{ className?: string }> = ({ className }) => (
+  <div className={cn("skeleton rounded-lg h-4", className)} />
+)
+
+export const SkeletonCard: React.FC = () => (
+  <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 space-y-3">
+    <div className="flex items-center gap-3">
+      <div className="skeleton w-10 h-10 rounded-xl" />
+      <div className="flex-1 space-y-2">
+        <SkeletonLine className="w-2/3" />
+        <SkeletonLine className="w-1/3 h-3" />
+      </div>
+    </div>
+    <SkeletonLine />
+    <SkeletonLine className="w-3/4" />
+  </div>
+)

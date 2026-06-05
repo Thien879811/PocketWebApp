@@ -1,54 +1,64 @@
 import React from 'react'
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface MonthSelectorProps {
   selectedDate: Date
   onDateChange: (date: Date) => void
 }
 
-export const MonthSelector: React.FC<MonthSelectorProps> = ({ selectedDate, onDateChange }) => {
-  const handlePrevMonth = () => {
+export const MonthSelector: React.FC<MonthSelectorProps> = ({
+  selectedDate,
+  onDateChange,
+}) => {
+  const handlePrevMonth = () =>
     onDateChange(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1))
-  }
 
-  const handleNextMonth = () => {
+  const handleNextMonth = () =>
     onDateChange(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1))
-  }
 
-  const handleResetDate = () => {
-    onDateChange(new Date())
-  }
+  const handleResetDate = () => onDateChange(new Date())
+
+  const isCurrentMonth =
+    selectedDate.getMonth() === new Date().getMonth() &&
+    selectedDate.getFullYear() === new Date().getFullYear()
+
+  const monthName = selectedDate.toLocaleDateString('vi-VN', {
+    month: 'long',
+    year: 'numeric',
+  })
 
   return (
-    <section className="bg-surface-container-low p-5 rounded-[2.5rem] border border-outline-variant/10 shadow-sm flex items-center justify-between mx-2">
-      <button 
+    <div className="flex items-center gap-2 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-1.5 shadow-card">
+      <button
         onClick={handlePrevMonth}
-        className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface hover:bg-white transition-all shadow-sm active:scale-90"
+        className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-surface-container transition-colors active:scale-90 flex-shrink-0"
+        aria-label="Tháng trước"
       >
-        <ChevronLeft size={20} className="text-on-surface-variant" />
+        <ChevronLeft size={18} className="text-on-surface-variant" />
       </button>
 
-      <div 
+      <button
         onClick={handleResetDate}
-        className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
+        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl hover:bg-surface-container transition-colors active:scale-95"
+        aria-label="Về tháng hiện tại"
       >
-        <div className="flex items-center gap-2 mb-0.5">
-          <Calendar size={14} className="text-primary" />
-          <span className="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary opacity-60">
-            {selectedDate.getFullYear()}
+        <span className="text-sm font-semibold text-on-surface capitalize">
+          {monthName}
+        </span>
+        {!isCurrentMonth && (
+          <span className="text-[10px] text-primary bg-primary/10 rounded-full px-1.5 py-0.5 font-semibold">
+            Reset
           </span>
-        </div>
-        <h3 className="font-headline font-black text-xl text-on-surface tracking-tight uppercase leading-none">
-          Tháng {selectedDate.getMonth() + 1}
-        </h3>
-      </div>
-
-      <button 
-        onClick={handleNextMonth}
-        className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface hover:bg-white transition-all shadow-sm active:scale-90"
-      >
-        <ChevronRight size={20} className="text-on-surface-variant" />
+        )}
       </button>
-    </section>
+
+      <button
+        onClick={handleNextMonth}
+        className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-surface-container transition-colors active:scale-90 flex-shrink-0"
+        aria-label="Tháng sau"
+      >
+        <ChevronRight size={18} className="text-on-surface-variant" />
+      </button>
+    </div>
   )
 }

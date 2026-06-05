@@ -3,7 +3,10 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X, ChevronRight, Calendar, Wallet, LayoutGrid, Inbox, Check, AlertTriangle } from 'lucide-react'
+import {
+  Loader2, X, ChevronRight, Calendar, Wallet,
+  LayoutGrid, Inbox, Check, AlertTriangle
+} from 'lucide-react'
 import { transactionSchema, type TransactionFormValues } from '../types/transaction.schema'
 import { useCreateTransaction } from '../hooks/useTransactionMutations'
 import { useCategories } from '../../categories/hooks/useCategories'
@@ -23,7 +26,7 @@ const AddTransaction: React.FC = () => {
   const { mutate: createTransaction, isPending } = useCreateTransaction()
   const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { data: accounts } = useAccounts()
-  
+
   const [transactionType, setTransactionType] = useState<TransactionType>('expense')
   const [showAccountSelector, setShowAccountSelector] = useState(false)
 
@@ -35,8 +38,8 @@ const AddTransaction: React.FC = () => {
       category_id: '',
       date: new Date().toISOString().split('T')[0],
       note: '',
-      account_id: ''
-    }
+      account_id: '',
+    },
   })
 
   const dateStr = watch('date') || new Date().toISOString().split('T')[0]
@@ -46,365 +49,394 @@ const AddTransaction: React.FC = () => {
   const currentAmount = watch('amount')
   const selectedCategoryId = watch('category_id')
   const selectedAccountId = watch('account_id')
-  
-  const selectedAccount = accounts?.find(a => a.id === selectedAccountId)
+  const selectedAccount = accounts?.find((a) => a.id === selectedAccountId)
 
-  const handleQuickAdd = (val: number) => {
-    setValue('amount', (currentAmount || 0) + val)
-  }
+  const handleQuickAdd = (val: number) => setValue('amount', (currentAmount || 0) + val)
 
   const onSubmit = (data: TransactionFormValues) => {
-    // For withdrawals, set category_id to null if empty
     const submissionData = { ...data, type: transactionType }
     if (transactionType === 'withdrawal' && !data.category_id) {
-      // @ts-ignore - Supabase accepts null for category_id
+      // @ts-ignore
       submissionData.category_id = null
     }
-    
     createTransaction(submissionData)
   }
 
-  // Filter categories by selected type
-  const filteredCategories = categories?.filter(cat => {
+  const filteredCategories = categories?.filter((cat) => {
     if (transactionType === 'borrow' || transactionType === 'lend') {
-      // Prioritize borrow/lend categories, but allow income/expense for backward compatibility or flexibility
       return cat.type === transactionType || cat.type === 'income' || cat.type === 'expense'
     }
     return cat.type === transactionType
   }) || []
 
-  // Budget checks
-  const todayStatus = (currentPlan && transactions) ? getDailyBudgetStatus(currentPlan, transactions, dateStr) : null
-  
+  const todayStatus = currentPlan && transactions
+    ? getDailyBudgetStatus(currentPlan, transactions, dateStr)
+    : null
+
   const isBudgetEmpty = Boolean(currentPlan && todayStatus?.budgetEmpty && transactionType === 'expense')
   const targetRemaining = isBudgetEmpty ? 0 : (todayStatus?.remainingDaily || 0)
   const willExceed = Boolean(currentPlan && transactionType === 'expense' && (currentAmount || 0) > targetRemaining)
-  
-  // Vibration effect helper
+
   React.useEffect(() => {
-    if (willExceed && "vibrate" in navigator) {
-       navigator.vibrate(200)
-    }
+    if (willExceed && 'vibrate' in navigator) navigator.vibrate(200)
   }, [willExceed])
+
+  const TYPE_OPTIONS = (['income', 'expense', 'withdrawal', 'borrow', 'business'] as const)
 
   return (
     <div className="min-h-screen bg-surface md:flex md:items-center md:justify-center md:p-8">
-      {/* 📱 Main Canvas Container */}
-      <div className="w-full max-w-[393px] md:max-w-xl bg-surface relative overflow-hidden flex flex-col md:rounded-[3rem] md:shadow-2xl md:h-[852px]">
-        
-        {/* 🏔️ Header */}
-        <header className="sticky top-0 w-full z-20 flex justify-between items-center px-6 h-16 bg-surface/80 backdrop-blur-md">
-          <button 
+      <div className="w-full max-w-[430px] md:max-w-lg bg-surface relative flex flex-col md:rounded-3xl md:shadow-2xl md:border md:border-outline-variant/20 md:max-h-[900px]">
+
+        {/* ── Header ─────────────────────────────── */}
+        <header className="sticky top-0 z-20 flex items-center justify-between px-5 h-14 bg-surface/90 backdrop-blur-md border-b border-outline-variant/10">
+          <button
             type="button"
             onClick={() => navigate(-1)}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors active:scale-95 duration-200"
+            className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-surface-container transition-colors active:scale-90"
           >
-            <X className="w-6 h-6 text-on-surface" />
+            <X size={20} className="text-on-surface" />
           </button>
-          <h1 className="font-headline font-bold text-xl tracking-tight text-primary">Giao dịch mới</h1>
-          <div className="w-10 h-10"></div>
+          <h1 className="text-base font-headline font-bold text-on-surface">Giao dịch mới</h1>
+          <div className="w-9" />
         </header>
 
-        {/* 🎨 Main Content scrolled area */}
-        <main className="flex-1 overflow-y-auto px-4 pb-40 no-scrollbar">
-          <form id="transaction-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 pt-4">
-            
-            {/* 💰 Hero Amount Section */}
-            <section className="text-center">
-              <div className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/10">
-                <div className="flex flex-col items-center gap-2">
-                  <span className="font-label text-label-sm uppercase tracking-widest text-on-surface-variant">Số tiền</span>
-                  <div className="flex items-baseline gap-1">
-                    <input 
-                      {...register('amount', { valueAsNumber: true })}
-                      className="bg-transparent border-none text-display-lg font-headline text-primary focus:ring-0 text-center w-full max-w-[250px]"
-                      placeholder="0"
-                      type="number"
-                      step="any"
-                      autoFocus
-                    />
-                    <span className="text-headline-sm font-headline text-on-surface-variant">đ</span>
-                  </div>
-                  {errors.amount && <p className="text-xs text-error font-bold">{errors.amount.message}</p>}
-                  
-                  {/* Budget Warnings UI */}
-                  {isBudgetEmpty && (
-                    <div className="mt-2 text-xs font-bold text-secondary bg-secondary/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
-                       <X className="w-4 h-4" /> Ngân sách kế hoạch đã cạn, bạn vẫn có thể lưu giao dịch.
-                    </div>
-                  )}
-                  {!isBudgetEmpty && willExceed && (
-                    <div className="mt-2 text-[10px] font-bold text-error bg-error/10 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
-                       <AlertTriangle className="w-3.5 h-3.5" /> Giao dịch này sẽ vượt hạn mức {formatCurrency(targetRemaining)}/ngày.
-                    </div>
-                  )}
-                </div>
+        {/* ── Scrollable content ───────────────────── */}
+        <main className="flex-1 overflow-y-auto scrollbar-hide px-5 pb-36 pt-4">
+          <form id="transaction-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
-                {/* Quick Amount Chips */}
-                <div className="flex flex-wrap mt-6 justify-center gap-2 pb-2">
-                  {[1,2,5,10,20,50,100,200,500].map(val => (
-                    <button 
-                      key={val}
-                      type="button"
-                      onClick={() => handleQuickAdd(val * 1000)}
-                      className="px-4 py-2 bg-surface-container-high rounded-full font-label text-label-sm text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors flex-shrink-0"
-                    >
-                      +{val}k đ
-                    </button>
-                  ))}
-                </div>
+            {/* ── Amount ──────────────────────────── */}
+            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5">
+              <p className="text-xs text-on-surface-variant/70 font-medium uppercase tracking-wider text-center mb-2">
+                Số tiền
+              </p>
+              <div className="flex items-baseline justify-center gap-2">
+                <input
+                  {...register('amount', { valueAsNumber: true })}
+                  type="number"
+                  step="any"
+                  autoFocus
+                  placeholder="0"
+                  className="bg-transparent border-none text-5xl font-headline font-bold text-primary text-center w-full max-w-[220px] p-0 focus:ring-0"
+                />
+                <span className="text-xl font-semibold text-on-surface-variant/60">đ</span>
               </div>
-            </section>
 
-            {/* 🔄 Type Toggle */}
-            <section>
-              <div className="bg-surface-container-high p-1.5 rounded-full flex relative shadow-inner overflow-x-auto no-scrollbar">
-                {(['income', 'expense', 'withdrawal', 'borrow', 'business'] as const).map(typeKey => {
-                  const meta = TRANSACTION_TYPES_METADATA[typeKey];
-                  const isActive = typeKey === 'borrow' 
-                    ? (transactionType === 'borrow' || transactionType === 'lend')
-                    : transactionType === typeKey;
+              {errors.amount && (
+                <p className="text-xs text-error text-center mt-2 font-medium">{errors.amount.message}</p>
+              )}
 
+              {/* Budget alerts */}
+              {isBudgetEmpty && (
+                <div className="flex items-center gap-2 mt-3 bg-secondary/8 text-secondary rounded-xl px-3 py-2 text-xs font-semibold">
+                  <AlertTriangle size={14} />
+                  Ngân sách kế hoạch đã cạn. Bạn vẫn có thể lưu giao dịch.
+                </div>
+              )}
+              {!isBudgetEmpty && willExceed && (
+                <div className="flex items-center gap-2 mt-3 bg-error/8 text-error rounded-xl px-3 py-2 text-xs font-semibold animate-pulse">
+                  <AlertTriangle size={14} />
+                  Vượt hạn mức {formatCurrency(targetRemaining)}/ngày
+                </div>
+              )}
+
+              {/* Quick chips */}
+              <div className="flex flex-wrap justify-center gap-2 mt-4">
+                {[1,2,5,10,20,50,100,200,500].map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => handleQuickAdd(val * 1000)}
+                    className="px-3 py-1.5 bg-surface-container rounded-lg text-xs font-semibold text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors flex-shrink-0"
+                  >
+                    +{val}k
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Type Toggle ─────────────────────── */}
+            <div className="bg-surface-container rounded-2xl p-1 flex gap-1 overflow-x-auto scrollbar-hide">
+              {TYPE_OPTIONS.map((typeKey) => {
+                const meta = TRANSACTION_TYPES_METADATA[typeKey]
+                const active = typeKey === 'borrow'
+                  ? (transactionType === 'borrow' || transactionType === 'lend')
+                  : transactionType === typeKey
+                return (
+                  <button
+                    key={typeKey}
+                    type="button"
+                    onClick={() => {
+                      const next = typeKey === 'borrow' ? 'borrow' : typeKey
+                      setTransactionType(next)
+                      setValue('type', next)
+                      if (typeKey === 'withdrawal') setValue('category_id', '')
+                    }}
+                    className={cn(
+                      "flex-shrink-0 px-3.5 py-2 rounded-xl text-[11px] font-semibold transition-all whitespace-nowrap",
+                      active
+                        ? "bg-surface-container-lowest text-on-surface shadow-sm"
+                        : "text-on-surface-variant/60 hover:text-on-surface"
+                    )}
+                  >
+                    {typeKey === 'borrow' ? 'Mượn/Trả' : meta.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* ── Borrow/Lend Sub-toggle ──────────── */}
+            {(transactionType === 'borrow' || transactionType === 'lend') && (
+              <div className="bg-surface-container rounded-xl p-1 flex gap-1">
+                {(['borrow', 'lend'] as const).map((typeKey) => {
+                  const meta = TRANSACTION_TYPES_METADATA[typeKey]
                   return (
-                    <button 
+                    <button
                       key={typeKey}
                       type="button"
-                      onClick={() => {
-                        const nextType = typeKey === 'borrow' ? 'borrow' : typeKey;
-                        setTransactionType(nextType);
-                        setValue('type', nextType);
-                        if (typeKey === 'withdrawal') setValue('category_id', '');
-                      }}
+                      onClick={() => { setTransactionType(typeKey); setValue('type', typeKey) }}
                       className={cn(
-                        "flex-1 py-3 px-2 rounded-full font-label text-[10px] font-black transition-all duration-300 min-w-[70px]",
-                        isActive 
-                          ? `${meta.badge.split(' ')[0]} ${meta.color} shadow-lg scale-x-[1.02]` 
-                          : "text-on-surface-variant/60 hover:text-on-surface"
+                        "flex-1 py-2 rounded-lg text-xs font-semibold transition-all",
+                        transactionType === typeKey
+                          ? "bg-surface-container-lowest text-on-surface shadow-sm"
+                          : "text-on-surface-variant/70"
                       )}
                     >
-                      {typeKey === 'borrow' ? 'Mượn/Trả' : meta.label}
+                      {meta.label} ({meta.prefix})
                     </button>
-                  );
+                  )
                 })}
               </div>
-            </section>
-
-            {/* ↕️ Lend/Borrow Sub-toggle */}
-            {(transactionType === 'borrow' || transactionType === 'lend') && (
-              <section className="animate-in fade-in slide-in-from-top-2">
-                <div className="bg-surface-container-high p-1 rounded-2xl flex border border-outline-variant/10">
-                  {(['borrow', 'lend'] as const).map(typeKey => {
-                    const meta = TRANSACTION_TYPES_METADATA[typeKey];
-                    return (
-                      <button 
-                        key={typeKey}
-                        type="button"
-                        onClick={() => {
-                          setTransactionType(typeKey);
-                          setValue('type', typeKey);
-                        }}
-                        className={cn(
-                          "flex-1 py-2.5 rounded-xl font-label text-[10px] font-black transition-all",
-                          transactionType === typeKey 
-                            ? `${meta.badge.split(' ')[0]} ${meta.color} shadow-sm` 
-                            : "text-on-surface-variant/60 hover:text-on-surface"
-                        )}
-                      >
-                        {meta.label} ({meta.prefix})
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="text-[9px] text-on-surface-variant/60 font-bold mt-2 px-2 italic text-center">
-                  * Giao dịch này chỉ ảnh hưởng ví, không tính vào kế hoạch chi tiêu.
-                </p>
-              </section>
             )}
 
-            {/* 📂 Category Grid */}
-            <section>
-              <div className="flex justify-between items-end mb-4 px-2">
-                <h2 className="font-headline text-headline-sm font-bold opacity-80 uppercase tracking-tight text-sm">Danh mục</h2>
-                <button 
-                  type="button" 
+            {/* ── Category Grid ────────────────────── */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-on-surface-variant/70 uppercase tracking-wider">
+                  Danh mục
+                </p>
+                <button
+                  type="button"
                   onClick={() => navigate('/settings/categories')}
-                  className="text-primary text-xs font-black hover:underline"
+                  className="text-xs text-primary font-semibold hover:underline"
                 >
                   Quản lý
                 </button>
               </div>
 
               {categoriesLoading ? (
-                <div className="flex flex-col items-center justify-center py-10 opacity-40">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <div className="flex justify-center py-8">
+                  <Loader2 size={24} className="animate-spin text-primary" />
                 </div>
               ) : filteredCategories.length === 0 ? (
-                <div className="bg-surface-container-low rounded-3xl p-8 text-center space-y-3 cursor-pointer hover:bg-surface-container-high transition-colors" onClick={() => navigate('/settings/categories/add')}>
-                   <Inbox className="w-8 h-8 text-outline-variant mx-auto" />
-                   <p className="text-xs text-outline font-bold uppercase tracking-tight">Trống danh mục {(transactionType === 'borrow' || transactionType === 'lend') ? 'mượn trả' : transactionType === 'income' ? 'thu nhập' : 'chi tiêu'}</p>
-                   <p className="text-[10px] text-primary font-bold">Thêm danh mục mới</p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/settings/categories/add')}
+                  className="w-full bg-surface-container rounded-2xl p-6 text-center border-2 border-dashed border-outline-variant/30 hover:border-primary/40 transition-colors"
+                >
+                  <Inbox size={22} className="text-on-surface-variant/40 mx-auto mb-2" />
+                  <p className="text-xs text-on-surface-variant/60 font-medium">
+                    Chưa có danh mục
+                  </p>
+                  <p className="text-xs text-primary font-semibold mt-1">Thêm ngay →</p>
+                </button>
               ) : (
-                <div className="grid grid-cols-4 gap-3">
-                  {filteredCategories.map(cat => (
-                    <button 
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setValue('category_id', cat.id)}
-                      className={cn(
-                        "flex flex-col items-center gap-2 p-3.5 rounded-2xl transition-all duration-200 active:scale-[0.9]",
-                        selectedCategoryId === cat.id 
-                          ? cn("shadow-xl ring-2", (transactionType === 'income' || transactionType === 'borrow') ? "bg-secondary/10 text-secondary ring-secondary/30" : "bg-primary-fixed text-on-primary-fixed ring-primary/30")
-                          : "bg-surface-container-low text-on-surface-variant/80 hover:bg-surface-container-high"
-                      )}
-                    >
-                      <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: selectedCategoryId === cat.id ? "'FILL' 1" : "'FILL' 0" }}>
-                        {cat.icon}
-                      </span>
-                      <span className="font-label text-[10px] font-black tracking-tighter truncate w-full text-center leading-none">{cat.name}</span>
-                    </button>
-                  ))}
-                  <button 
+                <div className="grid grid-cols-4 gap-2.5">
+                  {filteredCategories.map((cat) => {
+                    const active = selectedCategoryId === cat.id
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setValue('category_id', cat.id)}
+                        className={cn(
+                          "flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all duration-200 active:scale-90",
+                          active
+                            ? "bg-primary/10 ring-2 ring-primary/30 shadow-sm"
+                            : "bg-surface-container hover:bg-surface-container-high"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "material-symbols-outlined text-[22px] transition-colors",
+                            active ? "text-primary" : "text-on-surface-variant"
+                          )}
+                          style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
+                        >
+                          {cat.icon}
+                        </span>
+                        <span className="text-[10px] font-semibold text-on-surface-variant truncate w-full text-center leading-none">
+                          {cat.name}
+                        </span>
+                      </button>
+                    )
+                  })}
+                  <button
                     type="button"
                     onClick={() => navigate('/settings/categories/add')}
-                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-surface-container-highest/10 border-2 border-dashed border-outline-variant/30 text-outline-variant hover:text-primary transition-all active:scale-95"
+                    className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-surface-container border-2 border-dashed border-outline-variant/30 text-on-surface-variant/50 hover:text-primary hover:border-primary/40 transition-all active:scale-90"
                   >
-                    <LayoutGrid size={24} />
-                    <span className="font-label text-[10px] font-bold tracking-tight">Mới</span>
+                    <LayoutGrid size={20} />
+                    <span className="text-[10px] font-semibold">Mới</span>
                   </button>
                 </div>
               )}
-            </section>
+            </div>
 
-            {/* 📝 Form Details */}
-            <section className="flex flex-col gap-4 mb-20">
-              
-              {/* Wallet Selector */}
-              <div 
-                className={cn(
-                  "flex items-center gap-4 p-5 rounded-3xl border transition-all cursor-pointer group shadow-sm",
-                  selectedAccountId ? "bg-primary/5 border-primary/20" : "bg-surface-container-lowest border-outline-variant/10 hover:bg-surface-container-low"
-                )}
+            {/* ── Details ──────────────────────────── */}
+            <div className="space-y-3">
+
+              {/* Account */}
+              <button
+                type="button"
                 onClick={() => setShowAccountSelector(true)}
+                className={cn(
+                  "w-full flex items-center gap-3.5 p-4 rounded-2xl border transition-all text-left",
+                  selectedAccountId
+                    ? "bg-primary/5 border-primary/25"
+                    : "bg-surface-container-lowest border-outline-variant/20 hover:bg-surface-container"
+                )}
               >
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", selectedAccountId ? "bg-primary text-on-primary" : "bg-surface-container text-primary")}>
-                  <Wallet size={20} />
+                <div className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                  selectedAccountId ? "bg-primary text-white" : "bg-surface-container text-primary"
+                )}>
+                  <Wallet size={18} strokeWidth={2} />
                 </div>
-                <div className="flex-1 text-left">
-                  <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-0.5">Tài khoản / Ví</label>
-                  <span className={cn("text-body-md font-bold", selectedAccountId ? "text-on-surface" : "text-outline-variant italic")}>
-                    {selectedAccount ? selectedAccount.name : 'Chọn một tài khoản...'}
-                  </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-0.5">
+                    Tài khoản
+                  </p>
+                  <p className={cn(
+                    "text-sm font-semibold truncate",
+                    selectedAccountId ? "text-on-surface" : "text-on-surface-variant/60 italic"
+                  )}>
+                    {selectedAccount ? selectedAccount.name : 'Chọn tài khoản...'}
+                  </p>
                 </div>
-                <ChevronRight size={20} className="text-outline-variant group-hover:translate-x-1 transition-transform" />
-              </div>
+                <ChevronRight size={16} className="text-on-surface-variant/40 flex-shrink-0" />
+              </button>
 
-              {/* Date Input */}
-              <div className="flex items-center gap-4 bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10 group cursor-pointer relative shadow-sm hover:bg-surface-container-low transition-colors">
-                <Calendar className="w-5 h-5 text-primary" />
-                <div className="flex-1">
-                  <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-0.5">Ngày tháng</label>
-                  <input 
+              {/* Date */}
+              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20">
+                <div className="w-10 h-10 bg-surface-container text-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Calendar size={18} strokeWidth={2} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-0.5">
+                    Ngày
+                  </p>
+                  <input
                     {...register('date')}
                     type="date"
-                    className="w-full bg-transparent border-none p-0 text-body-md font-bold focus:ring-0 text-on-surface"
+                    className="w-full bg-transparent border-none p-0 text-sm font-semibold text-on-surface focus:ring-0"
                   />
                 </div>
               </div>
 
-              {/* Fee Input for Withdrawals */}
+              {/* Withdrawal fee */}
               {transactionType === 'withdrawal' && (
-                <div className="flex items-center gap-4 bg-surface-container-lowest p-5 rounded-3xl border border-outline-variant/10 group cursor-pointer relative shadow-sm hover:bg-surface-container-low transition-colors">
-                  <div className="flex-1">
-                    <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-0.5">Phí rút tiền ném vào ngân hàng</label>
-                    <div className="flex items-center gap-1">
-                      <input 
-                        {...register('fee', { valueAsNumber: true })}
-                        type="number"
-                        step="any"
-                        placeholder="0"
-                        className="w-full bg-transparent border-none p-0 text-body-md font-bold focus:ring-0 text-on-surface"
-                      />
-                      <span className="font-bold text-outline-variant">đ</span>
-                    </div>
+                <div className="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20">
+                  <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-1.5">
+                    Phí rút tiền
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      {...register('fee', { valueAsNumber: true })}
+                      type="number"
+                      step="any"
+                      placeholder="0"
+                      className="flex-1 bg-transparent border-none p-0 text-sm font-semibold text-on-surface focus:ring-0"
+                    />
+                    <span className="text-sm text-on-surface-variant/60 font-medium">đ</span>
                   </div>
                 </div>
               )}
 
               {/* Notes */}
-              <div className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/10 shadow-sm">
-                <label className="block font-label text-[10px] uppercase font-black text-outline opacity-70 mb-3">Ghi chú</label>
-                <textarea 
+              <div className="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20">
+                <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-2">
+                  Ghi chú
+                </p>
+                <textarea
                   {...register('note')}
-                  className="w-full 
-                      bg-transparent 
-                      border-none 
-                      p-0 
-                      focus:ring-0 
-                      min-h-[120px] 
-                      text-on-surface
-                      placeholder:text-outline-variant/50 
-                      font-medium 
-                      leading-relaxed" 
-                  placeholder="Bạn đã chi tiêu việc gì?..."
-                ></textarea>
+                  placeholder="Bạn đã chi tiêu gì?..."
+                  className="w-full bg-transparent border-none p-0 text-sm font-medium text-on-surface focus:ring-0 min-h-[80px] resize-none placeholder:text-on-surface-variant/40 leading-relaxed"
+                />
               </div>
-            </section>
+            </div>
           </form>
         </main>
 
-        {/* 🚀 Footer Action */}
-        <footer className="absolute bottom-0 w-full p-6 pt-2 bg-surface/80 backdrop-blur-3xl z-[30] border-t border-white/20">
-          <button 
+        {/* ── Footer Submit ─────────────────────── */}
+        <footer className="absolute bottom-0 left-0 right-0 p-4 bg-surface/95 backdrop-blur-lg border-t border-outline-variant/10 z-20">
+          <button
             type="submit"
             form="transaction-form"
             disabled={isPending}
-            className="w-full bg-primary text-on-primary h-16 rounded-[1.5rem] font-headline font-black text-lg shadow-2xl shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:active:scale-100 disabled:hover:brightness-100 disabled:cursor-not-allowed"
+            className="w-full h-14 bg-primary text-white rounded-2xl font-semibold text-base flex items-center justify-center gap-2 shadow-md shadow-primary/30 hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Lưu giao dịch'}
+            {isPending ? <Loader2 size={20} className="animate-spin" /> : 'Lưu giao dịch'}
           </button>
         </footer>
 
-        {/* 🏦 ACCOUNT SELECTOR DRAWER */}
+        {/* ── Account Selector Sheet ──────────────── */}
         {showAccountSelector && (
-          <div className="fixed inset-0 z-[100] flex flex-col md:absolute">
-             <div className="absolute inset-0 bg-on-background/60 backdrop-blur-md animate-in fade-in" onClick={() => setShowAccountSelector(false)} />
-             <div className="mt-auto bg-surface rounded-t-[3rem] p-8 pb-12 relative z-10 animate-in slide-in-from-bottom duration-300 max-h-[80%] overflow-y-auto">
-                <div className="w-12 h-1.5 bg-outline-variant/40 rounded-full mx-auto mb-8"></div>
-                <div className="flex items-center justify-between mb-8">
-                   <h3 className="font-headline font-black text-2xl text-on-surface">Chọn tài khoản</h3>
-                   <button onClick={() => setShowAccountSelector(false)} className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
-                     <X size={20} />
-                   </button>
-                </div>
-                <div className="grid gap-4">
-                  {accounts?.map(acc => (
+          <div className="fixed inset-0 z-[100] flex flex-col">
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowAccountSelector(false)}
+            />
+            <div className="mt-auto bg-surface rounded-t-3xl z-10 relative animate-in slide-in-from-bottom-4 duration-300">
+              {/* Drag handle */}
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 bg-outline-variant/50 rounded-full" />
+              </div>
+
+              <div className="px-5 py-4 flex items-center justify-between border-b border-outline-variant/10">
+                <h3 className="font-headline font-bold text-lg text-on-surface">
+                  Chọn tài khoản
+                </h3>
+                <button
+                  onClick={() => setShowAccountSelector(false)}
+                  className="w-8 h-8 bg-surface-container rounded-xl flex items-center justify-center hover:bg-surface-container-high transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="px-5 py-3 pb-8 space-y-2 max-h-[60vh] overflow-y-auto">
+                {accounts?.map((acc) => {
+                  const active = selectedAccountId === acc.id
+                  return (
                     <button
                       key={acc.id}
                       type="button"
-                      onClick={() => {
-                        setValue('account_id', acc.id);
-                        setShowAccountSelector(false);
-                      }}
+                      onClick={() => { setValue('account_id', acc.id); setShowAccountSelector(false) }}
                       className={cn(
-                        "flex items-center gap-5 p-5 rounded-3xl transition-all active:scale-[0.97] border",
-                        selectedAccountId === acc.id ? "bg-primary text-on-primary shadow-lg border-primary" : "bg-surface-container-lowest text-on-surface border-outline-variant/10 hover:bg-surface-container-low"
+                        "w-full flex items-center gap-3.5 p-4 rounded-2xl transition-all border text-left",
+                        active
+                          ? "bg-primary text-white border-primary"
+                          : "bg-surface-container-lowest border-outline-variant/20 hover:bg-surface-container"
                       )}
                     >
-                      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", selectedAccountId === acc.id ? "bg-white/20" : "bg-surface-container text-primary shadow-inner")}>
-                         <Wallet size={24} />
+                      <div className={cn(
+                        "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0",
+                        active ? "bg-white/20" : "bg-surface-container text-primary"
+                      )}>
+                        <Wallet size={20} strokeWidth={2} />
                       </div>
-                      <div className="flex-1 text-left">
-                        <p className="font-headline font-bold text-lg leading-tight">{acc.name}</p>
-                        <p className={cn("font-label text-xs font-bold opacity-60", selectedAccountId === acc.id ? "text-white" : "text-outline")}>
-                          Số dư: {formatCurrency(acc.balance)}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm leading-tight">{acc.name}</p>
+                        <p className={cn("text-xs mt-0.5 font-medium", active ? "text-white/70" : "text-on-surface-variant/60")}>
+                          {formatCurrency(acc.balance)}
                         </p>
                       </div>
-                      {selectedAccountId === acc.id && <Check size={18} strokeWidth={3} />}
+                      {active && <Check size={16} className="flex-shrink-0" strokeWidth={2.5} />}
                     </button>
-                  ))}
-                </div>
-             </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>

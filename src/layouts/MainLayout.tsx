@@ -3,172 +3,246 @@ import { Outlet, Link, useLocation } from 'react-router-dom'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useAuthStore } from '@/store/useAuthStore'
+import {
+  Plus, X, LogOut,
+} from 'lucide-react'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-const navLinksDesktop = [
-  { name: 'Home', path: '/', icon: 'home' },
-  { name: 'Ledger', path: '/ledger', icon: 'receipt_long' },
-  { name: 'Stats', path: '/stats', icon: 'insights' },
-  { name: 'Wallet', path: '/wallet', icon: 'account_balance_wallet' },
-  { name: 'Settings', path: '/settings', icon: 'settings' }
+const NAV_LINKS = [
+  { name: 'Trang chủ', path: '/',         materialIcon: 'home' },
+  { name: 'Sổ sách',   path: '/ledger',   materialIcon: 'receipt_long' },
+  { name: 'Thống kê',  path: '/stats',    materialIcon: 'insights' },
+  { name: 'Ví tiền',   path: '/wallet',   materialIcon: 'account_balance_wallet' },
+  { name: 'Cài đặt',   path: '/settings', materialIcon: 'settings' },
 ]
 
 const MainLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const location = useLocation()
-  
-  const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
+
+  const user      = useAuthStore((s) => s.user)
+  const logout    = useAuthStore((s) => s.logout)
 
   const isActive = (path: string) => location.pathname === path
 
-  const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || user?.email || 'User')}&background=005da7&color=fff`
-  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
+  const avatarUrl = user?.user_metadata?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      user?.user_metadata?.full_name || user?.email || 'U'
+    )}&background=4f6ef7&color=fff&bold=true&size=128`
+
+  const displayName =
+    user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
 
   return (
-    <div className="flex h-screen bg-surface font-body text-on-surface selection:bg-primary/10 overflow-hidden">
-      
-      {/* 🚀 DESKTOP SIDEBAR */}
-      <aside className="hidden md:flex w-72 flex-col border-r border-outline-variant/20 bg-surface-container-lowest/80 backdrop-blur-xl z-10 transition-all">
-        <div className="p-8 flex items-center gap-3 mt-2">
-          <div className="w-10 h-10 rounded-full bg-surface-container-high flex flex-shrink-0 items-center justify-center overflow-hidden border border-outline-variant/20 shadow-sm dark:shadow-dark">
-             <img alt="User avatar" className="w-full h-full object-cover dark:opacity-90" src={avatarUrl} />
+    <div className="flex h-screen bg-surface font-body text-on-surface overflow-hidden">
+
+      {/* ─── DESKTOP SIDEBAR ─────────────────────────────────────── */}
+      <aside className="hidden md:flex w-64 flex-col border-r border-outline-variant/20 bg-surface-container-lowest z-10">
+
+        {/* Brand */}
+        <div className="px-6 py-6 flex items-center gap-3">
+          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-sm shadow-primary/30">
+            <span className="material-symbols-outlined text-white text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              account_balance_wallet
+            </span>
           </div>
-          <h1 className="text-2xl font-headline font-extrabold tracking-tight text-primary italic dark:glow">PocketFlow</h1>
+          <span className="text-lg font-headline font-extrabold tracking-tight text-on-surface">
+            PocketFlow
+          </span>
         </div>
-        
-        <nav className="flex-1 space-y-2 px-6 pt-4">
-          {navLinksDesktop.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={cn(
-                "flex items-center gap-4 rounded-2xl px-5 py-3.5 text-sm font-bold transition-all duration-300",
-                isActive(link.path) 
-                  ? "bg-primary text-on-primary shadow-lg shadow-primary/20 dark:shadow-glow-primary scale-[1.02]" 
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              )}
-            >
-              <span className="material-symbols-outlined text-[24px]">{link.icon}</span>
-              {link.name}
-            </Link>
-          ))}
+
+        {/* Nav */}
+        <nav className="flex-1 px-3 space-y-1 pt-2">
+          {NAV_LINKS.map((link) => {
+            const active = isActive(link.path)
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200",
+                  active
+                    ? "bg-primary text-white shadow-sm shadow-primary/30"
+                    : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                )}
+              >
+                <span
+                  className="material-symbols-outlined text-[20px] flex-shrink-0"
+                  style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
+                >
+                  {link.materialIcon}
+                </span>
+                <span>{link.name}</span>
+              </Link>
+            )
+          })}
         </nav>
 
-        <div className="p-6 space-y-4">
-            <Link to="/add" className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary-container text-on-secondary-container px-4 py-3.5 text-sm font-bold hover:bg-secondary-container/80 transition-colors shadow-sm">
-               <span className="material-symbols-outlined text-[20px]">add</span>
-               New Transaction
-            </Link>
-            <button
-               onClick={logout}
-               className="flex w-full items-center gap-4 rounded-2xl px-5 py-3.5 text-sm font-bold text-error hover:bg-error-container transition-colors"
-            >
-               <span className="material-symbols-outlined text-[24px]">logout</span>
-               Sign Out
-            </button>
+        {/* Bottom Actions */}
+        <div className="p-4 space-y-2">
+          <Link
+            to="/add"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary/10 text-primary px-4 py-3 text-sm font-bold hover:bg-primary hover:text-white transition-all duration-200"
+          >
+            <Plus size={18} strokeWidth={2.5} />
+            Giao dịch mới
+          </Link>
+          <button
+            onClick={logout}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-on-surface-variant hover:bg-error/8 hover:text-error transition-all duration-200"
+          >
+            <LogOut size={16} strokeWidth={2} />
+            Đăng xuất
+          </button>
         </div>
       </aside>
 
-      {/* 📱 MAIN CONTENT WRAPPER */}
-      <div className="flex flex-1 flex-col overflow-hidden relative bg-surface">
-        
-        {/* Mobile Top Header */}
-        <header className="flex h-16 items-center justify-between px-6 bg-surface/90 backdrop-blur-md md:hidden sticky top-0 z-30 transition-all border-b border-outline-variant/10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-surface-container-high flex flex-shrink-0 items-center justify-center overflow-hidden border border-outline-variant/10 shadow-sm dark:shadow-dark active:scale-95 transition-transform" onClick={() => setIsSidebarOpen(true)}>
-              <img alt="User" className="w-full h-full object-cover dark:opacity-90" src={avatarUrl}/>
-            </div>
-            <span className="font-headline font-bold text-xl tracking-tight text-primary italic dark:glow">PocketFlow</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-200">
-              <span className="material-symbols-outlined text-primary">notifications</span>
-            </button>
-          </div>
+      {/* ─── MAIN CONTENT ─────────────────────────────────────────── */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+
+        {/* Mobile Header */}
+        <header className="md:hidden flex h-14 items-center justify-between px-4 bg-surface-container-lowest/95 backdrop-blur-md border-b border-outline-variant/15 sticky top-0 z-30">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-surface-container transition-colors active:scale-95"
+          >
+            <img
+              src={avatarUrl}
+              alt="User"
+              className="w-8 h-8 rounded-xl object-cover ring-2 ring-primary/20"
+            />
+          </button>
+
+          <span className="font-headline font-bold text-base tracking-tight text-on-surface">
+            PocketFlow
+          </span>
+
+          <Link
+            to="/add"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary text-white shadow-sm shadow-primary/40 active:scale-95 transition-transform"
+          >
+            <Plus size={18} strokeWidth={2.5} />
+          </Link>
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto scroll-smooth p-6 md:p-8 pt-4 md:pt-10 pb-36 md:pb-8">
-          <div className="mx-auto max-w-6xl">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto scroll-smooth pb-24 md:pb-0">
+          <div className="mx-auto max-w-5xl px-4 md:px-8 pt-4 md:pt-8">
             <Outlet />
           </div>
         </main>
 
-        {/* 📱 MOBILE BOTTOM NAV */}
-        <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-surface/85 backdrop-blur-xl rounded-t-[24px] shadow-[0_-4px_24px_rgba(9,29,46,0.06)] md:hidden border-t border-outline-variant/10">
-          {navLinksDesktop.map((link) => (
-            <Link 
-              key={link.path}
-              to={link.path} 
-              className={cn(
-                "relative flex flex-col items-center justify-center p-2 min-w-[64px] active:scale-90 transition-all duration-150", 
-                isActive(link.path) ? "text-primary dark:glow" : "text-on-surface-variant hover:text-primary"
-              )}
-            >
-               <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: isActive(link.path) ? "'FILL' 1" : "'FILL' 0" }}>
-                 {link.icon}
-               </span>
-               <span className={cn("font-label font-medium text-[10px] uppercase tracking-wider mt-1", isActive(link.path) ? "font-black" : "")}>{link.name}</span>
-               {isActive(link.path) && (
-                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary shadow-glow-primary" />
-               )}
-            </Link>
-          ))}
+        {/* ─── MOBILE BOTTOM NAV ─────────────────────────────────── */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest/95 backdrop-blur-xl border-t border-outline-variant/15 pb-safe">
+          <div className="flex items-center justify-around px-2 pt-2 pb-1">
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.path)
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-all duration-200 min-w-[56px] active:scale-90",
+                    active ? "text-primary" : "text-on-surface-variant"
+                  )}
+                >
+                  <div className="relative">
+                    <span
+                      className="material-symbols-outlined text-[24px]"
+                      style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
+                    >
+                      {link.materialIcon}
+                    </span>
+                    {active && (
+                      <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                    )}
+                  </div>
+                  <span className={cn(
+                    "text-[10px] font-medium tracking-tight leading-none",
+                    active ? "text-primary font-semibold" : "text-on-surface-variant/70"
+                  )}>
+                    {link.name}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
         </nav>
-
-        {/* 📱 MOBILE SIDEBAR */}
-        {isSidebarOpen && (
-           <div className="fixed inset-0 z-[100] flex md:hidden">
-              <div className="fixed inset-0 bg-on-background/40 backdrop-blur-sm transition-opacity" onClick={() => setIsSidebarOpen(false)} />
-              <aside className="relative flex w-80 flex-col bg-surface p-8 shadow-2xl animate-in slide-in-from-left duration-300">
-                 <button 
-                    onClick={() => setIsSidebarOpen(false)}
-                    className="absolute right-6 top-6 rounded-full p-2 bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"
-                 >
-                    <span className="material-symbols-outlined">close</span>
-                 </button>
-                 <div className="mb-10 mt-6 flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-surface-container-high flex items-center justify-center overflow-hidden border border-outline-variant/20 shadow-lg">
-                      <img alt="User" className="w-full h-full object-cover" src={avatarUrl}/>
-                    </div>
-                    <div>
-                      <h3 className="font-headline font-black text-xl tracking-tight text-on-surface">{displayName}</h3>
-                      <p className="font-label text-xs font-bold text-on-surface-variant opacity-60 truncate w-40">{user?.email}</p>
-                    </div>
-                 </div>
-                 
-                 <div className="flex-1 space-y-4">
-                    {navLinksDesktop.map((link) => (
-                      <Link 
-                        key={link.path}
-                        to={link.path} 
-                        onClick={() => setIsSidebarOpen(false)}
-                        className={cn(
-                          "flex items-center gap-5 p-4 rounded-2xl text-lg font-headline font-black transition-all",
-                          isActive(link.path) ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container"
-                        )}
-                      >
-                         <span className="material-symbols-outlined text-2xl">{link.icon}</span>
-                         {link.name}
-                      </Link>
-                    ))}
-                 </div>
-
-                 <button
-                    onClick={() => { setIsSidebarOpen(false); logout(); }}
-                    className="mt-auto flex items-center justify-center gap-3 rounded-2xl border-2 border-error/10 bg-error/5 p-5 text-lg font-headline font-black text-error hover:bg-error hover:text-white transition-all active:scale-95 shadow-xl shadow-error/10"
-                 >
-                    <span className="material-symbols-outlined">logout</span>
-                    Sign Out
-                 </button>
-              </aside>
-           </div>
-        )}
       </div>
+
+      {/* ─── MOBILE DRAWER ─────────────────────────────────────────── */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-[100] flex md:hidden">
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+          <aside className="relative w-72 flex flex-col bg-surface-container-lowest h-full shadow-2xl z-10">
+            {/* User info */}
+            <div className="p-6 pt-14 flex items-center gap-4 border-b border-outline-variant/15">
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                className="w-12 h-12 rounded-2xl object-cover ring-2 ring-primary/20"
+              />
+              <div className="min-w-0">
+                <p className="font-headline font-bold text-base text-on-surface truncate">
+                  {displayName}
+                </p>
+                <p className="text-xs text-on-surface-variant truncate">{user?.email}</p>
+              </div>
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="ml-auto w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors"
+              >
+                <X size={16} className="text-on-surface-variant" />
+              </button>
+            </div>
+
+            {/* Nav links */}
+            <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+              {NAV_LINKS.map((link) => {
+                const active = isActive(link.path)
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setIsSidebarOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl px-4 py-3.5 font-semibold text-sm transition-all duration-200",
+                      active
+                        ? "bg-primary text-white shadow-sm shadow-primary/30"
+                        : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                    )}
+                  >
+                    <span
+                      className="material-symbols-outlined text-[20px]"
+                      style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
+                    >
+                      {link.materialIcon}
+                    </span>
+                    {link.name}
+                  </Link>
+                )
+              })}
+            </nav>
+
+            {/* Sign out */}
+            <div className="p-4 border-t border-outline-variant/15">
+              <button
+                onClick={() => { setIsSidebarOpen(false); logout() }}
+                className="flex w-full items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-error hover:bg-error/8 transition-colors"
+              >
+                <LogOut size={18} strokeWidth={2} />
+                Đăng xuất
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   )
 }

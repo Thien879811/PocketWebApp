@@ -1,21 +1,14 @@
 import { formatCurrency } from '@/utils/format'
 import { LoadingScreen } from '@/components/Loading'
 import React, { useState } from 'react'
-import { 
-  Inbox, 
-  Search,
-  Filter,
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  Calendar
-} from 'lucide-react'
+import { Inbox, Search, Filter, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../../categories/hooks/useCategories'
+import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
+import { MonthSelector } from '@/components/MonthSelector'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -27,22 +20,22 @@ const Transactions: React.FC = () => {
   const [filter, setFilter] = useState<TransactionType | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [selectedDate, setSelectedDate] = useState(new Date())
-  
+
   const { data: transactions, isLoading: txLoading } = useTransactions()
   const { data: categories } = useCategories()
 
-  const filteredTransactions = transactions?.filter(tx => {
-    // Filter by Month & Year
+  const filteredTransactions = transactions?.filter((tx) => {
     const txDate = new Date(tx.date)
-    const isSameMonth = txDate.getMonth() === selectedDate.getMonth() && 
-                       txDate.getFullYear() === selectedDate.getFullYear()
-    
+    const isSameMonth =
+      txDate.getMonth() === selectedDate.getMonth() &&
+      txDate.getFullYear() === selectedDate.getFullYear()
     if (!isSameMonth) return false
 
-    const cat = categories?.find(c => c.id === tx.category_id)
+    const cat = categories?.find((c) => c.id === tx.category_id)
     const categoryName = cat?.name || (tx.type === 'withdrawal' ? 'Rút tiền' : '')
-    const matchesSearch = categoryName.toLowerCase().includes(search.toLowerCase()) || 
-                         (tx.note || '').toLowerCase().includes(search.toLowerCase())
+    const matchesSearch =
+      categoryName.toLowerCase().includes(search.toLowerCase()) ||
+      (tx.note || '').toLowerCase().includes(search.toLowerCase())
     const matchesTypeFilter = filter === 'all' || tx.type === filter
     const matchesCategoryFilter = categoryFilter === 'all' || tx.category_id === categoryFilter
     return matchesSearch && matchesTypeFilter && matchesCategoryFilter
@@ -50,221 +43,218 @@ const Transactions: React.FC = () => {
 
   // Group by date
   const groupedTransactions: Record<string, any[]> = {}
-  filteredTransactions?.forEach(tx => {
-    const dateStr = new Date(tx.date).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })
-    if (!groupedTransactions[dateStr]) {
-      groupedTransactions[dateStr] = []
-    }
+  filteredTransactions?.forEach((tx) => {
+    const dateStr = new Date(tx.date).toLocaleDateString('vi-VN', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+    if (!groupedTransactions[dateStr]) groupedTransactions[dateStr] = []
     groupedTransactions[dateStr].push(tx)
   })
 
-  // Helper to get category info from ID
   const getCategoryName = (categoryId?: string, type?: TransactionType) => {
-    const cat = categories?.find(c => c.id === categoryId)
+    const cat = categories?.find((c) => c.id === categoryId)
     if (cat) return cat.name
-    
-    if (type) {
-      return TRANSACTION_TYPES_METADATA[type]?.label || 'Chưa phân loại'
-    }
+    if (type) return TRANSACTION_TYPES_METADATA[type]?.label || 'Chưa phân loại'
     return 'Chưa phân loại'
   }
 
   const getCategoryIcon = (categoryId?: string, type?: TransactionType) => {
-    const cat = categories?.find(c => c.id === categoryId)
+    const cat = categories?.find((c) => c.id === categoryId)
     if (cat) return cat.icon
-
-    if (type) {
-      return TRANSACTION_TYPES_METADATA[type]?.icon || 'help_outline'
-    }
+    if (type) return TRANSACTION_TYPES_METADATA[type]?.icon || 'help_outline'
     return 'help_outline'
   }
 
-  const handlePrevMonth = () => {
-    setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
+  const getCategoryColor = (categoryId?: string) => {
+    const cat = categories?.find((c) => c.id === categoryId)
+    return cat?.color || 'bg-surface-container-high'
   }
 
-  const handleNextMonth = () => {
-    setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+  const hasActiveFilters = filter !== 'all' || categoryFilter !== 'all' || search !== ''
+
+  const clearFilters = () => {
+    setSearch('')
+    setFilter('all')
+    setCategoryFilter('all')
   }
 
-  const handleResetDate = () => {
-    setSelectedDate(new Date())
-  }
+  if (txLoading) return <LoadingScreen message="Đang tải giao dịch..." />
 
-  if (txLoading) {
-    return <LoadingScreen message="Đang tải danh sách giao dịch..." />
-  }
+  const TYPE_FILTERS: (TransactionType | 'all')[] = ['all', 'expense', 'income', 'business', 'borrow', 'lend']
 
   return (
-    <div className="max-w-lg mx-auto md:max-w-none pt-4 pb-24 scrollbar-hide">
-      
-      {/* 🏔️ Header Area */}
-      <section className="mb-10 px-2 flex flex-col gap-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-white transition-all shadow-sm active:scale-95">
-                <ArrowLeft size={20} className="text-primary" />
-            </button>
-            <div>
-               <p className="font-label text-[10px] uppercase font-black text-on-surface-variant opacity-60 tracking-widest hidden md:block">PocketFlow Ledger</p>
-               <h2 className="font-headline font-black text-3xl text-on-surface tracking-tight leading-none">Giao dịch</h2>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-              <button 
-                onClick={() => {
-                  const types: (TransactionType | 'all')[] = ['all', 'expense', 'income', 'business', 'borrow', 'lend'];
-                  const nextIndex = (types.indexOf(filter) + 1) % types.length;
-                  setFilter(types[nextIndex]);
-                }}
-                className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-2xl font-label font-black text-[10px] uppercase tracking-widest transition-all border whitespace-nowrap",
-                  filter === 'all' ? "bg-surface-container-high text-on-surface-variant border-outline-variant/10 shadow-sm" : "bg-primary text-on-primary border-primary shadow-lg shadow-primary/20 scale-105"
-                )}
-              >
-                <Filter size={14} strokeWidth={3} />
-                {filter === 'all' ? 'Tất cả' : TRANSACTION_TYPES_METADATA[filter as TransactionType]?.label}
-              </button>
-          </div>
-        </div>
+    <div className="max-w-xl mx-auto md:max-w-none space-y-4 pb-8">
 
-        {/* 🗓️ Month Selector */}
-        <div className="glass rounded-[2.5rem] p-5 flex items-center justify-between dark:shadow-glass-dark">
-            <button 
-              onClick={handlePrevMonth}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-high hover:bg-primary/10 transition-all shadow-sm active:scale-90 dark:hover:shadow-glow-primary"
-            >
-              <ChevronLeft size={20} className="text-on-surface-variant" />
-            </button>
+      {/* ── Title + Filter button ─────────────────── */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-headline font-bold text-on-surface tracking-tight">
+          Sổ giao dịch
+        </h1>
+        <button
+          onClick={() => {
+            const idx = TYPE_FILTERS.indexOf(filter)
+            setFilter(TYPE_FILTERS[(idx + 1) % TYPE_FILTERS.length])
+          }}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border",
+            filter !== 'all'
+              ? "bg-primary text-white border-primary shadow-sm shadow-primary/30"
+              : "bg-surface-container-lowest text-on-surface-variant border-outline-variant/20 hover:border-primary/30"
+          )}
+        >
+          <Filter size={12} strokeWidth={2.5} />
+          {filter === 'all' ? 'Lọc' : TRANSACTION_TYPES_METADATA[filter as TransactionType]?.label}
+        </button>
+      </div>
 
-            <div 
-              onClick={handleResetDate}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition-transform"
-            >
-               <div className="flex items-center gap-2 mb-0.5">
-                  <Calendar size={14} className="text-primary" />
-                  <span className="font-label text-[10px] font-black uppercase tracking-[0.2em] text-primary opacity-60">
-                    {selectedDate.getFullYear()}
-                  </span>
-               </div>
-               <h3 className="font-headline font-black text-xl text-on-surface tracking-tight uppercase">
-                 Tháng {selectedDate.getMonth() + 1}
-               </h3>
-            </div>
+      {/* ── Month Selector ───────────────────────── */}
+      <MonthSelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
-            <button 
-              onClick={handleNextMonth}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-high hover:bg-primary/10 transition-all shadow-sm active:scale-90 dark:hover:shadow-glow-primary"
-            >
-              <ChevronRight size={20} className="text-on-surface-variant" />
-            </button>
-        </div>
-
-        {/* 🔍 Search Bar */}
-        <div className="relative group">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant opacity-40 group-focus-within:opacity-100 transition-opacity" />
-            <input 
-               value={search}
-               onChange={(e) => setSearch(e.target.value)}
-               placeholder="Search by category, note..."
-               className="w-full glass rounded-[2rem] py-5 pl-14 pr-6 text-on-surface font-label font-bold text-sm focus:ring-4 focus:ring-primary/20 transition-all dark:shadow-glass-dark dark:placeholder-on-surface-variant/50"
-            />
-        </div>
-
-        {/* 📋 Category Filter */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      {/* ── Search ──────────────────────────────── */}
+      <div className="relative">
+        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/50" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Tìm kiếm theo danh mục, ghi chú..."
+          className="w-full h-11 bg-surface-container-lowest rounded-xl pl-10 pr-10 text-sm font-medium text-on-surface border border-outline-variant/20 placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/25 focus:border-primary/30 transition-all"
+        />
+        {search && (
           <button
-            onClick={() => setCategoryFilter('all')}
+            onClick={() => setSearch('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-on-surface-variant"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
+      {/* ── Category chips ──────────────────────── */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        <button
+          onClick={() => setCategoryFilter('all')}
+          className={cn(
+            "flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap border",
+            categoryFilter === 'all'
+              ? "bg-primary text-white border-primary shadow-sm"
+              : "bg-surface-container-lowest text-on-surface-variant border-outline-variant/20 hover:border-primary/30"
+          )}
+        >
+          Tất cả
+        </button>
+        {categories?.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setCategoryFilter(cat.id)}
             className={cn(
-              "px-6 py-3 rounded-full font-label font-bold text-sm whitespace-nowrap smooth-transition flex items-center gap-2 flex-shrink-0 transform hover:scale-105 active:scale-95",
-              categoryFilter === 'all'
-                ? "glass dark:shadow-glow-primary scale-105 text-primary"
-                : "bg-surface-container-highest hover:bg-surface-container/50 dark:hover:shadow-glass-dark text-on-surface-variant"
+              "flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap border",
+              categoryFilter === cat.id
+                ? "bg-primary text-white border-primary shadow-sm"
+                : "bg-surface-container-lowest text-on-surface-variant border-outline-variant/20 hover:border-primary/30"
             )}
           >
-            Tất cả
+            <span className="material-symbols-outlined text-[13px]">{cat.icon}</span>
+            {cat.name}
           </button>
-          {categories?.map((cat) => (
+        ))}
+      </div>
+
+      {/* ── Clear filters chip ──────────────────── */}
+      {hasActiveFilters && (
+        <button
+          onClick={clearFilters}
+          className="flex items-center gap-1.5 text-xs text-on-surface-variant/70 font-medium hover:text-primary transition-colors"
+        >
+          <X size={12} />
+          Xóa bộ lọc
+        </button>
+      )}
+
+      {/* ── Transaction Groups ──────────────────── */}
+      {Object.entries(groupedTransactions).length === 0 ? (
+        <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-12 text-center space-y-3 shadow-card">
+          <div className="w-12 h-12 bg-surface-container rounded-2xl flex items-center justify-center mx-auto">
+            <Inbox size={22} className="text-on-surface-variant/40" />
+          </div>
+          <p className="text-sm text-on-surface-variant/60 font-medium">
+            Không tìm thấy giao dịch nào
+          </p>
+          {hasActiveFilters && (
             <button
-              key={cat.id}
-              onClick={() => setCategoryFilter(cat.id)}
-              className={cn(
-                "px-6 py-3 rounded-full font-label font-bold text-sm whitespace-nowrap smooth-transition flex items-center gap-2 flex-shrink-0 transform hover:scale-105 active:scale-95",
-                categoryFilter === cat.id
-                  ? "glass dark:shadow-glow-primary scale-105 text-primary"
-                  : "bg-surface-container-highest hover:bg-surface-container/50 dark:hover:shadow-glass-dark text-on-surface-variant"
-              )}
+              onClick={clearFilters}
+              className="text-xs text-primary font-semibold hover:underline"
             >
-              <span className="material-symbols-outlined text-base">{cat.icon}</span>
-              {cat.name}
+              Xóa bộ lọc
             </button>
-          ))}
+          )}
         </div>
-      </section>
+      ) : (
+        <div className="space-y-6">
+          {Object.entries(groupedTransactions).map(([date, items]) => {
+            const dayTotal = items.reduce((sum, tx) => {
+              const multiplier = tx.type === 'income' ? 1 : -1
+              return sum + tx.amount * multiplier
+            }, 0)
 
-      {/* 📂 Transaction Groups */}
-      <section className="space-y-12 px-2">
-         {Object.entries(groupedTransactions).length === 0 ? (
-            <div className="glass rounded-[3rem] p-16 text-center space-y-4 glass-border dark:shadow-glass-dark">
-               <div className="w-20 h-20 glass rounded-full flex items-center justify-center mx-auto opacity-60 group-hover:shadow-glow-primary transition-all transform group-hover:scale-110 duration-300 dark:shadow-glass-dark">
-                  <Inbox className="w-10 h-10 text-primary opacity-70" />
-               </div>
-               <p className="text-on-surface-variant font-headline font-black text-sm uppercase opacity-60 tracking-widest leading-relaxed">
-                 No transactions <br /> matches found
-               </p>
-               <button 
-                 onClick={() => { setSearch(''); setFilter('all'); setCategoryFilter('all'); }}
-                 className="text-primary font-black text-xs uppercase tracking-tighter hover:underline"
-               >
-                 Clear all filters
-               </button>
-            </div>
-         ) : (
-            Object.entries(groupedTransactions).map(([date, items]) => (
-               <div key={date} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                  <div className="flex items-center justify-between px-4">
-                     <h3 className="font-headline font-black text-xs text-on-surface-variant opacity-60 uppercase tracking-[0.2em]">{date}</h3>
-                     <div className="h-[1px] flex-1 bg-outline-variant/10 ml-6"></div>
-                  </div>
-                  
-                  <div className="glass rounded-[3rem] overflow-hidden dark:shadow-glass-dark">
-                     {items.map((tx) => (
-                        <div 
-                           key={tx.id} 
-                           onClick={() => navigate(`/edit/${tx.id}`)}
-                           className="p-6 flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 dark:hover:shadow-glow-primary cursor-pointer smooth-transition border-b border-outline-variant/10 last:border-0 transform hover:scale-101 hover:-translate-y-0.5"
-                        >
-                           <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 rounded-2xl glass flex flex-shrink-0 items-center justify-center group-hover:shadow-glow-primary transition-all transform group-hover:rotate-6 duration-300 dark:shadow-glass-dark">
-                                 <span className="material-symbols-outlined text-2xl text-primary opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all">
-                                   {getCategoryIcon(tx.category_id, tx.type)}
-                                 </span>
-                              </div>
-                              <div className="overflow-hidden">
-                                 <p className="font-headline font-black text-lg text-on-surface group-hover:text-primary transition-all leading-none mb-1.5 truncate">
-                                   {getCategoryName(tx.category_id, tx.type)}
-                                 </p>
-                                 <p className="font-label text-[10px] text-on-surface-variant font-black truncate w-40 opacity-50 uppercase tracking-tighter leading-none">
-                                    {tx.note || TRANSACTION_TYPES_METADATA[tx.type as TransactionType]?.label || tx.type}
-                                 </p>
-                              </div>
-                           </div>
-                           <div className="text-right">
-                              <p className={cn(
-                                 "font-headline font-black text-xl italic tracking-tighter transition-all group-hover:scale-110",
-                                 TRANSACTION_TYPES_METADATA[tx.type as TransactionType]?.color || "text-on-surface"
-                              )}>
-                                 {TRANSACTION_TYPES_METADATA[tx.type as TransactionType]?.prefix || '-'}{formatCurrency(tx.amount)}
-                              </p>
-                           </div>
+            return (
+              <div key={date} className="space-y-2">
+                {/* Date header */}
+                <div className="flex items-center justify-between px-1">
+                  <h3 className="text-xs font-semibold text-on-surface-variant/70 capitalize">
+                    {date}
+                  </h3>
+                  <span className={cn(
+                    "text-xs font-bold",
+                    dayTotal >= 0 ? "text-secondary" : "text-error"
+                  )}>
+                    {dayTotal >= 0 ? '+' : ''}{formatCurrency(Math.abs(dayTotal))}
+                  </span>
+                </div>
+
+                {/* Transactions */}
+                <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden shadow-card divide-y divide-outline-variant/10">
+                  {items.map((tx) => {
+                    const txMeta = TRANSACTION_TYPES_METADATA[tx.type as TransactionType]
+                    return (
+                      <button
+                        key={tx.id}
+                        onClick={() => navigate(`/edit/${tx.id}`)}
+                        className="w-full flex items-center gap-3.5 px-4 py-3.5 hover:bg-surface-container/50 active:bg-primary/5 transition-colors text-left"
+                      >
+                        <div className={cn(
+                          "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                          getCategoryColor(tx.category_id)
+                        )}>
+                          <span className="material-symbols-outlined text-[18px] text-white">
+                            {getCategoryIcon(tx.category_id, tx.type)}
+                          </span>
                         </div>
-                     ))}
-                  </div>
-               </div>
-            ))
-         )}
-      </section>
-
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-on-surface truncate">
+                            {getCategoryName(tx.category_id, tx.type)}
+                          </p>
+                          <p className="text-[11px] text-on-surface-variant/60 font-medium mt-0.5 truncate">
+                            {tx.note || txMeta?.label || tx.type}
+                          </p>
+                        </div>
+                        <p className={cn(
+                          "text-sm font-bold flex-shrink-0",
+                          txMeta?.color || "text-on-surface"
+                        )}>
+                          {txMeta?.prefix || '-'}{formatCurrency(tx.amount)}
+                        </p>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
