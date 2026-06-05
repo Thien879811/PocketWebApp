@@ -5,59 +5,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, Loader2, Trash2 } from 'lucide-react'
 import { categorySchema, type CategoryFormValues } from '../types/category.schema'
 import { useCategory, useUpdateCategory, useDeleteCategory } from '../hooks/useCategories'
-import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-
-const ICONS = [
-  // Food & Drink
-  'restaurant', 'lunch_dining', 'local_cafe', 'liquor', 'bakery_dining', 'icecream',
-  // Transport
-  'directions_car', 'commute', 'subway', 'local_taxi', 'electric_bike',
-  // Home
-  'home', 'house', 'water_drop', 'electric_bolt', 'wifi', 'cleaning_services',
-  // Entertainment
-  'sports_esports', 'videogame_asset', 'stadium', 'theater_comedy', 'movie', 'casino',
-  // Health
-  'health_and_safety', 'medical_services', 'medication', 'spa', 'vaccines',
-  // Shopping
-  'shopping_bag', 'shopping_cart', 'local_mall', 'checkroom', 'favorite',
-  // Education
-  'school', 'book', 'menu_book', 'language',
-  // Travel
-  'flight', 'hotel', 'beach_access', 'train',
-  // Work & Finance
-  'work', 'receipt_long', 'credit_card', 'account_balance', 'savings', 'payments',
-  // Personal & Misc
-  'fitness_center', 'pets', 'child_care', 'person', 'redeem', 'celebration', 'build', 'more_horiz'
-]
-
-const COLORS = [
-  { name: 'Primary', class: 'bg-primary' },
-  { name: 'Secondary', class: 'bg-secondary' },
-  { name: 'Rose', class: 'bg-rose-500' },
-  { name: 'Pink', class: 'bg-pink-500' },
-  { name: 'Fuchsia', class: 'bg-fuchsia-500' },
-  { name: 'Purple', class: 'bg-purple-500' },
-  { name: 'Violet', class: 'bg-violet-500' },
-  { name: 'Indigo', class: 'bg-indigo-500' },
-  { name: 'Blue', class: 'bg-blue-500' },
-  { name: 'Sky', class: 'bg-sky-500' },
-  { name: 'Cyan', class: 'bg-cyan-500' },
-  { name: 'Teal', class: 'bg-teal-500' },
-  { name: 'Emerald', class: 'bg-emerald-500' },
-  { name: 'Green', class: 'bg-green-500' },
-  { name: 'Lime', class: 'bg-lime-500' },
-  { name: 'Yellow', class: 'bg-yellow-400' },
-  { name: 'Amber', class: 'bg-amber-500' },
-  { name: 'Orange', class: 'bg-orange-500' },
-  { name: 'Stone', class: 'bg-stone-500' },
-  { name: 'Slate', class: 'bg-slate-600' },
-]
+import { type TransactionType } from '@/types/transaction.types'
+import { CATEGORY_ICONS, CATEGORY_COLORS } from '@/constants/categorySelectors'
+import { IconSelectorGrid } from '@/components/shared/IconSelectorGrid'
+import { ColorSelectorGrid } from '@/components/shared/ColorSelectorGrid'
+import { TransactionTypeSelector } from '@/components/shared/TransactionTypeSelector'
+import { cn } from '@/utils/cn'
 
 const EditCategory: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -84,6 +37,11 @@ const EditCategory: React.FC = () => {
     }
   }, [category, setValue])
 
+  useEffect(() => {
+    setValue('icon', selectedIcon)
+    setValue('type', type)
+    setValue('color', selectedColor)
+  }, [selectedIcon, type, selectedColor, setValue])
 
   const onSubmit = (data: CategoryFormValues) => {
     if (!id) return
@@ -92,15 +50,9 @@ const EditCategory: React.FC = () => {
     })
   }
 
-  useEffect(() => {
-    setValue('icon', selectedIcon)
-    setValue('type', type)
-    setValue('color', selectedColor)
-  }, [selectedIcon, type, selectedColor, setValue])
-
   const handleDelete = () => {
     if (!id) return
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    if (window.confirm('Bạn có chắc muốn xoá danh mục này?')) {
       deleteCategory(id, {
         onSuccess: () => navigate('/settings/categories')
       })
@@ -117,21 +69,20 @@ const EditCategory: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-surface font-body text-on-background md:flex md:items-center md:justify-center md:p-8">
-      {/* 📱 Main Canvas Container */}
       <div className="w-full max-w-[393px] md:max-w-2xl bg-surface relative overflow-hidden flex flex-col md:rounded-[3rem] md:shadow-2xl md:h-[852px]">
-        
-        {/* 🏔️ TopAppBar */}
+
+        {/* TopAppBar */}
         <nav className="sticky top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#edf4ff] dark:bg-slate-900 border-none">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => navigate(-1)}
               className="flex items-center justify-center p-2 rounded-full hover:bg-surface-container transition-colors active:scale-95 duration-200 text-primary"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <h1 className="font-headline font-bold text-xl tracking-tight text-primary">Edit Category</h1>
+            <h1 className="font-headline font-bold text-xl tracking-tight text-primary">Sửa danh mục</h1>
           </div>
-          <button 
+          <button
             type="button"
             onClick={handleDelete}
             className="flex items-center justify-center p-2 rounded-full hover:bg-error/10 text-error transition-colors active:scale-95"
@@ -140,93 +91,57 @@ const EditCategory: React.FC = () => {
           </button>
         </nav>
 
-        {/* 🎨 Main Content */}
+        {/* Main Content */}
         <main className="flex-1 overflow-y-auto px-6 pt-8 pb-32 no-scrollbar space-y-10">
-          
-          {/* Identity Section */}
+
+          {/* Name */}
           <section className="space-y-4">
-            <label className="font-headline font-bold text-lg text-on-surface">Category Identity</label>
+            <label className="font-headline font-bold text-lg text-on-surface">Tên danh mục</label>
             <div className="glass rounded-2xl p-1.5 dark:shadow-glass-dark">
-              <input 
+              <input
                 {...register('name')}
-                className="w-full glass border-none rounded-xl px-6 py-4 text-lg font-body focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/50 font-medium dark:shadow-glass-dark smooth-transition" 
-                placeholder="Enter Category Name" 
+                className="w-full glass border-none rounded-xl px-6 py-4 text-lg font-body focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/50 font-medium dark:shadow-glass-dark smooth-transition"
+                placeholder="Nhập tên danh mục"
                 type="text"
               />
             </div>
             {errors.name && <p className="text-xs text-error font-bold px-2">{errors.name.message}</p>}
           </section>
 
-          {/* Type Selector */}
+          {/* Type */}
           <section className="space-y-4">
-            <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Transaction Type</span>
-            <div className="grid grid-cols-2 sm:grid-cols-3 p-1.5 glass rounded-2xl gap-2 dark:shadow-glass-dark">
-              {(['income', 'expense', 'business', 'withdrawal', 'borrow'] as const).map((key) => {
-                const meta = TRANSACTION_TYPES_METADATA[key];
-                return (
-                  <button 
-                    key={key}
-                    type="button"
-                    onClick={() => setType(key)}
-                    className={cn(
-                      "flex items-center justify-center gap-2 py-3 px-2 rounded-xl font-bold smooth-transition active:scale-95 transform hover:scale-105",
-                      type === key ? "glass dark:shadow-glow-primary text-primary" : "bg-surface-container-highest text-on-surface-variant dark:hover:shadow-glass-dark"
-                    )}
-                  >
-                    <span className="material-symbols-outlined text-base">{meta.icon}</span>
-                    <span className="text-[10px] sm:text-xs truncate">{meta.shortLabel}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Loại giao dịch</span>
+            <TransactionTypeSelector value={type} onChange={setType} />
           </section>
 
-          {/* Icon Section */}
-          <section className="space-y-6">
+          {/* Icon */}
+          <section className="space-y-4">
             <div className="flex justify-between items-end px-1">
-              <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Select Icon</span>
-              <span className="text-primary text-xs font-bold hover:underline cursor-pointer">View All</span>
+              <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Chọn biểu tượng</span>
             </div>
-            <div className="grid grid-cols-4 gap-4">
-              {ICONS.map(icon => (
-                <button 
-                  key={icon}
-                  type="button"
-                  onClick={() => setSelectedIcon(icon)}
-                  className={cn(
-                    "aspect-square flex items-center justify-center rounded-2xl smooth-transition active:scale-90 transform hover:scale-110",
-                    selectedIcon === icon 
-                      ? "glass dark:shadow-glow-primary text-primary" 
-                      : "bg-surface-container-highest text-on-surface-variant/60"
-                  )}
-                >
-                  <span className="material-symbols-outlined text-2xl">{icon}</span>
-                </button>
-              ))}
-            </div>
+            <IconSelectorGrid
+              icons={CATEGORY_ICONS}
+              selected={selectedIcon}
+              onSelect={setSelectedIcon}
+              gridClass="grid-cols-4"
+            />
           </section>
 
-          {/* Color Section */}
-          <section className="space-y-6">
-            <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Category Color</span>
-            <div className="grid grid-cols-5 gap-4">
-              {COLORS.map(color => (
-                <button 
-                  key={color.name}
-                  type="button"
-                  onClick={() => setSelectedColor(color.class)}
-                  className={cn(
-                    "aspect-square rounded-2xl border-4 transition-all duration-300 transform hover:scale-110 active:scale-90",
-                    color.class,
-                    selectedColor === color.class ? "border-white shadow-xl scale-110" : "border-transparent opacity-80"
-                  )}
-                />
-              ))}
-            </div>
+          {/* Color */}
+          <section className="space-y-4">
+            <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold">Màu danh mục</span>
+            <ColorSelectorGrid
+              colors={CATEGORY_COLORS}
+              selected={selectedColor}
+              onSelect={setSelectedColor}
+            />
           </section>
 
-          {/* Monthly Limit Section */}
-          <section className={cn("space-y-4 transition-all duration-300", type === 'income' || type === 'withdrawal' ? "opacity-0 h-0 overflow-hidden" : "opacity-100")}>
+          {/* Monthly Limit */}
+          <section className={cn(
+            'space-y-4 transition-all duration-300',
+            type === 'income' || type === 'withdrawal' ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'
+          )}>
             <label className="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
               Giới hạn tháng
               <span className="text-[10px] glass text-secondary px-2 py-0.5 rounded-full uppercase tracking-widest font-black dark:shadow-glass-dark">Budgeting</span>
@@ -235,10 +150,10 @@ const EditCategory: React.FC = () => {
               <span className="absolute left-6 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant group-focus-within:text-primary smooth-transition">
                 payments
               </span>
-              <input 
+              <input
                 {...register('limit', { valueAsNumber: true })}
-                className="w-full glass border-none rounded-xl pl-14 pr-6 py-4 text-lg font-body focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/50 font-black italic dark:shadow-glass-dark smooth-transition" 
-                placeholder="Đặt giới hạn (VNĐ)" 
+                className="w-full glass border-none rounded-xl pl-14 pr-6 py-4 text-lg font-body focus:ring-2 focus:ring-primary/20 outline-none placeholder:text-on-surface-variant/50 font-black italic dark:shadow-glass-dark smooth-transition"
+                placeholder="Đặt giới hạn (VNĐ)"
                 type="number"
                 step="10000"
               />
@@ -249,15 +164,15 @@ const EditCategory: React.FC = () => {
 
         </main>
 
-        {/* 🚀 Action Bar */}
+        {/* Action Bar */}
         <div className="absolute bottom-0 w-full p-6 bg-gradient-to-t from-surface via-surface to-transparent">
-          <button 
-            type="submit"
+          <button
+            type="button"
             onClick={handleSubmit(onSubmit)}
             disabled={updatePending || deletePending}
-            className="w-full h-16 bg-primary text-on-primary rounded-3xl font-headline font-black text-lg shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all transform hover:scale-102 dark:shadow-glow-primary"
+            className="w-full h-16 bg-primary text-on-primary rounded-3xl font-headline font-black text-lg shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-all dark:shadow-glow-primary"
           >
-            {updatePending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Update Category'}
+            {updatePending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Lưu thay đổi'}
           </button>
         </div>
 

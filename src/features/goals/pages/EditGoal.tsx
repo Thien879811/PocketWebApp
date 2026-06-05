@@ -5,26 +5,18 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Trash2 } from 'lucide-react'
 import { goalSchema, type GoalFormValues } from '../types/goal.schema'
 import { useGoal, useUpdateGoal, useDeleteGoal } from '../hooks/useGoals'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-
-const ICONS = [
-  'flight', 'home', 'directions_car', 'laptop_mac', 'celebration',
-  'school', 'fitness_center', 'volunteer_activism', 'medical_services', 'add'
-]
+import { GOAL_ICONS } from '@/constants/categorySelectors'
+import { IconSelectorGrid } from '@/components/shared/IconSelectorGrid'
+import { cn } from '@/utils/cn'
 
 const EditGoal: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  
+
   const { data: goal, isLoading: goalLoading } = useGoal(id)
   const { mutate: updateGoal, isPending: updatePending } = useUpdateGoal()
   const { mutate: deleteGoal, isPending: deletePending } = useDeleteGoal()
-  
+
   const [selectedIcon, setSelectedIcon] = useState('flight')
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<GoalFormValues>({
@@ -55,7 +47,7 @@ const EditGoal: React.FC = () => {
 
   const handleDelete = () => {
     if (!id) return
-    if (window.confirm('Are you sure you want to delete this goal?')) {
+    if (window.confirm('Bạn có chắc muốn xoá mục tiêu này?')) {
       deleteGoal(id, {
         onSuccess: () => navigate('/goals')
       })
@@ -73,16 +65,17 @@ const EditGoal: React.FC = () => {
   return (
     <div className="min-h-screen bg-surface text-on-surface font-body pb-24 md:p-8 md:flex md:justify-center">
       <div className="w-full max-w-2xl bg-surface relative overflow-hidden flex flex-col md:rounded-[3rem] md:shadow-2xl">
+
         {/* TopAppBar */}
-        <header className="sticky top-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-[#f7f9ff]/90 backdrop-blur-md no-line tonal-transition md:rounded-t-[3rem]">
+        <header className="sticky top-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-[#f7f9ff]/90 backdrop-blur-md md:rounded-t-[3rem]">
           <div className="flex items-center gap-3">
             <button type="button" onClick={() => navigate(-1)} className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full active:scale-95">
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
             <span className="text-secondary font-headline font-black tracking-tighter text-2xl italic">PocketFlow</span>
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={handleDelete}
             disabled={deletePending}
             className="p-2 text-error hover:bg-error/10 active:scale-95 transition-colors rounded-full disabled:opacity-50"
@@ -93,23 +86,23 @@ const EditGoal: React.FC = () => {
 
         <main className="flex-1 overflow-y-auto px-6 pt-6 max-w-2xl mx-auto w-full">
           <div className="mb-10 text-center">
-            <h1 className="text-4xl font-extrabold font-headline text-on-surface tracking-tight mb-2">Edit Goal</h1>
-            <p className="text-on-surface-variant font-body">Modify your destination or track your progress.</p>
+            <h1 className="text-4xl font-extrabold font-headline text-on-surface tracking-tight mb-2">Sửa mục tiêu</h1>
+            <p className="text-on-surface-variant font-body">Điều chỉnh đích đến hoặc theo dõi tiến độ.</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-32">
-            
             <section className="space-y-6">
-              {/* Goal Name */}
+
+              {/* Name */}
               <div className="space-y-2">
-                <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="goal_name">Goal Name</label>
+                <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="goal_name">Tên mục tiêu</label>
                 <div className="relative">
-                  <input 
+                  <input
                     {...register('name')}
-                    className="w-full glass border-none rounded-2xl py-4 px-5 text-lg font-bold focus:ring-2 focus:ring-primary/40 smooth-transition placeholder:text-on-surface-variant/50 font-headline dark:shadow-glass-dark" 
-                    id="goal_name" 
-                    placeholder="e.g., Tokyo Apartment, New Laptop" 
-                    type="text" 
+                    className="w-full glass border-none rounded-2xl py-4 px-5 text-lg font-bold focus:ring-2 focus:ring-primary/40 smooth-transition placeholder:text-on-surface-variant/50 font-headline dark:shadow-glass-dark"
+                    id="goal_name"
+                    placeholder="VD: Mua xe, Du lịch Nhật..."
+                    type="text"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40">
                     <span className="material-symbols-outlined font-light">edit_note</span>
@@ -118,34 +111,32 @@ const EditGoal: React.FC = () => {
                 {errors.name && <p className="text-xs text-error font-bold ml-1">{errors.name.message}</p>}
               </div>
 
-              {/* Bento Grid for Financials */}
+              {/* Amounts */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Target Amount */}
                 <div className="space-y-2">
-                  <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="target_amount">Target Amount (VNĐ)</label>
+                  <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="target_amount">Số tiền mục tiêu (VNĐ)</label>
                   <div className="relative">
-                    <input 
+                    <input
                       {...register('target_amount', { valueAsNumber: true })}
-                      className="w-full glass border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 smooth-transition font-mono font-bold dark:shadow-glass-dark" 
-                      id="target_amount" 
-                      placeholder="0" 
-                      type="number" 
+                      className="w-full glass border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 smooth-transition font-mono font-bold dark:shadow-glass-dark"
+                      id="target_amount"
+                      placeholder="0"
+                      type="number"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-primary font-label text-xs">VNĐ</span>
                   </div>
                   {errors.target_amount && <p className="text-xs text-error font-bold ml-1">{errors.target_amount.message}</p>}
                 </div>
 
-                {/* Current Deposit */}
                 <div className="space-y-2">
-                  <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="current_amount">Current Saved</label>
+                  <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="current_amount">Đã tiết kiệm</label>
                   <div className="relative">
-                    <input 
+                    <input
                       {...register('current_amount', { valueAsNumber: true })}
-                      className="w-full glass border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 smooth-transition font-mono font-bold dark:shadow-glass-dark" 
-                      id="current_amount" 
-                      placeholder="0" 
-                      type="number" 
+                      className="w-full glass border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 smooth-transition font-mono font-bold dark:shadow-glass-dark"
+                      id="current_amount"
+                      placeholder="0"
+                      type="number"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-secondary font-label text-xs">VNĐ</span>
                   </div>
@@ -155,81 +146,66 @@ const EditGoal: React.FC = () => {
 
               {/* Target Date */}
               <div className="space-y-2">
-                <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="target_date">Target Date</label>
+                <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="target_date">Ngày mục tiêu</label>
                 <div className="relative">
-                  <input 
+                  <input
                     {...register('target_date')}
-                    className="w-full glass border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 smooth-transition font-bold dark:shadow-glass-dark" 
-                    id="target_date" 
-                    type="date" 
+                    className="w-full glass border-none rounded-2xl py-4 px-5 text-lg focus:ring-2 focus:ring-primary/40 smooth-transition font-bold dark:shadow-glass-dark"
+                    id="target_date"
+                    type="date"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant/40">
                     <span className="material-symbols-outlined">calendar_today</span>
                   </div>
                 </div>
               </div>
-              
+
               {/* Status */}
               <div className="space-y-2">
-                <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1" htmlFor="status">Goal Status</label>
+                <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1">Trạng thái</label>
                 <div className="flex gap-2">
-                  {['active', 'completed', 'paused'].map((statusOption) => (
-                    <label 
-                      key={statusOption}
-                      className="flex-1 cursor-pointer"
-                    >
-                      <input 
-                        type="radio" 
-                        value={statusOption} 
-                        {...register('status')}
-                        className="peer hidden" 
-                      />
+                  {(['active', 'completed', 'paused'] as const).map(statusOption => (
+                    <label key={statusOption} className="flex-1 cursor-pointer">
+                      <input type="radio" value={statusOption} {...register('status')} className="peer hidden" />
                       <div className={cn(
-                        "text-center py-3 rounded-xl glass font-bold text-sm tracking-wide uppercase smooth-transition dark:shadow-glass-dark",
-                        "peer-checked:dark:shadow-glow-primary peer-checked:text-primary"
+                        'text-center py-3 rounded-xl glass font-bold text-sm tracking-wide uppercase smooth-transition dark:shadow-glass-dark',
+                        'peer-checked:dark:shadow-glow-primary peer-checked:text-primary'
                       )}>
-                        {statusOption}
+                        {statusOption === 'active' ? 'Đang thực hiện' : statusOption === 'completed' ? 'Hoàn thành' : 'Tạm dừng'}
                       </div>
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* Icon Selector Grid */}
+              {/* Icon Selector */}
               <div className="space-y-3">
-                <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1">Choose Icon</label>
-                <div className="grid grid-cols-5 md:grid-cols-10 gap-3 p-4 glass rounded-2xl dark:shadow-glass-dark">
-                  {ICONS.map(icon => (
-                    <button 
-                      key={icon}
-                      type="button"
-                      onClick={() => setSelectedIcon(icon)}
-                      className={cn(
-                        "aspect-square flex items-center justify-center rounded-2xl smooth-transition transform active:scale-90 hover:scale-110",
-                        selectedIcon === icon 
-                          ? "glass dark:shadow-glow-primary text-primary border-2 border-primary/20 scale-105" 
-                          : "text-on-surface-variant hover:bg-surface-container/50 border border-transparent"
-                      )}
-                    >
-                      <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: selectedIcon === icon ? "'FILL' 1" : "'FILL' 0" }}>
-                        {icon}
-                      </span>
-                    </button>
-                  ))}
+                <label className="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant ml-1">Chọn biểu tượng</label>
+                <div className="p-4 glass rounded-2xl dark:shadow-glass-dark">
+                  <IconSelectorGrid
+                    icons={GOAL_ICONS}
+                    selected={selectedIcon}
+                    onSelect={setSelectedIcon}
+                    gridClass="grid-cols-5 md:grid-cols-10"
+                    iconSize="text-3xl"
+                    fillSelected
+                  />
                 </div>
               </div>
+
             </section>
 
-            {/* Save Action */}
+            {/* Submit */}
             <div className="pt-6 pb-8">
-              <button 
+              <button
                 type="submit"
                 disabled={updatePending || deletePending}
                 className="w-full glass text-primary py-5 px-8 rounded-2xl font-bold font-headline text-lg dark:shadow-glow-primary smooth-transition transform hover:scale-102 active:scale-[0.98] flex justify-center items-center gap-2"
               >
-                {updatePending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Save Changes'}
+                {updatePending ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Lưu thay đổi'}
               </button>
             </div>
+
           </form>
         </main>
       </div>
