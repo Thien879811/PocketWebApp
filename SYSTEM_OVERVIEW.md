@@ -1,455 +1,636 @@
-# PocketWebApp - Tai lieu mo ta he thong
+# PocketWebApp – Tài liệu mô tả hệ thống
 
-Tai lieu nay duoc tong hop tu ma nguon hien tai cua du an PocketWebApp. Muc tieu la giup nguoi doc nam nhanh kien truc, module chuc nang, bang du lieu, luong xu ly va cac diem tich hop chinh.
+> Tài liệu này được tổng hợp trực tiếp từ mã nguồn.
+> Mục tiêu: giúp người đọc nắm kiến trúc, flow nghiệp vụ và **toàn bộ công thức tính chi phí / số dư** đang chạy trong ứng dụng.
 
-## 1. Tong quan
+---
 
-PocketWebApp la mot PWA viet bang React + TypeScript + Vite, dung Supabase lam backend chinh. Ung dung co hai mien chuc nang:
+## 1. Tổng quan
 
-| Mien | Mo ta | Route chinh |
-| --- | --- | --- |
-| PocketFlow | Quan ly tai chinh ca nhan: giao dich, vi/tai khoan, danh muc, thong ke, muc tieu, ngan sach. | `/`, `/ledger`, `/wallet`, `/stats`, `/budget`, `/settings/*` |
-| Relo | Quan ly moi quan he: lien he, ngay ky niem, lich hen, so thich, avatar. | `/relo/*` |
+**PocketFlow** là PWA quản lý tài chính cá nhân. Ứng dụng có hai miền chức năng tách biệt hoàn toàn:
 
-Nguoi dung phai dang nhap qua Supabase Auth de truy cap cac route duoc bao ve.
+| Miền | Mô tả | Route gốc |
+|------|--------|-----------|
+| **PocketFlow** | Giao dịch, ví/tài khoản, danh mục, thống kê, mục tiêu tiết kiệm, kế hoạch ngân sách | `/` |
+| **Relo** | Quản lý mối quan hệ: liên hệ, ngày kỷ niệm, lịch hẹn, sở thích, avatar | `/relo` |
+
+---
 
 ## 2. Tech stack
 
-| Lop | Cong nghe | Vai tro |
-| --- | --- | --- |
-| UI | React 19, React DOM | Render giao dien SPA |
-| Build | Vite 7 | Dev server, build, PWA plugin |
-| Language | TypeScript | Kieu du lieu va an toan compile |
-| Routing | React Router DOM v7 | Dinh tuyen, nested route, redirect |
-| Server state | TanStack Query v5 | Fetch, cache, invalidate query |
-| Client state | Zustand | Auth state, theme state |
-| Backend/BaaS | Supabase | Auth, PostgreSQL, Realtime, Storage |
-| Form | React Hook Form, Zod | Quan ly form va validate du lieu |
-| UI utilities | Tailwind CSS, clsx, tailwind-merge, lucide-react, PrimeReact Chart | Styling, icon, chart |
-| PWA | vite-plugin-pwa, Workbox | Manifest, service worker, runtime caching |
+| Lớp | Công nghệ |
+|-----|-----------|
+| UI | React 19 + TypeScript |
+| Build | Vite 7 + vite-plugin-pwa |
+| Routing | React Router DOM v7 (lazy load) |
+| Server state | TanStack Query v5 |
+| Client state | Zustand (persist localStorage) |
+| Backend | Supabase (Auth, PostgreSQL, Realtime, Storage) |
+| Form/Validate | React Hook Form + Zod |
+| Style | Tailwind CSS 3, clsx, tailwind-merge |
+| Charts | PrimeReact Chart (Chart.js) |
+| Icons | Lucide React + Google Material Symbols |
+| Notifications | react-hot-toast |
 
-## 3. Kien truc tong the
+---
 
-Ung dung di theo huong feature-based architecture: moi mien nghiep vu nam trong `src/features/*` hoac `src/apps/relo/*`, con cac thanh phan dung chung nam trong `src/components`, `src/layouts`, `src/lib`, `src/store`, `src/utils`.
+## 3. Kiến trúc tổng thể
 
-```mermaid
-flowchart TB
-  User[Nguoi dung] --> Browser[PWA tren trinh duyet]
-  Browser --> React[React App]
-  React --> Router[React Router]
-  React --> Zustand[Zustand stores]
-  React --> Query[TanStack Query]
-  React --> Forms[React Hook Form + Zod]
-
-  Router --> Protected[ProtectedRoute]
-  Protected --> MainLayout[MainLayout PocketFlow]
-  Protected --> ReloLayout[ReloLayout]
-
-  Zustand --> AuthStore[useAuthStore]
-  Zustand --> ThemeStore[useThemeStore]
-  Query --> SupabaseClient[Supabase client]
-  Forms --> SupabaseClient
-  AuthStore --> SupabaseAuth[Supabase Auth]
-  SupabaseClient --> Postgres[(Supabase PostgreSQL)]
-  SupabaseClient --> Realtime[Supabase Realtime]
-  SupabaseClient --> Storage[Supabase Storage]
-
-  Realtime --> Toast[react-hot-toast notifications]
-  Storage --> PublicFiles[Bucket public-files]
+```
+src/
+├── main.tsx              ← Entry point
+├── App.tsx               ← Bootstrap: Auth, Theme, PWA, Providers
+├── routes/index.tsx      ← Tất cả route định nghĩa (lazy load)
+├── layouts/              ← MainLayout, ReloLayout
+├── pages/                ← Home, Login, Register, Stats, Settings, AISettings
+├── components/           ← Shared components (MonthSelector, Loading, CategoryDetailModal…)
+├── features/
+│   ├── auth/             ← useLogin, useRegister + Zod schema
+│   ├── transactions/     ← CRUD + getTransactionStats + snapshotDailyBalances
+│   ├── accounts/         ← CRUD tài khoản + balance history
+│   ├── categories/       ← CRUD danh mục
+│   ├── goals/            ← CRUD mục tiêu tiết kiệm
+│   ├── budget/           ← Kế hoạch ngân sách + getDailyBudgetStatus
+│   ├── navigation/       ← Navigation cá nhân hoá
+│   └── notifications/    ← Realtime toast
+├── apps/relo/            ← Sub-app Relo (contacts, anniversaries, appointments…)
+├── store/                ← useAuthStore, useThemeStore
+├── lib/                  ← queryClient config, axios
+└── utils/                ← supabase client, formatCurrency
 ```
 
-## 4. Cau truc thu muc chinh
+---
 
-| Duong dan | Vai tro |
-| --- | --- |
-| `src/main.tsx` | Entry point, mount React vao `#root`. |
-| `src/App.tsx` | Khoi tao auth/theme, dang ky service worker, boc QueryClientProvider, router va realtime notifications. |
-| `src/routes/index.tsx` | Dinh nghia tat ca route, lazy loading page/component. |
-| `src/layouts/MainLayout.tsx` | Layout PocketFlow: sidebar desktop, bottom nav mobile, outlet noi dung. |
-| `src/components` | Component dung chung: ProtectedRoute, Loading, MonthSelector, SpendingChart, modal. |
-| `src/features/auth` | Login/register hooks va Zod schema. |
-| `src/features/transactions` | CRUD giao dich, thong ke giao dich, snapshot so du hang ngay. |
-| `src/features/accounts` | Tai khoan/vi va lich su so du. |
-| `src/features/categories` | Danh muc thu/chi/rut tien va han muc danh muc. |
-| `src/features/goals` | Muc tieu tich luy. |
-| `src/features/budget` | Ke hoach ngan sach va tinh rollover theo ngay. |
-| `src/features/navigation` | Cau hinh navigation ca nhan hoa theo user. |
-| `src/features/notifications` | Lang nghe realtime notification va hien toast. |
-| `src/apps/relo` | App con Relo: contact, anniversary, appointment, preference, upload avatar. |
-| `src/store` | Zustand stores: auth va theme. |
-| `src/utils/supabase.ts` | Supabase client dung `VITE_SUPABASE_URL` va `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`. |
-| `src/lib/queryClient.ts` | Cau hinh TanStack Query mac dinh. |
-| `vite.config.ts` | Alias `@`, PWA manifest va runtime caching. |
+## 4. Route map đầy đủ
 
-## 5. Route map
+| Route | Bảo vệ | Component | Chức năng |
+|-------|--------|-----------|-----------|
+| `/login` | Không | `Login` | Đăng nhập |
+| `/register` | Không | `Register` | Đăng ký |
+| `/` | Có | `Home` | Dashboard tổng quan |
+| `/add` | Có | `AddTransaction` | Tạo giao dịch mới |
+| `/edit/:id` | Có | `EditTransaction` | Sửa giao dịch |
+| `/ledger` | Có | `Transactions` | Sổ giao dịch + filter |
+| `/stats` | Có | `Stats` | Thống kê theo tháng/danh mục |
+| `/wallet` | Có | `Wallet` | Quản lý ví/tài khoản |
+| `/goals` | Có | `Goals` | Danh sách mục tiêu |
+| `/goals/add` | Có | `AddGoal` | Tạo mục tiêu |
+| `/goals/edit/:id` | Có | `EditGoal` | Sửa mục tiêu |
+| `/budget` | Có | `BudgetPlanner` | Kế hoạch ngân sách |
+| `/settings` | Có | `Settings` | Cài đặt |
+| `/settings/categories` | Có | `Categories` | Quản lý danh mục |
+| `/settings/categories/add` | Có | `AddCategory` | Thêm danh mục |
+| `/settings/categories/edit/:id` | Có | `EditCategory` | Sửa danh mục |
+| `/settings/ai` | Có | `AISettings` | Cài đặt AI |
+| `/settings/budget-history` | Có | `BudgetHistory` | Lịch sử ngân sách |
+| `/settings/budget-history/:id` | Có | `BudgetHistoryDetail` | Chi tiết ngân sách |
+| `/settings/balance-history` | Có | `BalanceHistory` | Lịch sử snapshot số dư |
+| `/relo` | Có | `Relo Dashboard` | Dashboard Relo |
+| `/relo/contacts` | Có | `Contacts` | Danh sách liên hệ |
+| `/relo/contacts/:id/edit` | Có | `EditContact` | Sửa liên hệ |
+| `/relo/anniversaries` | Có | `Anniversaries` | Ngày kỷ niệm |
+| `/relo/anniversaries/create` | Có | `CreateAnniversary` | Thêm ngày kỷ niệm |
+| `/relo/anniversaries/edit/:id` | Có | `EditAnniversary` | Sửa ngày kỷ niệm |
+| `/relo/appointments` | Có | `Appointments` | Lịch hẹn |
+| `/relo/events/create` | Có | `CreateEvent` | Tạo sự kiện |
+| `/relo/events/edit/:id` | Có | `EditEvent` | Sửa sự kiện |
+| `/relo/preferences` | Có | `Preferences` | Sở thích liên hệ |
+| `/relo/preferences/create` | Có | `CreatePreference` | Thêm sở thích |
+| `/relo/preferences/edit/:id` | Có | `EditPreference` | Sửa sở thích |
+| `/relo/settings` | Có | `ReloSettings` | Cài đặt Relo |
+| `*` | — | `Navigate('/')` | Fallback |
 
-| Route | Bao ve dang nhap | Component | Chuc nang |
-| --- | --- | --- | --- |
-| `/login` | Khong | `Login` | Dang nhap Supabase Auth. |
-| `/register` | Khong | `Register` | Dang ky Supabase Auth. |
-| `/` | Co | `MainLayout > Home` | Dashboard tai chinh. |
-| `/add` | Co | `AddTransaction` | Tao giao dich. |
-| `/edit/:id` | Co | `EditTransaction` | Sua giao dich. |
-| `/ledger` | Co | `Transactions` | So giao dich. |
-| `/stats` | Co | `Stats` | Thong ke theo thang/danh muc. |
-| `/wallet` | Co | `Wallet` | Quan ly tai khoan/vi. |
-| `/goals` | Co | `Goals` | Danh sach muc tieu. |
-| `/goals/add` | Co | `AddGoal` | Tao muc tieu. |
-| `/goals/edit/:id` | Co | `EditGoal` | Sua muc tieu. |
-| `/budget` | Co | `BudgetPlanner` | Lap ke hoach ngan sach. |
-| `/settings` | Co | `Settings` | Cai dat. |
-| `/settings/categories` | Co | `Categories` | Quan ly danh muc. |
-| `/settings/categories/add` | Co | `AddCategory` | Them danh muc. |
-| `/settings/categories/edit/:id` | Co | `EditCategory` | Sua danh muc. |
-| `/settings/ai` | Co | `AISettings` | Cai dat AI. |
-| `/settings/budget-history` | Co | `BudgetHistory` | Lich su ngan sach. |
-| `/settings/budget-history/:id` | Co | `BudgetHistoryDetail` | Chi tiet ngan sach. |
-| `/settings/balance-history` | Co | `BalanceHistory` | Lich su snapshot so du. |
-| `/relo` | Co | `ReloLayout > Dashboard` | Dashboard Relo. |
-| `/relo/contacts` | Co | `Contacts` | Danh sach lien he. |
-| `/relo/contacts/:id/edit` | Co | `EditContact` | Sua lien he. |
-| `/relo/anniversaries` | Co | `Anniversaries` | Ngay ky niem. |
-| `/relo/anniversaries/create` | Co | `CreateAnniversary` | Tao ngay ky niem. |
-| `/relo/anniversaries/edit/:id` | Co | `EditAnniversary` | Sua ngay ky niem. |
-| `/relo/appointments` | Co | `Appointments` | Lich hen. |
-| `/relo/events/create` | Co | `CreateEvent` | Tao lich hen/su kien. |
-| `/relo/events/edit/:id` | Co | `EditEvent` | Sua lich hen/su kien. |
-| `/relo/preferences` | Co | `Preferences` | So thich cua lien he. |
-| `/relo/preferences/create` | Co | `CreatePreference` | Tao so thich. |
-| `/relo/preferences/edit/:id` | Co | `EditPreference` | Sua so thich. |
-| `/relo/settings` | Co | `ReloSettings` | Cai dat Relo. |
-| `*` | - | `Navigate('/')` | Fallback route. |
+---
 
-## 6. State management va data flow
+## 5. Các loại giao dịch (TransactionType)
 
-| Thanh phan | File | Noi dung quan ly |
-| --- | --- | --- |
-| `useAuthStore` | `src/store/useAuthStore.ts` | `user`, `session`, `isAuthenticated`, `isInitialized`, initialize session, listen auth changes, logout. |
-| `useThemeStore` | `src/store/useThemeStore.ts` | Dark mode, persist key `pocket-flow-theme`, apply class `dark` len `documentElement`. |
-| `queryClient` | `src/lib/queryClient.ts` | Query retry 1 lan, stale 5 phut, gc 24 gio, mutation khong retry. |
+Đây là nền tảng của toàn bộ nghiệp vụ. Mỗi loại có quy tắc tác động số dư khác nhau:
 
-Query keys chinh:
+| Type | Nhãn | Prefix | Tác động số dư tài khoản | Tính vào ngân sách? |
+|------|------|--------|--------------------------|---------------------|
+| `income` | Thu nhập | `+` | `balance += amount` | Không |
+| `expense` | Chi tiêu | `-` | `balance -= amount` | **Có** |
+| `withdrawal` | Rút tiền | `-` | Xem mục 7.3 (logic đặc biệt 2 tài khoản) | Không |
+| `borrow` | Vay / Thu nợ | `+` | `balance += amount` | Không |
+| `lend` | Cho vay / Trả nợ | `-` | `balance -= amount` | Không |
+| `business` | Kinh doanh | `+` | `balance += amount` | Không |
 
-| Query key | Du lieu |
-| --- | --- |
-| `['transactions', userId]` | Giao dich cua user. |
-| `['transaction', id]` | Mot giao dich. |
-| `['accounts', userId]` | Tai khoan/vi. |
-| `['categories', userId]` | Danh muc. |
-| `['category', id]` | Mot danh muc. |
-| `['goals', userId]` | Muc tieu tich luy. |
-| `['goal', id]` | Mot muc tieu. |
-| `['active-budget', userId]` | Ke hoach ngan sach moi nhat. |
-| `['budget-history', userId]` | Lich su ngan sach. |
-| `['daily_balance_logs', userId]` | Snapshot so du hang ngay. |
-| `['balance_history', userId]` | Lich su so du kem thong tin account. |
-| `['app_navigation', userId]` | Navigation ca nhan hoa. |
-| `['relo_contacts', userId]` | Lien he Relo. |
-| `['relo_anniversaries', userId]` | Ngay ky niem Relo. |
-| `['relo_appointments', userId]` | Lich hen Relo. |
-| `['relo_preferences', userId, contactId]` | So thich Relo. |
+> **Lưu ý quan trọng:** `thisMonthCount` (số giao dịch hiển thị trên dashboard) **không tính** giao dịch `withdrawal`.
 
-## 7. Mo hinh du lieu suy ra tu code
+---
 
-Code hien tai khong co migration SQL trong repo, nen bang duoi duoc suy ra tu TypeScript schema, hook Supabase va select/join dang duoc dung.
+## 6. Mô hình dữ liệu
 
-### 7.1 Bang tai chinh PocketFlow
+### 6.1 Bảng tài chính PocketFlow
 
-| Bang | Cot chinh | Quan he/ghi chu |
-| --- | --- | --- |
-| `transactions` | `id`, `user_id`, `amount`, `type`, `category_id`, `date`, `account_id`, `note`, `receipt_url`, `fee`, `created_at` | Thu/chi/rut tien. `type`: `income`, `expense`, `withdrawal`. Lien ket `accounts.id`, `categories.id`. |
-| `accounts` | `id`, `user_id`, `name`, `balance`, `type`, `color`, `icon`, `limit`, `provider`, `created_at` | Vi/tai khoan. `type`: `cash`, `bank`, `credit`. |
-| `categories` | `id`, `user_id`, `name`, `icon`, `type`, `color`, `limit`, `created_at` | Danh muc thu/chi/rut tien. `limit` dung lam han muc hoac muc tieu theo danh muc. |
-| `goals` | `id`, `user_id`, `name`, `target_amount`, `current_amount`, `target_date`, `icon`, `status`, `color`, `created_at` | Muc tieu tich luy. `status`: `active`, `completed`, `paused`. |
-| `budget_plans` | `id`, `user_id`, `total_budget`, `start_date`, `end_date`, `created_at`, `updated_at` | Ke hoach ngan sach theo ky. |
-| `daily_balance_logs` | `id`, `user_id`, `log_date`, `account_id`, `balance`, `note`, `created_at`, `updated_at` | Snapshot so du theo ngay/tai khoan. Upsert theo `user_id, log_date, account_id`. |
-| `app_navigation` | `id`, `user_id`, `group_key`, `group_label`, `item_label`, `item_path`, `item_icon`, `item_color`, `sort_order`, `is_external`, `is_active`, `created_at`, `updated_at` | Navigation ca nhan hoa. Tu seed default neu user chua co du lieu. |
-| `notifications` | `id`, `user_id`, `title`, `message`, `link`, ... | Realtime insert notification, code chi doc payload moi. |
+| Bảng | Cột chính | Ghi chú |
+|------|-----------|---------|
+| `transactions` | `id`, `user_id`, `amount`, `type`, `category_id`, `date`, `account_id`, `note`, `receipt_url`, `fee`, `created_at` | Mọi giao dịch. `fee` chỉ dùng cho `withdrawal`. |
+| `accounts` | `id`, `user_id`, `name`, `balance`, `type`, `color`, `icon`, `limit`, `provider` | `type`: `cash`, `bank`, `credit`. Logic rút tiền tìm tài khoản `type = 'cash'`. |
+| `categories` | `id`, `user_id`, `name`, `icon`, `type`, `color`, `limit` | `limit` là hạn mức chi tiêu (expense) hoặc mục tiêu thu nhập (income) theo danh mục. |
+| `goals` | `id`, `user_id`, `name`, `target_amount`, `current_amount`, `target_date`, `icon`, `status`, `color` | `status`: `active`, `completed`, `paused`. |
+| `budget_plans` | `id`, `user_id`, `total_budget`, `start_date`, `end_date`, `created_at`, `updated_at` | Một kỳ ngân sách. Nhiều kỳ có thể tồn tại; hệ thống dùng bản mới nhất. |
+| `daily_balance_logs` | `id`, `user_id`, `log_date`, `account_id`, `balance`, `note`, `created_at`, `updated_at` | Snapshot số dư mỗi ngày. Upsert theo `(user_id, log_date, account_id)`. |
+| `app_navigation` | `id`, `user_id`, `group_key`, `item_label`, `item_path`, `item_icon`, `sort_order`, `is_active` | Navigation cá nhân hoá từng user. |
+| `notifications` | `id`, `user_id`, `title`, `message`, `link` | Realtime INSERT từ Supabase. |
 
-### 7.2 Bang Relo
+### 6.2 Bảng Relo
 
-| Bang | Cot chinh | Quan he/ghi chu |
-| --- | --- | --- |
-| `relo_contacts` | `id`, `user_id`, `name`, `relationship_type`, `avatar_url`, `birthday`, `contact_type`, `notes`, `phone`, `email`, `preferences`, `created_at`, `updated_at` | Lien he. `relationship_type`: `partner`, `family`, `friend`, `other`. |
-| `relo_anniversaries` | `id`, `user_id`, `contact_id`, `title`, `description`, `anniversary_date`, `is_recurring`, `reminder_days`, `created_at`, `updated_at` | Ngay ky niem, join `relo_contacts(name, avatar_url)`. |
-| `relo_appointments` | `id`, `user_id`, `contact_id`, `title`, `description`, `location`, `appointment_date`, `appointment_time`, `status`, `created_at`, `updated_at` | Lich hen, join `relo_contacts(name, avatar_url)`. `status`: `upcoming`, `completed`, `cancelled`. |
-| `relo_preferences` | `id`, `user_id`, `contact_id`, `category`, `item`, `notes`, `created_at` | So thich cua lien he. `category`: `food`, `hobby`, `gift`, `travel`, `other`. |
+| Bảng | Cột chính | Ghi chú |
+|------|-----------|---------|
+| `relo_contacts` | `id`, `user_id`, `name`, `relationship_type`, `avatar_url`, `birthday`, `notes`, `phone`, `email` | `relationship_type`: `partner`, `family`, `friend`, `other`. |
+| `relo_anniversaries` | `id`, `user_id`, `contact_id`, `title`, `anniversary_date`, `is_recurring`, `reminder_days` | Join `relo_contacts(name, avatar_url)`. |
+| `relo_appointments` | `id`, `user_id`, `contact_id`, `title`, `location`, `appointment_date`, `appointment_time`, `status` | `status`: `upcoming`, `completed`, `cancelled`. |
+| `relo_preferences` | `id`, `user_id`, `contact_id`, `category`, `item`, `notes` | `category`: `food`, `hobby`, `gift`, `travel`, `other`. |
 
-### 7.3 Storage
+### 6.3 Storage
 
-| Bucket | Path | Vai tro |
-| --- | --- | --- |
-| `public-files` | `relo-contacts/{userId}/{timestamp}_{random}.{ext}` | Luu avatar lien he Relo. Chi chap nhan JPEG, PNG, WebP, GIF, toi da 5MB. |
+| Bucket | Path pattern | Giới hạn |
+|--------|-------------|----------|
+| `public-files` | `relo-contacts/{userId}/{timestamp}_{random}.{ext}` | JPEG/PNG/WebP/GIF, tối đa 5 MB |
 
-## 8. So do quan he du lieu
+---
 
-```mermaid
-erDiagram
-  AUTH_USERS ||--o{ TRANSACTIONS : owns
-  AUTH_USERS ||--o{ ACCOUNTS : owns
-  AUTH_USERS ||--o{ CATEGORIES : owns
-  AUTH_USERS ||--o{ GOALS : owns
-  AUTH_USERS ||--o{ BUDGET_PLANS : owns
-  AUTH_USERS ||--o{ DAILY_BALANCE_LOGS : owns
-  AUTH_USERS ||--o{ APP_NAVIGATION : owns
-  AUTH_USERS ||--o{ NOTIFICATIONS : receives
+## 7. Flow nghiệp vụ chi tiết
 
-  ACCOUNTS ||--o{ TRANSACTIONS : used_by
-  CATEGORIES ||--o{ TRANSACTIONS : classifies
-  ACCOUNTS ||--o{ DAILY_BALANCE_LOGS : snapshotted
+### 7.1 Khởi động ứng dụng & bảo vệ route
 
-  AUTH_USERS ||--o{ RELO_CONTACTS : owns
-  RELO_CONTACTS ||--o{ RELO_ANNIVERSARIES : has
-  RELO_CONTACTS ||--o{ RELO_APPOINTMENTS : has
-  RELO_CONTACTS ||--o{ RELO_PREFERENCES : has
+```
+Browser load bundle
+  → App.tsx:
+      registerSW({ immediate: true })          ← Đăng ký service worker PWA
+      useAuthStore.initialize()                ← getSession() từ Supabase
+      useThemeStore.initializeTheme()          ← Đọc localStorage / system preference
+
+  → React Router render routes
+      → ProtectedRoute kiểm tra isInitialized
+          ├── isInitialized = false  → Hiển thị LoadingScreen (chờ auth)
+          ├── isAuthenticated = false → Navigate('/login')
+          └── isAuthenticated = true  → Render layout + Outlet
 ```
 
-## 9. Luong khoi dong ung dung va bao ve route
+### 7.2 Đăng nhập / Đăng ký
 
-```mermaid
-sequenceDiagram
-  actor U as User
-  participant B as Browser
-  participant App as App.tsx
-  participant AuthStore as useAuthStore
-  participant ThemeStore as useThemeStore
-  participant Router as React Router
-  participant Supabase as Supabase Auth
-
-  U->>B: Mo PWA
-  B->>App: Load bundle React
-  App->>App: registerSW({ immediate: true })
-  App->>AuthStore: initialize()
-  AuthStore->>Supabase: getSession()
-  Supabase-->>AuthStore: session hoac null
-  AuthStore->>AuthStore: set user/session/isInitialized
-  AuthStore->>Supabase: onAuthStateChange(...)
-  App->>ThemeStore: initializeTheme()
-  ThemeStore->>B: Add/remove class dark
-  App->>Router: Render routes
-  Router->>Router: ProtectedRoute check isInitialized
-  alt Chua dang nhap
-    Router-->>U: Navigate /login
-  else Da dang nhap
-    Router-->>U: Render MainLayout/ReloLayout
-  end
+```
+User nhập form → Zod validate → useLogin/useRegister hook
+  → supabase.auth.signInWithPassword(email, password)   // đăng nhập
+     hoặc supabase.auth.signUp(email, password)          // đăng ký
+  → supabase.auth.onAuthStateChange(newSession)
+      → useAuthStore.setSession(session)
+          → navigate('/', replace: true)
 ```
 
-## 10. Luong dang nhap va dang ky
+### 7.3 Tạo giao dịch mới (flow quan trọng nhất)
 
-```mermaid
-sequenceDiagram
-  actor U as User
-  participant Page as Login/Register Page
-  participant Form as React Hook Form + Zod
-  participant Hook as useLogin/useRegister
-  participant Supabase as Supabase Auth
-  participant Router as useNavigate
-  participant Store as useAuthStore listener
+Mỗi lần tạo giao dịch thực hiện **6 bước tuần tự** trên client:
 
-  U->>Page: Nhap form
-  Page->>Form: Validate schema
-  Form-->>Hook: Du lieu hop le
-  alt Dang nhap
-    Hook->>Supabase: signInWithPassword(email, password)
-  else Dang ky
-    Hook->>Supabase: signUp(email, password, full_name)
-  end
-  Supabase-->>Hook: authData hoac error
-  Supabase-->>Store: onAuthStateChange(newSession)
-  Store->>Store: cap nhat user/session
-  Hook->>Router: navigate('/', replace)
+```
+Step 1: INSERT transactions (+ user_id)
+          → trả về transaction mới
+
+Step 2: SELECT accounts.balance WHERE id = account_id
+
+Step 3: UPDATE accounts.balance theo loại giao dịch:
+
+  ┌─ income  → balance += amount
+  ├─ borrow  → balance += amount   (cùng logic với income)
+  ├─ lend    → balance -= amount
+  ├─ expense → balance -= amount
+  ├─ business→ balance += amount
+  └─ withdrawal (LOGIC ĐẶC BIỆT):
+       SELECT accounts WHERE user_id AND type = 'cash'  ← tìm ví tiền mặt
+       UPDATE source_account.balance -= (amount + fee)  ← trừ ngân hàng
+       UPDATE cash_account.balance   += amount           ← cộng tiền mặt
+       (fee bị mất, không cộng vào đâu)
+
+Step 4: onSuccess:
+          invalidate ['transactions']
+          invalidate ['accounts']
+
+Step 5: snapshotDailyBalances(userId, date)
+          SELECT tất cả accounts của user
+          UPSERT daily_balance_logs {user_id, log_date, account_id, balance}
+          conflict target: (user_id, log_date, account_id)
+
+Step 6: invalidate ['daily_balance_logs']
+        navigate('/')
 ```
 
-## 11. Luong tao giao dich
+> **Điểm rủi ro:** Các bước thực hiện tuần tự bằng nhiều request riêng biệt. Nếu một bước thất bại giữa chừng, số dư có thể không nhất quán. Giải pháp an toàn hơn là dùng PostgreSQL RPC/transaction.
 
-Day la luong nghiep vu quan trong nhat vi tao giao dich dong thoi cap nhat so du tai khoan va snapshot so du hang ngay.
+### 7.4 Sửa giao dịch (balance reversal)
 
-```mermaid
-sequenceDiagram
-  actor U as User
-  participant Page as AddTransaction
-  participant Mut as useCreateTransaction
-  participant DB as Supabase DB
-  participant QC as QueryClient
-  participant Router as React Router
+Khi sửa giao dịch, hệ thống phải **hoàn lại số dư cũ** trước rồi mới **áp dụng số dư mới**:
 
-  U->>Page: Luu giao dich
-  Page->>Mut: mutate(TransactionFormValues)
-  Mut->>DB: insert transactions + user_id
-  DB-->>Mut: transaction moi
-  Mut->>DB: select accounts.balance theo account_id
-  alt type = withdrawal
-    Mut->>DB: update source account = balance - amount - fee
-    Mut->>DB: select cash account cua user
-    Mut->>DB: update cash account = balance + amount
-  else type = income
-    Mut->>DB: update account = balance + amount
-  else type = expense
-    Mut->>DB: update account = balance - amount
-  end
-  Mut-->>QC: onSuccess
-  QC->>QC: invalidate transactions
-  QC->>QC: invalidate accounts
-  Mut->>DB: upsert daily_balance_logs theo user_id, log_date, account_id
-  QC->>QC: invalidate daily_balance_logs
-  Mut->>Router: navigate('/')
+```
+Step 1: SELECT transaction cũ (lấy type, amount, fee, account_id)
+
+Step 2: SELECT accounts.balance (tài khoản cũ)
+
+Step 3: HOÀN LẠI số dư theo type cũ:
+  ┌─ income/borrow → balance -= old.amount   (hoàn lại cộng)
+  ├─ lend/expense  → balance += old.amount   (hoàn lại trừ)
+  └─ withdrawal    → source_account += (old.amount + old.fee)
+                     cash_account   -= old.amount
+
+Step 4: UPDATE transactions SET ...new_data...
+
+Step 5: SELECT accounts.balance (tài khoản mới - có thể khác tài khoản cũ)
+
+Step 6: ÁP DỤNG số dư mới (giống Step 3 trong useCreateTransaction)
+
+Step 7: onSuccess → invalidate + snapshotDailyBalances
 ```
 
-## 12. Luong sua va xoa giao dich
+### 7.5 Xoá giao dịch
 
-| Hanh dong | Cac buoc chinh | Query invalidate |
-| --- | --- | --- |
-| Sua giao dich | Lay giao dich cu, hoan lai so du cu, update row `transactions`, ap dung so du moi, snapshot daily balance. | `transactions`, `accounts`, `daily_balance_logs` |
-| Xoa giao dich | Lay giao dich can xoa, hoan lai so du tai khoan, xoa row `transactions`, snapshot daily balance. | `transactions`, `accounts`, `daily_balance_logs` |
+```
+Step 1: SELECT transaction (lấy type, amount, fee, account_id)
 
-Luu y nghiep vu rut tien: khi `type = withdrawal`, he thong tru tien tu tai khoan nguon kem `fee`, sau do cong `amount` vao tai khoan `cash` cua cung user neu tim thay.
+Step 2: SELECT accounts.balance (tài khoản của giao dịch)
 
-## 13. Luong thong ke va ngan sach
+Step 3: HOÀN LẠI số dư (logic giống Step 3 của useUpdateTransaction)
+  ┌─ income/borrow → balance -= amount
+  ├─ lend/expense  → balance += amount
+  └─ withdrawal    → source_account += (amount + fee)
+                     cash_account   -= amount
 
-### 13.1 Thong ke giao dich
+Step 4: DELETE transactions WHERE id
 
-Ham `getTransactionStats(transactions, categories, targetDate)` tinh du lieu hoan toan tren client:
-
-| Ket qua | Cach tinh |
-| --- | --- |
-| `totalIncome` | Tong `amount` cua `income` trong thang duoc chon. |
-| `totalExpense` | Tong `amount` cua `expense` trong thang duoc chon. |
-| `topCategories` | Nhom giao dich chi tieu theo `category_id`, gan metadata category, sap xep giam theo amount. |
-| `topIncomeCategories` | Nhom giao dich thu nhap theo `category_id`. |
-| `weeklyTrends` | Tong chi tieu theo 5 tuan trong thang. |
-| `monthlyTrends` | Tong chi tieu 12 thang cua nam duoc chon. |
-| `monthlyIncomeTrends` | Tong thu nhap 12 thang cua nam duoc chon. |
-| `dailyTrends` | Tong chi tieu tung ngay trong thang. |
-| `dailyIncomeTrends` | Tong thu nhap tung ngay trong thang. |
-| `thisMonthCount` | So giao dich trong thang, bo qua `withdrawal`. |
-
-### 13.2 Ngan sach rollover
-
-Ham `getDailyBudgetStatus(plan, transactions, targetDate, categories)`:
-
-1. Chi tinh neu `targetDate` nam trong `start_date` va `end_date`.
-2. Loc giao dich `expense` trong ky ngan sach.
-3. Bo qua danh muc co ten chua `grap chi` hoac `grab chi`.
-4. Tinh so da chi truoc ngay target va trong ngay target.
-5. Chia ngan sach con lai dau ngay cho so ngay con lai.
-6. Tra ve trang thai vuot muc, ngan sach ngay con lai, tong ngan sach con lai va tong da chi.
-
-```mermaid
-flowchart LR
-  Plan[budget_plans moi nhat] --> Calc[getDailyBudgetStatus]
-  Transactions[transactions expense trong ky] --> Exclude[Bo danh muc Grab/Grap chi]
-  Categories[categories] --> Exclude
-  Exclude --> Calc
-  Calc --> Today[remainingDaily]
-  Calc --> Total[remainingTotal]
-  Calc --> Flags[isExceeded / budgetEmpty]
+Step 5: onSuccess → invalidate + snapshotDailyBalances(userId, today)
 ```
 
-## 14. Luong realtime notification
+> **Lưu ý:** Khi xoá, snapshot dùng `today` (không phải ngày của giao dịch bị xoá). Điều này có thể làm log ngày cũ không được cập nhật lại.
 
-```mermaid
-sequenceDiagram
-  participant App as RealtimeNotifications
-  participant Store as useAuthStore
-  participant RT as Supabase Realtime
-  participant Toast as react-hot-toast
-  participant Router as router.navigate
+---
 
-  App->>Store: lay user.id
-  App->>RT: subscribe channel public:notifications
-  RT->>App: INSERT public.notifications filter user_id
-  App->>Toast: Hien toast title/message
-  alt payload.new.link ton tai va user click toast
-    Toast->>Router: navigate(link)
-  else user dong toast
-    Toast->>Toast: dismiss
-  end
+## 8. Công thức tính thống kê (`getTransactionStats`)
+
+Hàm này chạy **hoàn toàn trên client** (không query DB). Input: toàn bộ mảng transactions + categories + targetDate.
+
+### 8.1 Lọc theo tháng
+
+```
+thisMonthTx = transactions.filter(tx =>
+  tx.date.getMonth() === targetDate.getMonth() &&
+  tx.date.getFullYear() === targetDate.getFullYear()
+)
 ```
 
-## 15. Luong Relo va upload avatar
+### 8.2 Tổng thu/chi
 
-```mermaid
-sequenceDiagram
-  actor U as User
-  participant Page as Relo Contact Page
-  participant Upload as uploadContactAvatar
-  participant Storage as Supabase Storage public-files
-  participant Mut as useCreateReloContact/useUpdateReloContact
-  participant DB as Supabase DB
-  participant QC as QueryClient
-
-  U->>Page: Chon avatar va luu lien he
-  Page->>Upload: uploadContactAvatar(file, userId)
-  Upload->>Upload: validate type va max 5MB
-  Upload->>Storage: upload relo-contacts/{userId}/...
-  Storage-->>Upload: ok
-  Upload->>Storage: getPublicUrl(path)
-  Storage-->>Upload: publicUrl
-  Page->>Mut: mutate contact values + avatar_url
-  Mut->>DB: insert/update relo_contacts
-  DB-->>Mut: row moi/cap nhat
-  Mut->>QC: invalidate relo_contacts
+```
+totalIncome  = Σ amount  WHERE type = 'income'   (trong tháng)
+totalExpense = Σ amount  WHERE type = 'expense'  (trong tháng)
+totalBorrow  = Σ amount  WHERE type = 'borrow'   (trong tháng)
+totalLend    = Σ amount  WHERE type = 'lend'     (trong tháng)
 ```
 
-## 16. PWA va cache
+### 8.3 Phân tích theo danh mục (topCategories)
 
-Cau hinh PWA nam trong `vite.config.ts`:
+```
+Với mỗi type (expense, income, borrow, lend):
+  - Gom nhóm theo category_id
+  - Tính tổng amount + count
+  - Join metadata từ categories[] (name, icon, color, limit)
+  - Sắp xếp giảm dần theo amount
 
-| Muc | Gia tri |
-| --- | --- |
+Kết quả: topCategories, topIncomeCategories, topBorrowCategories, topLendCategories
+```
+
+### 8.4 Xu hướng theo tuần (weeklyTrends)
+
+```
+Chỉ tính giao dịch expense trong tháng.
+weekIndex = min( floor((day - 1) / 7), 4 )   ← 5 tuần (index 0..4)
+weeklyTrends[weekIndex] += amount
+```
+
+Phân bổ ngày vào tuần:
+- Tuần 0: ngày 1–7
+- Tuần 1: ngày 8–14
+- Tuần 2: ngày 15–21
+- Tuần 3: ngày 22–28
+- Tuần 4: ngày 29+ (bị cap ở 4)
+
+### 8.5 Xu hướng theo tháng trong năm (monthlyTrends)
+
+```
+Tính cho tất cả transactions (không chỉ tháng hiện tại) trong năm của targetDate.
+Chỉ loại expense và income.
+
+monthlyTrends[month]       += amount  (expense)
+monthlyIncomeTrends[month] += amount  (income)
+```
+
+### 8.6 Xu hướng theo ngày trong tháng (dailyTrends)
+
+```
+Array kích thước = số ngày trong tháng
+
+dailyTrends[day-1]        += amount  (expense)
+dailyIncomeTrends[day-1]  += amount  (income)
+
+Riêng type = 'business':
+  - Nếu tên danh mục chứa 'thu' HOẶC 'income' → dailyBusinessTrends[day-1] += amount
+  - Ngược lại                                  → dailyBusinessTrends[day-1] -= amount
+```
+
+### 8.7 Đếm giao dịch trong tháng
+
+```
+thisMonthCount = thisMonthTx.filter(tx => tx.type !== 'withdrawal').length
+```
+
+Giao dịch `withdrawal` bị loại khỏi tổng đếm vì đây là chuyển tiền nội bộ, không phải thu/chi thực sự.
+
+---
+
+## 9. Công thức tính ngân sách hàng ngày (`getDailyBudgetStatus`)
+
+Đây là hệ thống **"rollover budget"** – phân bổ lại ngân sách chưa dùng sang các ngày còn lại.
+
+### 9.1 Điều kiện áp dụng
+
+```
+Nếu targetDate < plan.start_date  → return null  (ngoài kỳ ngân sách)
+Nếu targetDate > plan.end_date    → return null  (kỳ đã kết thúc)
+```
+
+### 9.2 Lọc giao dịch nằm trong kỳ ngân sách
+
+```
+planTransactions = transactions.filter(tx =>
+  tx.type === 'expense'        &&    ← Chỉ chi tiêu
+  tx.date >= plan.start_date   &&
+  tx.date <= plan.end_date
+)
+```
+
+> Các loại `withdrawal`, `borrow`, `lend`, `business`, `income` **không tính** vào ngân sách.
+
+### 9.3 Phân tách chi tiêu theo ngày
+
+```
+spentBeforeTarget = Σ amount  WHERE date < targetDate
+spentOnTargetDay  = Σ amount  WHERE date = targetDate
+totalSpentSoFar   = Σ amount  (toàn bộ trong kỳ đến hết targetDate)
+```
+
+### 9.4 Công thức phân bổ ngân sách ngày (rollover)
+
+```
+remainingTotalAtStartOfDay = plan.total_budget - spentBeforeTarget
+  → Ngân sách còn lại tính đến đầu ngày hôm nay (chưa tính chi tiêu hôm nay)
+
+remainingDays = calculateDaysBetween(targetDate, plan.end_date)
+  → Số ngày còn lại bao gồm targetDate
+  → Công thức: ceil( |end - target| / 86400000 ) + 1
+
+allocatedDaily = remainingTotalAtStartOfDay / remainingDays
+  → Mức cho phép mỗi ngày (sau rollover)
+
+remainingDaily = allocatedDaily - spentOnTargetDay
+  → Còn lại trong ngày hôm nay = được phép - đã chi hôm nay
+
+currentRemainingTotal = plan.total_budget - totalSpentSoFar
+  → Tổng ngân sách còn lại sau khi tính hôm nay
+```
+
+### 9.5 Kết quả trả về
+
+| Field | Ý nghĩa |
+|-------|---------|
+| `isExceeded` | `remainingDaily < 0` — đã chi quá mức hôm nay |
+| `remainingDaily` | Số tiền còn được chi trong ngày hôm nay |
+| `remainingTotal` | Tổng ngân sách còn lại trong toàn bộ kỳ |
+| `allocatedDaily` | Mức được phép chi mỗi ngày (sau rollover) |
+| `budgetEmpty` | `remainingTotal <= 0` — đã hết ngân sách toàn kỳ |
+| `totalSpent` | Tổng đã chi trong kỳ (tính đến hết targetDate) |
+
+### 9.6 Ví dụ minh hoạ
+
+```
+Kỳ ngân sách: 01/06 – 30/06, total_budget = 3.000.000đ
+Hôm nay: 10/06
+
+Chi tiêu trước ngày 10/06:
+  05/06: Ăn uống 200.000
+  07/06: Xăng    150.000
+  08/06: Cà phê   50.000
+  → spentBeforeTarget = 400.000
+
+Chi tiêu ngày 10/06 đã có:
+  10/06: Ăn trưa 80.000
+  → spentOnTargetDay = 80.000
+
+Tính toán:
+  remainingTotalAtStartOfDay = 3.000.000 - 400.000 = 2.600.000
+  remainingDays = (10/06 → 30/06) = 21 ngày
+  allocatedDaily = 2.600.000 / 21 ≈ 123.809đ/ngày
+  remainingDaily = 123.809 - 80.000 = 43.809đ
+
+  → Hôm nay còn được chi thêm 43.809đ
+  → isExceeded = false
+  → budgetEmpty = false
+  → totalSpent = 400.000 + 80.000 = 480.000
+  → remainingTotal = 3.000.000 - 480.000 = 2.520.000
+```
+
+### 9.7 Cảnh báo vượt ngân sách trong form AddTransaction
+
+```
+isBudgetEmpty = currentPlan AND todayStatus.budgetEmpty AND type = 'expense'
+willExceed    = currentPlan AND type = 'expense' AND currentAmount > targetRemaining
+
+  → Nếu isBudgetEmpty: hiện thông báo "Ngân sách đã cạn"
+  → Nếu willExceed:    hiện cảnh báo + rung điện thoại (navigator.vibrate(200))
+  → Người dùng vẫn có thể lưu dù vượt ngân sách
+```
+
+---
+
+## 10. Snapshot số dư hàng ngày (`snapshotDailyBalances`)
+
+```
+Được gọi trong onSuccess của: Create, Update, Delete transaction
+
+Input: userId, logDate (ngày của giao dịch)
+
+Logic:
+  SELECT id, balance FROM accounts WHERE user_id = userId
+
+  Với mỗi account:
+    rows.push({ user_id, log_date: date, account_id, balance, updated_at })
+
+  UPSERT daily_balance_logs
+    ON CONFLICT (user_id, log_date, account_id)
+    DO UPDATE SET balance, updated_at
+```
+
+Đây là cơ sở dữ liệu cho biểu đồ "Biến động số dư" (`/settings/balance-history`).
+
+---
+
+## 11. Flow thống kê trên màn hình Stats
+
+```
+Màn hình Stats (/stats)
+  ├── useTransactions() → lấy tất cả transactions của user
+  ├── useCategories()   → lấy categories
+  └── getTransactionStats(transactions, categories, selectedDate)
+       → Tính toán CLIENT-SIDE (không query DB thêm)
+
+Hiển thị theo statsType: expense | income | borrow | lend
+
+Hero card:
+  displayTotal = tổng của statsType trong tháng chọn
+  totalBudget  = Σ category.limit (chỉ categories của statsType đó)
+  progress     = min(displayTotal / totalBudget * 100, 100)
+  remainingBudget = max(totalBudget - displayTotal, 0)
+  dailyLimit   = remainingBudget / daysLeft  (chỉ khi là tháng hiện tại)
+
+Category breakdown:
+  Với mỗi category của statsType:
+    pct = cat.limit > 0 ? (cat.amount / cat.limit * 100) : (cat.amount / displayTotal * 100)
+    Nếu cat.amount > cat.limit && type = 'expense' → hiện cảnh báo đỏ
+    Nếu cat.amount >= cat.limit && type = 'income' → hiện thông báo đạt mục tiêu
+```
+
+> **Lưu ý phân biệt:** `getDailyBudgetStatus` dùng `budget_plans` (kỳ ngân sách tổng). Còn màn hình Stats dùng `category.limit` (hạn mức từng danh mục). Đây là **hai hệ thống kiểm soát chi tiêu độc lập**.
+
+---
+
+## 12. State management
+
+### 12.1 useAuthStore
+
+```
+State: user, session, isAuthenticated, isInitialized
+
+initialize():
+  supabase.auth.getSession()
+  → set user/session/isInitialized = true
+  supabase.auth.onAuthStateChange((event, session))
+  → update user/session/isAuthenticated khi session thay đổi
+
+logout():
+  supabase.auth.signOut()
+  → clear user/session/isAuthenticated
+```
+
+### 12.2 useThemeStore
+
+```
+State: isDarkMode
+Persist: localStorage key 'pocket-flow-theme'
+
+initializeTheme():
+  Đọc localStorage → nếu không có, dùng window.matchMedia('(prefers-color-scheme: dark)')
+  Apply/remove class 'dark' trên document.documentElement
+
+toggleTheme() / setTheme(isDark):
+  Flip isDarkMode → apply class 'dark'
+```
+
+### 12.3 TanStack Query defaults
+
+```
+staleTime: 5 phút    → không refetch nếu data < 5 phút tuổi
+gcTime: 24 giờ       → giữ cache offline 24 giờ
+retry: 1             → thử lại 1 lần khi query lỗi
+refetchOnWindowFocus: false
+mutation retry: false
+```
+
+### 12.4 Query keys quan trọng
+
+| Key | Dữ liệu |
+|-----|---------|
+| `['transactions', userId]` | Tất cả giao dịch |
+| `['transaction', id]` | Một giao dịch |
+| `['accounts', userId]` | Tất cả tài khoản/ví |
+| `['categories', userId]` | Tất cả danh mục |
+| `['goals', userId]` | Tất cả mục tiêu |
+| `['active-budget', userId]` | Budget plan mới nhất |
+| `['budget-by-date', userId, date]` | Budget plan bao gồm ngày `date` |
+| `['budget-history', userId]` | Toàn bộ lịch sử budget plans |
+| `['daily_balance_logs', userId]` | Snapshot số dư theo ngày |
+| `['balance_history', userId]` | Balance logs join tên account |
+| `['relo_contacts', userId]` | Liên hệ Relo |
+| `['relo_anniversaries', userId]` | Ngày kỷ niệm Relo |
+| `['relo_appointments', userId]` | Lịch hẹn Relo |
+| `['relo_preferences', userId, contactId]` | Sở thích của liên hệ |
+
+---
+
+## 13. Realtime notifications
+
+```
+RealtimeNotifications component (mount trong App.tsx):
+
+supabase.channel('public:notifications')
+  .on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'notifications',
+    filter: `user_id=eq.${userId}`
+  }, (payload) => {
+    toast(payload.new.title + ': ' + payload.new.message, {
+      onClick: () => navigate(payload.new.link)  ← nếu có link
+    })
+  })
+  .subscribe()
+```
+
+---
+
+## 14. PWA & Service Worker
+
+| Mục | Giá trị |
+|-----|---------|
 | App name | `PocketFlow Financial Atelier` |
 | Short name | `PocketFlow` |
-| Display | `standalone` |
+| Display | `standalone` (toàn màn hình, không thanh URL) |
 | Orientation | `portrait` |
-| Service worker | `registerType: autoUpdate`, `registerSW({ immediate: true })` |
-| Static assets cache | `CacheFirst`, toi da 50 entries, 30 ngay |
-| API cache pattern | `https://api.*`, `NetworkFirst`, toi da 100 entries, 24 gio |
+| SW update | `registerType: 'autoUpdate'` + `registerSW({ immediate: true })` |
+| Static cache | `CacheFirst`, max 50 entries, 30 ngày |
+| API cache | pattern `/https://api.*/`, `NetworkFirst`, max 100 entries, 24 giờ |
 
-Luu y: Supabase request thuong khong match pattern `https://api.*`, nen neu muon cache Supabase REST/Reatime/Storage can bo sung pattern phu hop voi domain Supabase.
+> ⚠️ Supabase thường có domain dạng `*.supabase.co`, **không** match pattern `/https://api.*/`. Cần bổ sung pattern nếu muốn cache offline request Supabase.
 
-## 17. Bien moi truong
+---
 
-| Bien | Noi dung | File dung |
-| --- | --- | --- |
-| `VITE_SUPABASE_URL` | URL project Supabase. | `src/utils/supabase.ts` |
-| `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Publishable anon key cua Supabase. | `src/utils/supabase.ts` |
-| `VITE_API_URL` | Base URL cho Axios instance cu/du phong. | `src/lib/axios.ts` |
+## 15. Biến môi trường
 
-## 18. Cac module chuc nang
+| Biến | Mục đích |
+|------|----------|
+| `VITE_SUPABASE_URL` | URL project Supabase |
+| `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Anon/public key |
+| `VITE_API_URL` | Base URL cho Axios (hiện không dùng trong luồng chính) |
 
-| Module | File chinh | Chuc nang |
-| --- | --- | --- |
-| Auth | `features/auth/hooks/useLogin.ts`, `useRegister.ts` | Sign in/sign up Supabase, validate form. |
-| Protected route | `components/ProtectedRoute.tsx` | Cho loading khi auth chua init, redirect `/login` neu chua dang nhap. |
-| Dashboard | `pages/Home.tsx` | Tong so du, thu/chi, chart ngay/thang, shortcut, recent activity. |
-| Transactions | `features/transactions/*` | CRUD giao dich, cap nhat account balance, snapshot so du. |
-| Accounts | `features/accounts/*` | Quan ly vi/tai khoan va lich su so du. |
-| Categories | `features/categories/*` | CRUD danh muc va han muc. |
-| Goals | `features/goals/*` | CRUD muc tieu tich luy. |
-| Budget | `features/budget/*` | Ke hoach chi tieu va tinh ngan sach ngay. |
-| Stats | `pages/Stats.tsx` | Thong ke theo thang, danh muc, progress so voi limit. |
-| Navigation | `features/navigation/*` | Seed va doc navigation ca nhan hoa. |
-| Notifications | `features/notifications/RealtimeNotifications.tsx` | Subscribe insert notifications va dieu huong tu toast. |
-| Relo | `apps/relo/*` | Quan ly lien he, ky niem, lich hen, so thich, avatar. |
+---
 
-## 19. Ghi chu ky thuat va rui ro hien tai
+## 16. Điểm cần chú ý & rủi ro kỹ thuật
 
-| Diem | Ghi chu |
-| --- | --- |
-| Cap nhat so du giao dich | Dang thuc hien nhieu request client-side; neu can an toan cao nen chuyen thanh RPC/transaction trong Postgres de tranh race condition. |
-| RLS | Code luon loc `user_id`, nhung can dam bao Supabase Row Level Security duoc bat va policy dung. |
-| Select mot ban ghi | Mot so query theo `id` khong filter `user_id`; nen dua RLS vao DB hoac bo sung `.eq('user_id', user.id)`. |
-| Axios | `src/lib/axios.ts` ton tai nhung cac module chinh dung Supabase client; co the la lop API du phong. |
-| README/TECH_STACK encoding | Noi dung tieng Viet trong file hien tai co dau hieu loi encoding; file nay duoc viet lai de doc ro hon. |
-| PWA API cache | Pattern cache API hien tai co the chua bao phu Supabase domain. |
-| Budget history invalidate | Tao/sua/xoa budget chi invalidate `active-budget`; neu trang history can cap nhat ngay, nen invalidate them `budget-history`. |
+| Điểm | Mô tả | Mức độ |
+|------|-------|--------|
+| **Race condition số dư** | 6 request độc lập client-side cho mỗi transaction. Lỗi giữa chừng gây mất nhất quán. | ⚠️ Cao |
+| **RLS chưa xác nhận** | Code lọc `user_id` phía client, nhưng nếu Supabase RLS chưa bật, user có thể đọc/sửa data của nhau. | ⚠️ Cao |
+| **useTransaction(id) không filter user_id** | Chỉ filter theo `id`. Dựa hoàn toàn vào RLS. | ⚠️ Trung bình |
+| **Snapshot xoá giao dịch dùng ngày hiện tại** | Khi xoá giao dịch ngày cũ, snapshot chỉ cập nhật log hôm nay, không cập nhật ngày của giao dịch bị xoá. | ℹ️ Thấp |
+| **Budget history invalidate thiếu** | Tạo/sửa/xoá budget chỉ invalidate `active-budget`, không invalidate `budget-history`. | ℹ️ Thấp |
+| **withdrawal tìm cash account bằng `.single()`** | Nếu user có nhiều hơn 1 tài khoản `type = 'cash'`, sẽ lỗi. | ⚠️ Trung bình |
+| **PWA cache không cover Supabase** | Domain Supabase không match pattern `https://api.*`. | ℹ️ Thấp |
 
-## 20. Tom tat nhanh cho developer moi
+---
 
-1. Bat dau tu `src/App.tsx` de hieu bootstrapping.
-2. Xem `src/routes/index.tsx` de biet man hinh nao map voi route nao.
-3. Voi du lieu server, tim trong cac hook `use*` o `src/features/*/hooks` va `src/apps/relo/features/useReloData.ts`.
-4. Voi schema form/type, xem `src/features/*/types/*.schema.ts` va `src/apps/relo/types/relo.types.ts`.
-5. Voi Supabase, bang du lieu nam trong `.from('table_name')`; auth va storage nam trong `supabase.auth` va `supabase.storage`.
-6. Khi thay doi mutation, nho invalidate query key lien quan trong TanStack Query.
+## 17. Hướng dẫn nhanh cho developer mới
+
+1. **Bootstrap:** `src/App.tsx` → `src/routes/index.tsx`
+2. **Thêm màn hình mới:** Tạo page trong `src/features/<feature>/pages/`, thêm route lazy trong `src/routes/index.tsx`, bọc `<ProtectedRoute>` nếu cần đăng nhập.
+3. **Thêm query mới:** Viết hook trong `src/features/<feature>/hooks/`, dùng `useQuery` + `queryKey` + `supabase.from().select()`.
+4. **Thêm mutation mới:** Dùng `useMutation`, gọi `queryClient.invalidateQueries` trong `onSuccess`.
+5. **Schema form:** Định nghĩa Zod schema trong `src/features/<feature>/types/*.schema.ts`, dùng `zodResolver` trong `useForm`.
+6. **Sửa màu/theme:** CSS variables trong `src/index.css`. Tailwind tokens trong `tailwind.config.js`.
+7. **Không dùng @apply với opacity modifier** (ví dụ `@apply text-primary/50`) trong file CSS — Tailwind không resolve được với CSS variable colors. Dùng `color-mix()` hoặc plain CSS thay thế.

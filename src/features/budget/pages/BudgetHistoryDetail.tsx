@@ -1,10 +1,9 @@
 import { formatCurrency } from '@/utils/format'
 import { LoadingScreen } from '@/components/Loading'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Calendar, Info } from 'lucide-react'
-import { useBudgetHistory } from '../hooks/useBudget'
-import { useTransactions } from '../../transactions/hooks/useTransactions'
+import { useBudgetHistory, useBudgetStatus } from '../hooks/useBudget'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -18,12 +17,12 @@ const BudgetHistoryDetail: React.FC = () => {
   const navigate = useNavigate()
   
   const { data: plans, isLoading: plansLoading } = useBudgetHistory()
-  const { data: transactions, isLoading: txLoading } = useTransactions()
-  const { data: categories, isLoading: catLoading } = useCategories()
+  const { data: categories } = useCategories()
 
   const plan = plans?.find(p => p.id === id)
+  const status = useBudgetStatus(plan, plan?.end_date)
 
-  if (plansLoading || txLoading || catLoading) {
+  if (plansLoading || !plans) {
     return <LoadingScreen message="Đang tải chi tiết ngân sách..." />
   }
 
@@ -37,34 +36,10 @@ const BudgetHistoryDetail: React.FC = () => {
      )
   }
 
-  const filteredTransactions = useMemo(() => {
-    if (!transactions || !categories) return transactions
-    
-    const excludedIds = categories
-      .filter(c => {
-        const name = c.name.toLowerCase()
-        return name.includes('grap chi') || name.includes('grab chi') || name === 'nhà'
-      })
-      .map(c => c.id)
-
-    if (excludedIds.length === 0) return transactions
-    return transactions.filter(tx => {
-      // Chỉ giữ lại type 'expense'
-      if (tx.type !== 'expense') return false
-
-      // Loại bỏ danh mục Grap chi
-      return !tx.category_id || !excludedIds.includes(tx.category_id)
-    })
-  }, [transactions, categories])
-
-  const planTransactions = filteredTransactions
-    ?.filter(tx => tx.date >= plan.start_date && tx.date <= plan.end_date)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) || []
-
-  const expenseTransactions = planTransactions.filter(tx => tx.type === 'expense')
-  const totalSpent = expenseTransactions.reduce((acc, curr) => acc + curr.amount, 0)
-  const isExceeded = totalSpent > plan.total_budget
-  const progress = Math.min(100, Math.max(0, (totalSpent / plan.total_budget) * 100))
+  const planTransactions = status?.planTransactions ?? []
+  const totalSpent = status?.totalSpent ?? 0
+  const isExceeded = status?.isExceeded ?? false
+  const progress = status?.progressPercentage ?? 0
 
   return (
     <div className="min-h-screen bg-surface dark:bg-background pb-24 md:p-8">

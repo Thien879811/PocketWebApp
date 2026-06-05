@@ -5,9 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Target, Calendar, TrendingUp, AlertTriangle, CheckCircle2, TrendingDown, PiggyBank, Edit3, X, Loader2 } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { useActiveBudget, useBudgetMutations, getDailyBudgetStatus } from '../hooks/useBudget'
-import { useTransactions } from '../../transactions/hooks/useTransactions'
-import { useCategories } from '../../categories/hooks/useCategories'
+import { useActiveBudget, useBudgetMutations, useBudgetStatus } from '../hooks/useBudget'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -17,8 +15,6 @@ const BudgetPlanner: React.FC = () => {
   const navigate = useNavigate()
   
   const { data: currentPlan, isLoading: planLoading } = useActiveBudget()
-  const { data: transactions } = useTransactions()
-  const { data: categories } = useCategories()
   const { createBudget, updateBudget, deleteBudget } = useBudgetMutations()
 
   const [isEditing, setIsEditing] = useState(false)
@@ -67,18 +63,9 @@ const BudgetPlanner: React.FC = () => {
 
 
 
-  const filteredTransactions = (transactions && categories) 
-    ? transactions.filter(tx => {
-        const cat = categories.find(c => c.id === tx.category_id)
-        return cat?.name?.toLowerCase() !== 'nhà'
-      })
-    : transactions
-
-  const todayStatus = (currentPlan && filteredTransactions) ? getDailyBudgetStatus(currentPlan, filteredTransactions, isExpired ? currentPlan.end_date : todayStr) : null
-
-  const progressPercentage = currentPlan && todayStatus
-    ? Math.min(100, Math.max(0, (todayStatus.totalSpent / currentPlan.total_budget) * 100))
-    : 0
+  const status = useBudgetStatus(currentPlan, isExpired ? currentPlan?.end_date : todayStr)
+  const todayStatus = status?.todayStatus
+  const progressPercentage = status?.progressPercentage ?? 0
 
   if (planLoading) {
     return <LoadingScreen message="Đang tải dữ liệu ngân sách..." />
@@ -260,7 +247,7 @@ const BudgetPlanner: React.FC = () => {
                           />
                         </div>
                         <div className="flex justify-between text-[10px] font-bold opacity-80 text-on-surface-variant">
-                          <span>Đã tiêu {formatCurrency(todayStatus?.totalSpent)}</span>
+                          <span>Đã tiêu {formatCurrency(status?.totalSpent)}</span>
                           <span>{progressPercentage.toFixed(1)}%</span>
                         </div>
                       </div>

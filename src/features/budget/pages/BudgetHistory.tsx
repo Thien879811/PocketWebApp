@@ -3,7 +3,7 @@ import { LoadingScreen } from '@/components/Loading'
 import React, { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, History, Calendar, Target, CheckCircle2, TrendingUp } from 'lucide-react'
-import { useBudgetHistory } from '../hooks/useBudget'
+import { useBudgetHistory, filterExpensesForBudget } from '../hooks/useBudget'
 import { useTransactions } from '../../transactions/hooks/useTransactions'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { clsx, type ClassValue } from 'clsx'
@@ -20,25 +20,10 @@ const BudgetHistory: React.FC = () => {
   const { data: transactions, isLoading: txLoading } = useTransactions()
   const { data: categories, isLoading: catLoading } = useCategories()
 
-  const filteredTransactions = useMemo(() => {
-    if (!transactions || !categories) return transactions
-    
-    const excludedIds = categories
-      .filter(c => {
-        const name = c.name.toLowerCase()
-        return name.includes('grap chi') || name.includes('grab chi') || name === 'nhà'
-      })
-      .map(c => c.id)
-
-    if (excludedIds.length === 0) return transactions
-    return transactions.filter(tx => {
-      // Chỉ giữ lại type 'expense'
-      if (tx.type !== 'expense') return false
-
-      // Loại bỏ danh mục Grap chi
-      return !tx.category_id || !excludedIds.includes(tx.category_id)
-    })
-  }, [transactions, categories])
+  const budgetExpenses = useMemo(
+    () => filterExpensesForBudget(transactions ?? [], categories ?? []),
+    [transactions, categories]
+  )
 
   if (plansLoading || txLoading || catLoading) {
      return <LoadingScreen message="Đang tải lịch sử ngân sách..." />
@@ -75,11 +60,9 @@ const BudgetHistory: React.FC = () => {
            ) : (
               <div className="space-y-4">
                  {plans.map((plan, index) => {
-                    const planTransactions = filteredTransactions?.filter(tx => 
-                       tx.type === 'expense' && 
-                       tx.date >= plan.start_date && 
-                       tx.date <= plan.end_date
-                    ) || []
+                    const planTransactions = budgetExpenses.filter(tx =>
+                       tx.date >= plan.start_date && tx.date <= plan.end_date
+                    )
 
                     const totalSpent = planTransactions.reduce((acc, curr) => acc + curr.amount, 0)
                     const isExceeded = totalSpent > plan.total_budget

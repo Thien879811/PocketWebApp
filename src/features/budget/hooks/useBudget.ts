@@ -1,6 +1,11 @@
+import { useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/utils/supabase'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useTransactions } from '../../transactions/hooks/useTransactions'
+import { useCategories } from '../../categories/hooks/useCategories'
+import type { Transaction } from '../../transactions/types/transaction.schema'
+import type { Category } from '../../categories/types/category.schema'
 
 export interface BudgetPlan {
   id: string
@@ -142,6 +147,64 @@ export const useBudgetMutations = () => {
   })
 
   return { createBudget, updateBudget, deleteBudget }
+}
+
+// Danh mục loại khỏi tính toán ngân sách
+export const BUDGET_EXCLUDED_CATEGORIES = ['nhà', 'grap chi', 'grab chi']
+
+/**
+ * Lọc transactions về expense-only, loại bỏ danh mục cố định.
+ * Không lọc theo date range — dùng kết hợp với plan.start_date/end_date.
+ */
+export const filterExpensesForBudget = (
+  transactions: Transaction[],
+  categories: Category[]
+): Transaction[] => {
+  const excludedIds = categories
+    .filter(c => BUDGET_EXCLUDED_CATEGORIES.some(n => c.name.toLowerCase().includes(n)))
+    .map(c => c.id)
+  return transactions.filter(tx =>
+    tx.type === 'expense' &&
+    (!tx.category_id || !excludedIds.includes(tx.category_id))
+  )
+}
+
+/**
+ * Hook thống nhất tính toán trạng thái ngân sách cho một kỳ.
+ * Thay thế tất cả pattern filteredTransactions + getDailyBudgetStatus phân tán
+ * ở BudgetPlanner, BudgetHistoryDetail, AddTransaction.
+ *
+ * @param plan  Kế hoạch ngân sách (null → trả về null)
+ * @param targetDate  Ngày mục tiêu cho rollover (mặc định hôm nay)
+ */
+export const useBudgetStatus = (
+  plan: BudgetPlan | null | undefined,
+  targetDate?: string
+) => {
+  const { data: allTransactions = [] } = useTransactions()
+  const { data: categories = [] } = useCategories()
+
+  return useMemo(() => {
+    if (!plan) return null
+
+    const target = targetDate ?? new Date().toISOString().split('T')[0]
+    const budgetExpenses = filterExpensesForBudget(allTransactions, categories)
+    const todayStatus = getDailyBudgetStatus(plan, budgetExpenses, target)
+
+    const planTransactions = budgetExpenses
+      .filter(tx => tx.date >= plan.start_date && tx.date <= plan.end_date)
+      .sort((a, b) => b.date.localeCompare(a.date))
+
+    const totalSpent = planTransactions.reduce((acc, tx) => acc + tx.amount, 0)
+
+    return {
+      todayStatus,
+      planTransactions,
+      totalSpent,
+      progressPercentage: Math.min(100, Math.max(0, (totalSpent / plan.total_budget) * 100)),
+      isExceeded: totalSpent > plan.total_budget,
+    }
+  }, [plan, allTransactions, categories, targetDate])
 }
 
 export const calculateDaysBetween = (start: string, end: string) => {

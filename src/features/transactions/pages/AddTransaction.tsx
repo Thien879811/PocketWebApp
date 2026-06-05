@@ -11,8 +11,7 @@ import { transactionSchema, type TransactionFormValues } from '../types/transact
 import { useCreateTransaction } from '../hooks/useTransactionMutations'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { useAccounts } from '../../accounts/hooks/useAccounts'
-import { useBudgetByDate, getDailyBudgetStatus } from '../../budget/hooks/useBudget'
-import { useTransactions } from '../../transactions/hooks/useTransactions'
+import { useBudgetByDate, useBudgetStatus } from '../../budget/hooks/useBudget'
 import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -44,7 +43,8 @@ const AddTransaction: React.FC = () => {
 
   const dateStr = watch('date') || new Date().toISOString().split('T')[0]
   const { data: currentPlan } = useBudgetByDate(dateStr)
-  const { data: transactions } = useTransactions()
+  const budgetStatus = useBudgetStatus(currentPlan, dateStr)
+  const todayStatus = budgetStatus?.todayStatus
 
   const currentAmount = watch('amount')
   const selectedCategoryId = watch('category_id')
@@ -68,10 +68,6 @@ const AddTransaction: React.FC = () => {
     }
     return cat.type === transactionType
   }) || []
-
-  const todayStatus = currentPlan && transactions
-    ? getDailyBudgetStatus(currentPlan, transactions, dateStr)
-    : null
 
   const isBudgetEmpty = Boolean(currentPlan && todayStatus?.budgetEmpty && transactionType === 'expense')
   const targetRemaining = isBudgetEmpty ? 0 : (todayStatus?.remainingDaily || 0)
