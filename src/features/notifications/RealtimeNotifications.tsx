@@ -4,10 +4,13 @@ import { supabase } from '@/utils/supabase';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Bell } from 'lucide-react';
 import { router } from '@/routes';
+import { useDueDateScheduler } from './useDueDateScheduler';
 
 export const RealtimeNotifications: React.FC = () => {
   const user = useAuthStore((s) => s.user);
 
+  // Kích hoạt scheduler kiểm tra ngày trả nợ
+  useDueDateScheduler();
 
   useEffect(() => {
     if (!user?.id) return;

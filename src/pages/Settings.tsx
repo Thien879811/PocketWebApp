@@ -1,15 +1,244 @@
-import React from 'react'
-import { LogOut, ChevronRight, Camera } from 'lucide-react'
+import React, { useState } from 'react'
+import { LogOut, ChevronRight, Camera, Bell, BellOff, CheckCircle2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useThemeStore } from '@/store/useThemeStore'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { useNotificationSettings } from '@/features/notifications/useNotificationSettings'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/* ─── Tiny Toggle Switch ─────────────────────────────────────── */
+interface ToggleSwitchProps {
+  checked: boolean
+  onChange: (v: boolean) => void
+  disabled?: boolean
+}
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, disabled }) => (
+  <button
+    type="button"
+    disabled={disabled}
+    onClick={() => onChange(!checked)}
+    className={cn(
+      'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+      checked ? 'bg-primary' : 'bg-surface-container',
+      disabled && 'opacity-50 cursor-not-allowed'
+    )}
+  >
+    <span
+      className={cn(
+        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition duration-200 ease-in-out',
+        checked ? 'translate-x-5' : 'translate-x-0'
+      )}
+    />
+  </button>
+)
+
+/* ─── Notification Settings Section ─────────────────────────── */
+const NotificationSection: React.FC = () => {
+  const { settings, saveSettings, isSaving } = useNotificationSettings()
+  const [saved, setSaved] = useState(false)
+
+  const handleChange = <K extends keyof typeof settings>(
+    key: K,
+    value: (typeof settings)[K]
+  ) => {
+    saveSettings({ ...settings, [key]: value })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  const isDisabled = !settings.enabled
+
+  return (
+    <div className="space-y-2">
+      <p className="text-[11px] font-semibold text-on-surface-variant/60 uppercase tracking-wider px-1">
+        Thông báo
+      </p>
+
+      <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden shadow-card divide-y divide-outline-variant/10">
+
+        {/* Master toggle */}
+        <div className="flex items-center gap-3.5 px-4 py-3.5">
+          <div className={cn(
+            'w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0',
+            settings.enabled ? 'bg-primary/10 text-primary' : 'bg-surface-container text-on-surface-variant/50'
+          )}>
+            {settings.enabled ? <Bell size={18} /> : <BellOff size={18} />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium text-on-surface">Bật thông báo</span>
+            <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+              Nhận thông báo realtime từ ứng dụng
+            </p>
+          </div>
+          <ToggleSwitch
+            checked={settings.enabled}
+            onChange={(v) => handleChange('enabled', v)}
+          />
+        </div>
+
+        {/* Due date reminder */}
+        <div className={cn('flex items-center gap-3.5 px-4 py-3.5', isDisabled && 'opacity-50')}>
+          <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center flex-shrink-0">
+            <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              alarm
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium text-on-surface">Nhắc hạn trả nợ</span>
+            <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+              Thông báo khi khoản vay sắp đến hạn
+            </p>
+          </div>
+          <ToggleSwitch
+            checked={settings.due_date_reminder}
+            onChange={(v) => handleChange('due_date_reminder', v)}
+            disabled={isDisabled}
+          />
+        </div>
+
+        {/* Reminder days — only when due_date_reminder is on */}
+        {settings.due_date_reminder && !isDisabled && (
+          <div className="px-4 py-3.5 bg-amber-500/3">
+            <p className="text-[10px] font-semibold text-amber-600/80 uppercase tracking-wider mb-3">
+              Nhắc trước bao nhiêu ngày?
+            </p>
+            <div className="flex gap-2">
+              {[1, 2, 3, 5, 7].map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => handleChange('due_date_reminder_days', d)}
+                  className={cn(
+                    'flex-1 h-9 rounded-xl text-sm font-semibold transition-all',
+                    settings.due_date_reminder_days === d
+                      ? 'bg-amber-500 text-white shadow-sm'
+                      : 'bg-surface-container text-on-surface-variant/70 hover:bg-amber-500/10 hover:text-amber-600'
+                  )}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-on-surface-variant/50 mt-2 text-center">
+              Nhắc trước <strong>{settings.due_date_reminder_days}</strong> ngày so với ngày đến hạn
+            </p>
+          </div>
+        )}
+
+        {/* Budget alert */}
+        <div className={cn('flex items-center gap-3.5 px-4 py-3.5', isDisabled && 'opacity-50')}>
+          <div className="w-9 h-9 rounded-xl bg-error/10 text-error flex items-center justify-center flex-shrink-0">
+            <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              account_balance_wallet
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium text-on-surface">Cảnh báo ngân sách</span>
+            <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+              Thông báo khi chi tiêu vượt ngưỡng
+            </p>
+          </div>
+          <ToggleSwitch
+            checked={settings.budget_alert}
+            onChange={(v) => handleChange('budget_alert', v)}
+            disabled={isDisabled}
+          />
+        </div>
+
+        {/* Budget threshold */}
+        {settings.budget_alert && !isDisabled && (
+          <div className="px-4 py-3.5 bg-error/3">
+            <p className="text-[10px] font-semibold text-error/70 uppercase tracking-wider mb-3">
+              Cảnh báo khi vượt ngưỡng (%)
+            </p>
+            <div className="flex gap-2">
+              {[60, 70, 80, 90].map((pct) => (
+                <button
+                  key={pct}
+                  type="button"
+                  onClick={() => handleChange('budget_alert_threshold', pct)}
+                  className={cn(
+                    'flex-1 h-9 rounded-xl text-sm font-semibold transition-all',
+                    settings.budget_alert_threshold === pct
+                      ? 'bg-error text-white shadow-sm'
+                      : 'bg-surface-container text-on-surface-variant/70 hover:bg-error/10 hover:text-error'
+                  )}
+                >
+                  {pct}%
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-on-surface-variant/50 mt-2 text-center">
+              Cảnh báo khi chi đến <strong>{settings.budget_alert_threshold}%</strong> ngân sách ngày
+            </p>
+          </div>
+        )}
+
+        {/* Daily summary */}
+        <div className={cn('flex items-center gap-3.5 px-4 py-3.5', isDisabled && 'opacity-50')}>
+          <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center flex-shrink-0">
+            <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              summarize
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium text-on-surface">Tóm tắt hàng ngày</span>
+            <p className="text-[11px] text-on-surface-variant/60 mt-0.5">
+              Nhận tóm tắt chi tiêu mỗi buổi sáng
+            </p>
+          </div>
+          <ToggleSwitch
+            checked={settings.daily_summary}
+            onChange={(v) => handleChange('daily_summary', v)}
+            disabled={isDisabled}
+          />
+        </div>
+
+        {/* Daily summary time */}
+        {settings.daily_summary && !isDisabled && (
+          <div className="px-4 py-3.5 bg-indigo-500/3">
+            <p className="text-[10px] font-semibold text-indigo-500/80 uppercase tracking-wider mb-2">
+              Giờ nhận tóm tắt
+            </p>
+            <input
+              type="time"
+              value={settings.daily_summary_time}
+              onChange={(e) => handleChange('daily_summary_time', e.target.value)}
+              className="w-full bg-surface-container rounded-xl px-3 py-2 text-sm font-semibold text-on-surface border border-outline-variant/20 focus:ring-0 focus:border-primary/40"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Save confirmation */}
+      {(isSaving || saved) && (
+        <div className={cn(
+          'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all',
+          saved ? 'bg-secondary/10 text-secondary' : 'bg-surface-container text-on-surface-variant/60'
+        )}>
+          {saved ? (
+            <>
+              <CheckCircle2 size={14} />
+              Đã lưu cài đặt thông báo
+            </>
+          ) : (
+            <>
+              <span className="w-3.5 h-3.5 border-2 border-on-surface-variant/30 border-t-primary rounded-full animate-spin" />
+              Đang lưu...
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Main Settings Page ─────────────────────────────────────── */
 const Settings: React.FC = () => {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
@@ -90,6 +319,9 @@ const Settings: React.FC = () => {
           </span>
         </div>
       </div>
+
+      {/* ── Notification Settings ────────────────── */}
+      <NotificationSection />
 
       {/* ── Settings Groups ─────────────────────── */}
       {settingsGroups.map((group, gIdx) => (

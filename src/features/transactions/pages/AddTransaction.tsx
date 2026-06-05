@@ -4,7 +4,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X, ChevronRight, Calendar, Wallet, AlertTriangle } from 'lucide-react'
+import { Loader2, X, ChevronRight, Calendar, Wallet, AlertTriangle, User, Clock } from 'lucide-react'
 import { transactionSchema, type TransactionFormValues } from '../types/transaction.schema'
 import { useCreateTransaction } from '../hooks/useTransactionMutations'
 import { useCategories } from '../../categories/hooks/useCategories'
@@ -32,6 +32,8 @@ const AddTransaction: React.FC = () => {
       date: new Date().toISOString().split('T')[0],
       note: '',
       account_id: '',
+      due_date: '',
+      person_name: '',
     },
   })
 
@@ -251,6 +253,45 @@ const AddTransaction: React.FC = () => {
                       className="flex-1 bg-transparent border-none p-0 text-sm font-semibold text-on-surface focus:ring-0"
                     />
                     <span className="text-sm text-on-surface-variant/60 font-medium">đ</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Person name for borrow/lend */}
+              {(transactionType === 'borrow' || transactionType === 'lend') && (
+                <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20">
+                  <div className="w-10 h-10 bg-surface-container text-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                    <User size={18} strokeWidth={2} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-0.5">
+                      {transactionType === 'borrow' ? 'Người cho vay' : 'Người vay'}
+                    </p>
+                    <input
+                      {...register('person_name')}
+                      type="text"
+                      placeholder="Nhập tên..."
+                      className="w-full bg-transparent border-none p-0 text-sm font-semibold text-on-surface focus:ring-0 placeholder:text-on-surface-variant/40"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Due date for borrow/lend */}
+              {(transactionType === 'borrow' || transactionType === 'lend') && (
+                <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+                  <div className="w-10 h-10 bg-amber-500/10 text-amber-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Clock size={18} strokeWidth={2} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-semibold text-amber-600/80 uppercase tracking-wider mb-0.5">
+                      Ngày đến hạn {transactionType === 'borrow' ? 'trả nợ' : 'thu hồi'}
+                    </p>
+                    <input
+                      {...register('due_date')}
+                      type="date"
+                      className="w-full bg-transparent border-none p-0 text-sm font-semibold text-on-surface focus:ring-0"
+                    />
                   </div>
                 </div>
               )}
