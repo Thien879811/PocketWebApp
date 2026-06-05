@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useLogin } from '@/features/auth/hooks/useLogin'
 import { Loader2, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { DURATION, EASE_OUT } from '@/lib/motion'
 
 const Login: React.FC = () => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -24,25 +26,40 @@ const Login: React.FC = () => {
       <div className="w-full max-w-[400px] relative z-10">
 
         {/* Logo / Brand */}
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl shadow-lg shadow-primary/30 mb-5">
+        <motion.div
+          className="mb-10 text-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: DURATION.slow, ease: EASE_OUT }}
+        >
+          <motion.div
+            className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl shadow-lg shadow-primary/30 mb-5"
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.05, duration: DURATION.normal, ease: EASE_OUT }}
+          >
             <span
               className="material-symbols-outlined text-white text-[32px]"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               account_balance_wallet
             </span>
-          </div>
+          </motion.div>
           <h1 className="font-headline font-extrabold text-3xl text-on-surface tracking-tight">
             PocketFlow
           </h1>
           <p className="text-sm text-on-surface-variant mt-1.5">
             Quản lý tài chính thông minh
           </p>
-        </div>
+        </motion.div>
 
         {/* Card */}
-        <div className="bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/20 shadow-elevated">
+        <motion.div
+          className="bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/20 shadow-elevated"
+          initial={{ opacity: 0, y: 20, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.1, duration: DURATION.slow, ease: EASE_OUT }}
+        >
 
           <h2 className="font-headline font-bold text-xl text-on-surface mb-6">
             Đăng nhập
@@ -72,10 +89,15 @@ const Login: React.FC = () => {
                 />
               </div>
               {errors.email && (
-                <p className="text-xs text-error flex items-center gap-1 mt-1">
+                <motion.p
+                  className="text-xs text-error flex items-center gap-1 mt-1"
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: DURATION.fast }}
+                >
                   <AlertCircle size={12} />
                   {errors.email.message}
-                </p>
+                </motion.p>
               )}
             </div>
 
@@ -113,29 +135,42 @@ const Login: React.FC = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-error flex items-center gap-1 mt-1">
+                <motion.p
+                  className="text-xs text-error flex items-center gap-1 mt-1"
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: DURATION.fast }}
+                >
                   <AlertCircle size={12} />
                   {errors.password.message}
-                </p>
+                </motion.p>
               )}
             </div>
 
             {/* Server error */}
             {error && (
-              <div className="flex items-center gap-3 bg-error-container text-on-error-container rounded-xl p-3.5 text-sm border border-error/15">
+              <motion.div
+                className="flex items-center gap-3 bg-error-container text-on-error-container rounded-xl p-3.5 text-sm border border-error/15"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: DURATION.fast, ease: EASE_OUT }}
+              >
                 <AlertCircle size={16} className="flex-shrink-0" />
                 <span className="font-medium">{error.message}</span>
-              </div>
+              </motion.div>
             )}
 
             {/* Submit */}
-            <button
+            <motion.button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 bg-primary text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-sm shadow-primary/30 hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+              whileHover={!isLoading ? { scale: 1.01 } : {}}
+              whileTap={!isLoading ? { scale: 0.98 } : {}}
+              transition={{ duration: DURATION.fast, ease: EASE_OUT }}
+              className="w-full h-12 bg-primary text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-sm shadow-primary/30 hover:brightness-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-2"
             >
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Đăng nhập'}
-            </button>
+            </motion.button>
           </form>
 
           {/* Divider */}
@@ -149,9 +184,12 @@ const Login: React.FC = () => {
 
           {/* Social */}
           <div className="space-y-3">
-            <button
+            <motion.button
               type="button"
-              className="w-full h-12 bg-surface-container rounded-xl border border-outline-variant/30 flex items-center justify-center gap-3 text-sm font-medium text-on-surface hover:bg-surface-container-high transition-colors active:scale-[0.98]"
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: DURATION.fast, ease: EASE_OUT }}
+              className="w-full h-12 bg-surface-container rounded-xl border border-outline-variant/30 flex items-center justify-center gap-3 text-sm font-medium text-on-surface hover:bg-surface-container-high transition-colors"
             >
               <svg className="w-4.5 h-4.5" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -160,17 +198,22 @@ const Login: React.FC = () => {
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
               Tiếp tục với Google
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Sign up link */}
-        <p className="text-center text-sm text-on-surface-variant mt-6">
+        <motion.p
+          className="text-center text-sm text-on-surface-variant mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.25, duration: DURATION.normal }}
+        >
           Chưa có tài khoản?{' '}
           <Link to="/register" className="text-primary font-semibold hover:underline">
             Đăng ký ngay
           </Link>
-        </p>
+        </motion.p>
       </div>
     </div>
   )

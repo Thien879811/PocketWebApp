@@ -1,8 +1,10 @@
 import React from 'react'
+import { motion } from 'framer-motion'
 import { cn } from '@/utils/cn'
 import { formatCurrency } from '@/utils/format'
 import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 import type { Category } from '@/features/categories/types/category.schema'
+import { EASE_OUT, DURATION } from '@/lib/motion'
 
 const TYPE_LEFT_ACCENT: Record<TransactionType, string> = {
   income: 'border-l-secondary',
@@ -54,11 +56,22 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
     : null
 
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
+      /* Stagger entrance: each card fades up with a small index-based delay */
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        delay: Math.min(index * 0.04, 0.32), // cap at 8 items worth of stagger
+        duration: DURATION.normal,
+        ease: EASE_OUT,
+      }}
+      /* Micro-interactions */
+      whileHover={{ scale: 1.005 }}
+      whileTap={{ scale: 0.98 }}
       className={cn(
-        'w-full flex items-center gap-3.5 py-3.5 pr-4 rounded-xl transition-all text-left active:scale-[0.99]',
+        'w-full flex items-center gap-3.5 py-3.5 pr-4 rounded-xl transition-colors text-left',
         isAlternate
           ? cn(
               'pl-3.5 bg-surface-container',
@@ -97,6 +110,6 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
       <p className={cn('text-sm font-bold flex-shrink-0 tabular-nums', meta?.color || 'text-on-surface')}>
         {meta?.prefix || '-'}{formatCurrency(tx.amount)}
       </p>
-    </button>
+    </motion.button>
   )
 }
