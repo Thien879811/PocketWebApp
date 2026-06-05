@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/utils/format'
+import { cn } from '@/utils/cn'
 import { LoadingScreen } from '@/components/Loading'
 import React, { useState } from 'react'
 import { Inbox, Search, Filter, X } from 'lucide-react'
@@ -7,12 +8,7 @@ import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 import { MonthSelector } from '@/components/MonthSelector'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+import { TransactionCard } from '@/components/shared/TransactionCard'
 
 const Transactions: React.FC = () => {
   const navigate = useNavigate()
@@ -53,25 +49,6 @@ const Transactions: React.FC = () => {
     if (!groupedTransactions[dateStr]) groupedTransactions[dateStr] = []
     groupedTransactions[dateStr].push(tx)
   })
-
-  const getCategoryName = (categoryId?: string, type?: TransactionType) => {
-    const cat = categories?.find((c) => c.id === categoryId)
-    if (cat) return cat.name
-    if (type) return TRANSACTION_TYPES_METADATA[type]?.label || 'Chưa phân loại'
-    return 'Chưa phân loại'
-  }
-
-  const getCategoryIcon = (categoryId?: string, type?: TransactionType) => {
-    const cat = categories?.find((c) => c.id === categoryId)
-    if (cat) return cat.icon
-    if (type) return TRANSACTION_TYPES_METADATA[type]?.icon || 'help_outline'
-    return 'help_outline'
-  }
-
-  const getCategoryColor = (categoryId?: string) => {
-    const cat = categories?.find((c) => c.id === categoryId)
-    return cat?.color || 'bg-surface-container-high'
-  }
 
   const hasActiveFilters = filter !== 'all' || categoryFilter !== 'all' || search !== ''
 
@@ -214,41 +191,17 @@ const Transactions: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Transactions */}
-                <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden shadow-card divide-y divide-outline-variant/10">
-                  {items.map((tx) => {
-                    const txMeta = TRANSACTION_TYPES_METADATA[tx.type as TransactionType]
-                    return (
-                      <button
-                        key={tx.id}
-                        onClick={() => navigate(`/edit/${tx.id}`)}
-                        className="w-full flex items-center gap-3.5 px-4 py-3.5 hover:bg-surface-container/50 active:bg-primary/5 transition-colors text-left"
-                      >
-                        <div className={cn(
-                          "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-                          getCategoryColor(tx.category_id)
-                        )}>
-                          <span className="material-symbols-outlined text-[18px] text-white">
-                            {getCategoryIcon(tx.category_id, tx.type)}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-on-surface truncate">
-                            {getCategoryName(tx.category_id, tx.type)}
-                          </p>
-                          <p className="text-[11px] text-on-surface-variant/60 font-medium mt-0.5 truncate">
-                            {tx.note || txMeta?.label || tx.type}
-                          </p>
-                        </div>
-                        <p className={cn(
-                          "text-sm font-bold flex-shrink-0",
-                          txMeta?.color || "text-on-surface"
-                        )}>
-                          {txMeta?.prefix || '-'}{formatCurrency(tx.amount)}
-                        </p>
-                      </button>
-                    )
-                  })}
+                {/* Alternating cards */}
+                <div className="space-y-2">
+                  {items.map((tx, idx) => (
+                    <TransactionCard
+                      key={tx.id}
+                      tx={tx}
+                      categories={categories}
+                      index={idx}
+                      onClick={() => navigate(`/edit/${tx.id}`)}
+                    />
+                  ))}
                 </div>
               </div>
             )

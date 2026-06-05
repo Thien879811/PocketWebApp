@@ -1,14 +1,10 @@
 import { formatCurrency } from '@/utils/format'
+import { cn } from '@/utils/cn'
 import React, { useMemo } from 'react'
 import { X, TrendingUp, AlertCircle } from 'lucide-react'
 import { type Category } from '@/features/categories/types/category.schema'
 import { type Transaction } from '@/features/transactions/types/transaction.schema'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+import { TransactionCard } from '@/components/shared/TransactionCard'
 
 interface CategoryDetailModalProps {
   category: Category | null
@@ -203,35 +199,15 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
             <h3 className="font-headline font-black text-lg text-on-surface mb-4">Giao dịch trong tháng</h3>
 
             {categoryData.transactions.length > 0 ? (
-              <div className="space-y-3">
-                {categoryData.transactions.map((tx) => (
-                  <div
+              <div className="space-y-2">
+                {categoryData.transactions.map((tx, idx) => (
+                  <TransactionCard
                     key={tx.id}
-                    className="bg-surface-container-lowest p-4 rounded-[1.5rem] flex justify-between items-center border border-outline-variant/5 hover:border-primary/20 transition-all"
-                  >
-                    <div className="flex-1">
-                      <p className="font-headline font-black text-sm text-on-surface">{tx.note}</p>
-                      <p className="text-on-surface-variant text-xs opacity-60 mt-1">
-                        {new Date(tx.date).toLocaleDateString('vi-VN', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
-                    </div>
-                    <div
-                      className={cn(
-                        'text-right',
-                        tx.type === 'expense' ? 'text-error' : 'text-secondary'
-                      )}
-                    >
-                      <p className="font-headline font-black text-sm">
-                        {tx.type === 'expense' ? '-' : '+'}
-                        {formatCurrency(tx.amount)}
-                      </p>
-                    </div>
-                  </div>
+                    tx={tx}
+                    categories={[category]}
+                    index={idx}
+                    noteFirst
+                  />
                 ))}
               </div>
             ) : (

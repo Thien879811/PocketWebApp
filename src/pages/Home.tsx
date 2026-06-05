@@ -11,14 +11,9 @@ import { useAccounts } from '../features/accounts/hooks/useAccounts'
 import { useCategories } from '../features/categories/hooks/useCategories'
 import { MonthSelector } from '@/components/MonthSelector'
 import { Chart } from 'primereact/chart'
-import { TRANSACTION_TYPES_METADATA, type TransactionType } from '../types/transaction.types'
 import { useAuthStore } from '@/store/useAuthStore'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+import { cn } from '@/utils/cn'
+import { TransactionCard } from '@/components/shared/TransactionCard'
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
@@ -334,41 +329,17 @@ const ActivitySection = ({
           </Link>
         </div>
       ) : (
-        <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden shadow-card divide-y divide-outline-variant/10">
-          {filtered.map((tx) => {
-            const meta = TRANSACTION_TYPES_METADATA[tx.type as TransactionType]
-            const category = categories.find((c) => c.id === tx.category_id)
-            return (
-              <button
-                key={tx.id}
-                onClick={() => onNavigate(`/edit/${tx.id}`)}
-                className="w-full flex items-center gap-3.5 px-4 py-3.5 hover:bg-surface-container/50 active:bg-primary/5 transition-colors text-left"
-              >
-                <div
-                  className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-                    category?.color || "bg-surface-container-high"
-                  )}
-                >
-                  <span className="material-symbols-outlined text-[20px] text-white">
-                    {category?.icon || meta?.icon || 'payments'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-on-surface truncate">
-                    {category?.name || meta?.label || 'Giao dịch'}
-                  </p>
-                  <p className="text-[11px] text-on-surface-variant/60 font-medium mt-0.5">
-                    {new Date(tx.date).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })}
-                    {tx.note ? ` · ${tx.note}` : ''}
-                  </p>
-                </div>
-                <p className={cn("text-sm font-bold flex-shrink-0", meta?.color || "text-on-surface")}>
-                  {meta?.prefix || '-'}{formatCurrency(tx.amount)}
-                </p>
-              </button>
-            )
-          })}
+        <div className="space-y-2">
+          {filtered.map((tx, idx) => (
+            <TransactionCard
+              key={tx.id}
+              tx={tx}
+              categories={categories}
+              index={idx}
+              onClick={() => onNavigate(`/edit/${tx.id}`)}
+              showDate
+            />
+          ))}
         </div>
       )}
     </div>

@@ -11,12 +11,7 @@ import CategoryDetailModal from '../components/CategoryDetailModal'
 import { type Category } from '../features/categories/types/category.schema'
 import { TRANSACTION_TYPES_METADATA } from '../types/transaction.types'
 import { MonthSelector } from '@/components/MonthSelector'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+import { cn } from '@/utils/cn'
 
 const STAT_TYPES = ['expense', 'income', 'borrow', 'lend'] as const
 type StatsType = typeof STAT_TYPES[number]
@@ -194,65 +189,71 @@ const Stats: React.FC = () => {
               </button>
             </div>
 
-            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 overflow-hidden shadow-card divide-y divide-outline-variant/10">
-              {allCategoriesWithData.map((cat) => {
-                const pct = cat.limit
-                  ? Math.min((cat.amount / cat.limit) * 100, 100)
-                  : displayTotal > 0
-                    ? (cat.amount / displayTotal) * 100
-                    : 0
-                const overBudget = cat.limit && cat.amount > cat.limit && statsType === 'expense'
+            {allCategoriesWithData.length === 0 ? (
+              <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 py-10 text-center text-sm text-on-surface-variant/60">
+                Không có danh mục nào
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {allCategoriesWithData.map((cat, idx) => {
+                  const pct = cat.limit
+                    ? Math.min((cat.amount / cat.limit) * 100, 100)
+                    : displayTotal > 0
+                      ? (cat.amount / displayTotal) * 100
+                      : 0
+                  const overBudget = cat.limit && cat.amount > cat.limit && statsType === 'expense'
+                  const isAlternate = idx % 2 === 1
 
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => handleCategoryClick(cat.id)}
-                    className="w-full flex items-center gap-3.5 px-4 py-3.5 hover:bg-surface-container/50 active:bg-primary/5 transition-colors text-left"
-                  >
-                    <div className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-                      cat.color || "bg-surface-container-high"
-                    )}>
-                      <span className="material-symbols-outlined text-[18px] text-white">
-                        {cat.icon}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-baseline mb-1.5">
-                        <span className="text-sm font-semibold text-on-surface truncate">
-                          {cat.name}
-                        </span>
-                        <span className="text-xs text-on-surface-variant/70 font-medium ml-2 flex-shrink-0">
-                          {formatCurrency(cat.amount)}
-                          {cat.limit ? ` / ${formatCurrency(cat.limit)}` : ''}
-                        </span>
-                      </div>
-                      <div className="h-1.5 bg-surface-container rounded-full overflow-hidden">
-                        <div
-                          className={cn(
-                            "h-full rounded-full transition-all duration-700",
-                            overBudget ? "bg-error animate-pulse" : (cat.color || "bg-primary")
-                          )}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      {overBudget && (
-                        <p className="text-[10px] text-error font-semibold mt-1 flex items-center gap-1">
-                          <AlertCircle size={10} />
-                          Vượt {formatCurrency(cat.amount - cat.limit!)}
-                        </p>
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => handleCategoryClick(cat.id)}
+                      className={cn(
+                        'w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-left active:scale-[0.99]',
+                        isAlternate
+                          ? 'bg-surface-container border border-outline-variant/10 hover:bg-surface-container-high'
+                          : 'bg-surface-container-lowest border border-outline-variant/15 shadow-sm hover:bg-surface-container'
                       )}
-                    </div>
-                  </button>
-                )
-              })}
-
-              {allCategoriesWithData.length === 0 && (
-                <div className="py-10 text-center text-sm text-on-surface-variant/60">
-                  Không có danh mục nào
-                </div>
-              )}
-            </div>
+                    >
+                      <div className={cn(
+                        'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
+                        cat.color || 'bg-surface-container-high'
+                      )}>
+                        <span className="material-symbols-outlined text-[18px] text-white">
+                          {cat.icon}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-baseline mb-1.5">
+                          <span className="text-sm font-semibold text-on-surface truncate">
+                            {cat.name}
+                          </span>
+                          <span className="text-xs text-on-surface-variant/70 font-medium ml-2 flex-shrink-0">
+                            {formatCurrency(cat.amount)}
+                            {cat.limit ? ` / ${formatCurrency(cat.limit)}` : ''}
+                          </span>
+                        </div>
+                        <div className="h-1.5 bg-surface-container rounded-full overflow-hidden">
+                          <div
+                            className={cn(
+                              'h-full rounded-full transition-all duration-700',
+                              overBudget ? 'bg-error animate-pulse' : (cat.color || 'bg-primary')
+                            )}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        {overBudget && (
+                          <p className="text-[10px] text-error font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle size={10} />
+                            Vượt {formatCurrency(cat.amount - cat.limit!)}
+                          </p>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </>
       )}

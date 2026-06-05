@@ -1,16 +1,12 @@
 import { formatCurrency } from '@/utils/format'
+import { cn } from '@/utils/cn'
 import { LoadingScreen } from '@/components/Loading'
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Calendar, Info } from 'lucide-react'
+import { Calendar, ChevronLeft, Info } from 'lucide-react'
 import { useBudgetHistory, useBudgetStatus } from '../hooks/useBudget'
 import { useCategories } from '../../categories/hooks/useCategories'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+import { TransactionCard } from '@/components/shared/TransactionCard'
 
 const BudgetHistoryDetail: React.FC = () => {
   const { id } = useParams()
@@ -113,46 +109,16 @@ const BudgetHistoryDetail: React.FC = () => {
                    <p className="text-sm font-bold text-on-surface-variant max-w-[180px] mx-auto opacity-60">Không có giao dịch nào được ghi nhận trong kỳ.</p>
                 </div>
              ) : (
-                <div className="bg-surface-container-lowest dark:bg-surface-container/30 dark:backdrop-blur-md rounded-[2rem] border border-outline-variant/10 overflow-hidden shadow-sm dark:shadow-dark">
-                   {planTransactions.map((tx, idx) => {
-                      const category = categories?.find(c => c.id === tx.category_id)
-                      const isExpense = tx.type === 'expense'
-
-                      return (
-                         <div key={tx.id} className={cn(
-                            "p-5 flex items-center justify-between transition-all hover:bg-primary/5 active:scale-[0.98] duration-200 cursor-pointer group",
-                            idx !== planTransactions.length - 1 ? "border-b border-outline-variant/10" : ""
-                         )}>
-                            <div className="flex items-center gap-4">
-                               <div className={cn(
-                                  "w-12 h-12 rounded-2xl flex items-center justify-center bg-surface-container-high group-hover:scale-110 transition-transform duration-300 shadow-sm",
-                                  isExpense ? "opacity-90" : "text-primary opacity-100"
-                               )}>
-                                  <span className="material-symbols-outlined text-2xl">
-                                    {category?.icon || 'help_outline'}
-                                  </span>
-                               </div>
-                               <div>
-                                  <h4 className="font-headline font-bold text-base text-on-surface line-clamp-1">{tx.note || category?.name || 'Chưa phân loại'}</h4>
-                                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest flex items-center gap-1 opacity-50 mt-0.5">
-                                     <Calendar size={10} /> {tx.date.split('-').reverse().join('/')}
-                                  </p>
-                               </div>
-                            </div>
-                            <div className={cn(
-                               "font-headline font-black text-base flex flex-col items-end",
-                               isExpense ? "text-on-surface" : "text-primary dark:glow"
-                            )}>
-                               <span className="flex items-center gap-0.5">
-                                 {isExpense ? '−' : '+'} {formatCurrency(tx.amount)}<span className="text-[10px] opacity-60 ml-0.5">đ</span>
-                               </span>
-                               {isExpense && (
-                                 <span className="text-[8px] font-black uppercase opacity-30 mt-0.5 tracking-tighter">Giao dịch chi</span>
-                               )}
-                            </div>
-                         </div>
-                      )
-                   })}
+                <div className="space-y-2">
+                   {planTransactions.map((tx, idx) => (
+                      <TransactionCard
+                         key={tx.id}
+                         tx={tx}
+                         categories={categories}
+                         index={idx}
+                         showDate
+                      />
+                   ))}
                 </div>
              )}
           </div>
