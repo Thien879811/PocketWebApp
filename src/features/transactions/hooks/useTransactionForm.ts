@@ -28,9 +28,6 @@ export const useTransactionForm = (
 
   const filteredCategories = useMemo(() =>
     (categories ?? []).filter(cat => {
-      if (transactionType === 'borrow' || transactionType === 'lend') {
-        return cat.type === transactionType || cat.type === 'income' || cat.type === 'expense'
-      }
       return cat.type === transactionType
     }),
     [categories, transactionType]
