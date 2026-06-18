@@ -2,10 +2,12 @@ import { formatCurrency } from '@/utils/format'
 import { LoadingScreen } from '@/components/Loading'
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Target, Calendar, TrendingUp, AlertTriangle, CheckCircle2, TrendingDown, PiggyBank, Edit3, X, Loader2 } from 'lucide-react'
+import { ArrowLeft, Target, Calendar, TrendingUp, AlertTriangle, CheckCircle2, TrendingDown, PiggyBank, Edit3, X, Loader2, Receipt, ChevronDown, ChevronUp } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useActiveBudget, useBudgetMutations, useBudgetStatus } from '../hooks/useBudget'
+import { useCategories } from '../../categories/hooks/useCategories'
+import { TransactionCard } from '@/components/shared/TransactionCard'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -18,6 +20,7 @@ const BudgetPlanner: React.FC = () => {
   const { createBudget, updateBudget, deleteBudget } = useBudgetMutations()
 
   const [isEditing, setIsEditing] = useState(false)
+  const [showTransactions, setShowTransactions] = useState(false)
   const [budgetAmount, setBudgetAmount] = useState<number | string>('')
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0])
   const [endDate, setEndDate] = useState<string>('')
@@ -63,9 +66,11 @@ const BudgetPlanner: React.FC = () => {
 
 
 
+  const { data: categories } = useCategories()
   const status = useBudgetStatus(currentPlan, isExpired ? currentPlan?.end_date : todayStr)
   const todayStatus = status?.todayStatus
   const progressPercentage = status?.progressPercentage ?? 0
+  const planTransactions = status?.planTransactions ?? []
 
   if (planLoading) {
     return <LoadingScreen message="Đang tải dữ liệu ngân sách..." />
@@ -291,6 +296,55 @@ const BudgetPlanner: React.FC = () => {
                         💡 <strong className="text-on-surface">Công thức Rollover:</strong> Số dư hạn mức ngân sách ngày hôm nay sẽ tự động được cộng dồn và chia đều cho những ngày còn lại!
                       </p>
                     </div>
+                  </div>
+
+                  {/* TRANSACTION DETAIL SECTION */}
+                  <div className="glass rounded-3xl overflow-hidden dark:shadow-glass-dark">
+                    <button
+                      onClick={() => setShowTransactions(v => !v)}
+                      className="w-full flex items-center justify-between px-5 py-4 text-left smooth-transition hover:bg-surface-container/30 active:scale-[0.99]"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 glass rounded-xl text-primary">
+                          <Receipt size={16} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-on-surface">Chi tiết chi tiêu</p>
+                          <p className="text-[10px] text-on-surface-variant font-bold opacity-60">
+                            {planTransactions.length} giao dịch trong kỳ
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-error tabular-nums">
+                          -{formatCurrency(status?.totalSpent ?? 0)}
+                        </span>
+                        {showTransactions
+                          ? <ChevronUp size={18} className="text-on-surface-variant" />
+                          : <ChevronDown size={18} className="text-on-surface-variant" />}
+                      </div>
+                    </button>
+
+                    {showTransactions && (
+                      <div className="border-t border-on-surface/10 px-3 pb-3 space-y-1.5 pt-2">
+                        {planTransactions.length === 0 ? (
+                          <div className="text-center py-8 opacity-50">
+                            <Receipt size={28} className="mx-auto mb-2 text-on-surface-variant" />
+                            <p className="text-sm font-bold text-on-surface-variant">Chưa có chi tiêu nào</p>
+                          </div>
+                        ) : (
+                          planTransactions.map((tx, idx) => (
+                            <TransactionCard
+                              key={tx.id}
+                              tx={tx}
+                              categories={categories}
+                              index={idx}
+                              showDate
+                            />
+                          ))
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* ACTIVE CONFIG */}
