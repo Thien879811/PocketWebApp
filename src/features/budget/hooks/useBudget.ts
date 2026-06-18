@@ -181,7 +181,9 @@ export const useBudgetStatus = (
   plan: BudgetPlan | null | undefined,
   targetDate?: string
 ) => {
-  const { data: allTransactions = [] } = useTransactions()
+  const { data: allTransactions = [] } = useTransactions(
+    plan ? { startDate: plan.start_date, endDate: plan.end_date } : undefined
+  )
   const { data: categories = [] } = useCategories()
 
   return useMemo(() => {

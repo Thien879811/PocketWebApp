@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import {
   Plus, ChevronRight, Inbox, ArrowUpRight, ArrowDownLeft,
   PiggyBank, TrendingUp, TrendingDown, Trophy, Target,
-  BarChart2, Zap, Flame, LayoutGrid
+  BarChart2, Zap, Flame, LayoutGrid, Landmark, CreditCard, Wallet as WalletIcon
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTransactions, getTransactionStats } from '../features/transactions/hooks/useTransactions'
@@ -238,6 +238,42 @@ const Home: React.FC = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* ── 2b. Accounts List ────────────────────────────── */}
+        {accounts && accounts.length > 0 && (
+          <motion.div 
+            variants={fadeUpVariants}
+            className="flex gap-3 overflow-x-auto pb-3 pt-1 scrollbar-hide -mx-4 px-4"
+          >
+            {accounts.map((acc) => {
+              const IconComponent = acc.type === 'bank' ? Landmark : acc.type === 'credit' ? CreditCard : WalletIcon
+              return (
+                <motion.div
+                  key={acc.id}
+                  onClick={() => navigate('/wallet')}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant/10 rounded-2xl p-3 min-w-[150px] max-w-[200px] flex-shrink-0 cursor-pointer shadow-sm hover:bg-surface-container-low transition-colors duration-200"
+                >
+                  <div className={cn(
+                    "w-8 h-8 rounded-xl flex items-center justify-center bg-surface-container text-xs flex-shrink-0",
+                    acc.type === 'bank' ? "text-primary" : acc.type === 'credit' ? "text-error" : "text-secondary"
+                  )}>
+                    <IconComponent size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-on-surface-variant font-bold truncate uppercase tracking-wider opacity-70">
+                      {acc.name}
+                    </p>
+                    <p className="text-xs font-black text-on-surface mt-0.5 tabular-nums leading-none">
+                      {acc.balance?.toLocaleString('vi-VN')}đ
+                    </p>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        )}
 
         {/* ── Month Selector ──────────────────────────────── */}
         <motion.div variants={fadeUpVariants}>
