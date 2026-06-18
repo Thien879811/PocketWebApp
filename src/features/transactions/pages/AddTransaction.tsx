@@ -208,51 +208,75 @@ const AddTransaction: React.FC = () => {
             <div className="space-y-3">
 
               {/* Account */}
-              <button
-                type="button"
-                onClick={() => setShowAccountSelector(true)}
-                className={cn(
-                  'w-full flex items-center gap-3.5 p-4 rounded-2xl border transition-all text-left',
-                  selectedAccountId
-                    ? 'bg-primary/5 border-primary/25'
-                    : 'bg-surface-container-lowest border-outline-variant/20 hover:bg-surface-container'
-                )}
-              >
-                <div className={cn(
-                  'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
-                  selectedAccountId ? 'bg-primary text-white' : 'bg-surface-container text-primary'
-                )}>
-                  <Wallet size={18} strokeWidth={2} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-0.5">
-                    Tài khoản
-                  </p>
-                  <p className={cn(
-                    'text-sm font-semibold truncate',
-                    selectedAccountId ? 'text-on-surface' : 'text-on-surface-variant/60 italic'
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowAccountSelector(true)}
+                  className={cn(
+                    'w-full flex items-center gap-3.5 p-4 rounded-2xl border transition-all text-left',
+                    errors.account_id
+                      ? 'bg-error/5 border-error/40'
+                      : selectedAccountId
+                        ? 'bg-primary/5 border-primary/25'
+                        : 'bg-surface-container-lowest border-outline-variant/20 hover:bg-surface-container'
+                  )}
+                >
+                  <div className={cn(
+                    'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
+                    errors.account_id ? 'bg-error/10 text-error' : selectedAccountId ? 'bg-primary text-white' : 'bg-surface-container text-primary'
                   )}>
-                    {selectedAccount ? selectedAccount.name : 'Chọn tài khoản...'}
+                    <Wallet size={18} strokeWidth={2} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-0.5">
+                      Tài khoản
+                    </p>
+                    <p className={cn(
+                      'text-sm font-semibold truncate',
+                      errors.account_id ? 'text-error' : selectedAccountId ? 'text-on-surface' : 'text-on-surface-variant/60 italic'
+                    )}>
+                      {selectedAccount ? selectedAccount.name : 'Chọn tài khoản...'}
+                    </p>
+                  </div>
+                  <ChevronRight size={16} className="text-on-surface-variant/40 flex-shrink-0" />
+                </button>
+                {errors.account_id && (
+                  <p className="flex items-center gap-1 text-xs text-error font-medium mt-1.5 px-1">
+                    <AlertTriangle size={11} />
+                    {errors.account_id.message}
                   </p>
-                </div>
-                <ChevronRight size={16} className="text-on-surface-variant/40 flex-shrink-0" />
-              </button>
+                )}
+              </div>
 
               {/* Date */}
-              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20">
-                <div className="w-10 h-10 bg-surface-container text-primary rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Calendar size={18} strokeWidth={2} />
+              <div>
+                <div className={cn(
+                  'flex items-center gap-3.5 p-4 rounded-2xl border',
+                  errors.date ? 'bg-error/5 border-error/40' : 'bg-surface-container-lowest border-outline-variant/20'
+                )}>
+                  <div className={cn(
+                    'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
+                    errors.date ? 'bg-error/10 text-error' : 'bg-surface-container text-primary'
+                  )}>
+                    <Calendar size={18} strokeWidth={2} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-0.5">
+                      Ngày
+                    </p>
+                    <input
+                      {...register('date')}
+                      type="date"
+                      className="w-full bg-transparent border-none p-0 text-sm font-semibold text-on-surface focus:ring-0"
+                    />
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-0.5">
-                    Ngày
+                {errors.date && (
+                  <p className="flex items-center gap-1 text-xs text-error font-medium mt-1.5 px-1">
+                    <AlertTriangle size={11} />
+                    {errors.date.message}
                   </p>
-                  <input
-                    {...register('date')}
-                    type="date"
-                    className="w-full bg-transparent border-none p-0 text-sm font-semibold text-on-surface focus:ring-0"
-                  />
-                </div>
+                )}
               </div>
 
               {/* Withdrawal fee */}
@@ -276,21 +300,29 @@ const AddTransaction: React.FC = () => {
 
               {/* Person name for borrow/lend */}
               {(transactionType === 'borrow' || transactionType === 'lend') && (
-                <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20">
-                  <div className="w-10 h-10 bg-surface-container text-primary rounded-xl flex items-center justify-center flex-shrink-0">
-                    <User size={18} strokeWidth={2} />
+                <div>
+                  <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20">
+                    <div className="w-10 h-10 bg-surface-container text-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                      <User size={18} strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-0.5">
+                        {transactionType === 'borrow' ? 'Người cho vay' : 'Người vay'}
+                      </p>
+                      <input
+                        {...register('person_name')}
+                        type="text"
+                        placeholder="Nhập tên..."
+                        className="w-full bg-transparent border-none p-0 text-sm font-semibold text-on-surface focus:ring-0 placeholder:text-on-surface-variant/40"
+                      />
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-0.5">
-                      {transactionType === 'borrow' ? 'Người cho vay' : 'Người vay'}
+                  {errors.person_name && (
+                    <p className="flex items-center gap-1 text-xs text-error font-medium mt-1.5 px-1">
+                      <AlertTriangle size={11} />
+                      {errors.person_name.message}
                     </p>
-                    <input
-                      {...register('person_name')}
-                      type="text"
-                      placeholder="Nhập tên..."
-                      className="w-full bg-transparent border-none p-0 text-sm font-semibold text-on-surface focus:ring-0 placeholder:text-on-surface-variant/40"
-                    />
-                  </div>
+                  )}
                 </div>
               )}
 
@@ -314,15 +346,23 @@ const AddTransaction: React.FC = () => {
               )}
 
               {/* Notes */}
-              <div className="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20">
-                <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-2">
-                  Ghi chú
-                </p>
-                <textarea
-                  {...register('note')}
-                  placeholder="Bạn đã chi tiêu gì?..."
-                  className="w-full bg-transparent border-none p-0 text-sm font-medium text-on-surface focus:ring-0 min-h-[80px] resize-none placeholder:text-on-surface-variant/40 leading-relaxed"
-                />
+              <div>
+                <div className="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20">
+                  <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wider mb-2">
+                    Ghi chú
+                  </p>
+                  <textarea
+                    {...register('note')}
+                    placeholder="Bạn đã chi tiêu gì?..."
+                    className="w-full bg-transparent border-none p-0 text-sm font-medium text-on-surface focus:ring-0 min-h-[80px] resize-none placeholder:text-on-surface-variant/40 leading-relaxed"
+                  />
+                </div>
+                {errors.note && (
+                  <p className="flex items-center gap-1 text-xs text-error font-medium mt-1.5 px-1">
+                    <AlertTriangle size={11} />
+                    {errors.note.message}
+                  </p>
+                )}
               </div>
             </div>
           </form>
