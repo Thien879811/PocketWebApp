@@ -13,7 +13,7 @@ import { TRANSACTION_TYPES_METADATA } from '../types/transaction.types'
 import { MonthSelector } from '@/components/MonthSelector'
 import { cn } from '@/utils/cn'
 
-const STAT_TYPES = ['expense', 'income', 'borrow', 'lend'] as const
+const STAT_TYPES = ['expense', 'income', 'borrow', 'lend', 'savings'] as const
 type StatsType = typeof STAT_TYPES[number]
 
 const Stats: React.FC = () => {
@@ -53,6 +53,7 @@ const Stats: React.FC = () => {
     if (statsType === 'income')   cs = stats?.topIncomeCategories?.find(s => s.id === cat.id)
     if (statsType === 'borrow')   cs = stats?.topBorrowCategories?.find(s => s.id === cat.id)
     if (statsType === 'lend')     cs = stats?.topLendCategories?.find(s => s.id === cat.id)
+    if (statsType === 'savings')  cs = stats?.topSavingsCategories?.find(s => s.id === cat.id)
     return { ...cat, amount: cs?.amount || 0, count: cs?.count || 0 }
   }).sort((a, b) => b.amount - a.amount)
 
@@ -61,6 +62,7 @@ const Stats: React.FC = () => {
   if (statsType === 'income')  displayTotal = stats?.totalIncome || 0
   if (statsType === 'borrow')  displayTotal = stats?.totalBorrow || 0
   if (statsType === 'lend')    displayTotal = stats?.totalLend || 0
+  if (statsType === 'savings') displayTotal = stats?.totalSavings || 0
 
   const totalBudget = allCategoriesWithData.reduce((a, c) => a + (c.limit || 0), 0) || 10_000_000
   const progress = Math.min((displayTotal / totalBudget) * 100, 100)

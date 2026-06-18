@@ -94,11 +94,16 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     .filter(tx => tx.type === 'lend')
     .reduce((acc, curr) => acc + curr.amount, 0)
 
+  const totalSavings = thisMonthTx
+    .filter(tx => tx.type === 'savings')
+    .reduce((acc, curr) => acc + curr.amount, 0)
+
   // 2. Category Breakdowns (Separated by Type)
   const expenseMap: Record<string, { amount: number, count: number }> = {}
   const incomeMap: Record<string, { amount: number, count: number }> = {}
   const borrowMap: Record<string, { amount: number, count: number }> = {}
   const lendMap: Record<string, { amount: number, count: number }> = {}
+  const savingsMap: Record<string, { amount: number, count: number }> = {}
 
   thisMonthTx.forEach(tx => {
     if (!tx.category_id) return
@@ -119,8 +124,11 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
       if (!lendMap[tx.category_id]) lendMap[tx.category_id] = { amount: 0, count: 0 }
       lendMap[tx.category_id].amount += tx.amount
       lendMap[tx.category_id].count += 1
+    } else if (tx.type === 'savings') {
+      if (!savingsMap[tx.category_id]) savingsMap[tx.category_id] = { amount: 0, count: 0 }
+      savingsMap[tx.category_id].amount += tx.amount
+      savingsMap[tx.category_id].count += 1
     }
-    // Note: 'savings' transactions are NOT included in category breakdowns
   })
 
   const mapToTopList = (map: Record<string, { amount: number, count: number }>) => 
@@ -142,6 +150,7 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
   const topIncomeCategories = mapToTopList(incomeMap)
   const topBorrowCategories = mapToTopList(borrowMap)
   const topLendCategories = mapToTopList(lendMap)
+  const topSavingsCategories = mapToTopList(savingsMap)
 
   // 4. Weekly Trends
   const weeklyTrends = [0, 0, 0, 0, 0] // 5 weeks
@@ -194,11 +203,13 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     topIncomeCategories,
     topBorrowCategories,
     topLendCategories,
+    topSavingsCategories,
     weeklyTrends,
     monthlyTrends,
     monthlyIncomeTrends,
     dailyTrends,
     dailyIncomeTrends,
+    totalSavings,
     thisMonthCount: thisMonthTx.filter(tx => !['withdrawal', 'savings'].includes(tx.type)).length
   }
 }
