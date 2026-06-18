@@ -12,12 +12,11 @@ CREATE OR REPLACE FUNCTION create_transaction(
   p_user_id      UUID,
   p_amount       NUMERIC,
   p_type         TEXT,
-  p_category_id  TEXT,
-  p_goal_id      TEXT,
+  p_category_id  UUID,
+  p_goal_id      UUID,
   p_date         TEXT,
-  p_account_id   TEXT,
+  p_account_id   UUID,
   p_note         TEXT,
-  p_receipt_url  TEXT,
   p_fee          NUMERIC DEFAULT 0,
   p_due_date     TEXT DEFAULT NULL,
   p_person_name  TEXT DEFAULT NULL
@@ -37,10 +36,10 @@ BEGIN
   -- 1. Insert the transaction
   INSERT INTO transactions (
     user_id, amount, type, category_id, goal_id,
-    date, account_id, note, receipt_url, fee, due_date, person_name
+    date, account_id, note, fee, due_date, person_name
   ) VALUES (
     p_user_id, p_amount, p_type, p_category_id, p_goal_id,
-    p_date, p_account_id, p_note, p_receipt_url, p_fee, p_due_date, p_person_name
+    p_date, p_account_id, p_note, p_fee, p_due_date, p_person_name
   )
   RETURNING to_json(transactions.*) INTO v_transaction;
 
@@ -114,16 +113,15 @@ $$;
 -- 2. UPDATE TRANSACTION (atomic)
 -- ---------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_transaction(
-  p_tx_id        TEXT,
+  p_tx_id        UUID,
   p_user_id      UUID,
   p_amount       NUMERIC,
   p_type         TEXT,
-  p_category_id  TEXT,
-  p_goal_id      TEXT,
+  p_category_id  UUID,
+  p_goal_id      UUID,
   p_date         TEXT,
-  p_account_id   TEXT,
+  p_account_id   UUID,
   p_note         TEXT,
-  p_receipt_url  TEXT,
   p_fee          NUMERIC DEFAULT 0,
   p_due_date     TEXT DEFAULT NULL,
   p_person_name  TEXT DEFAULT NULL
@@ -207,7 +205,6 @@ BEGIN
     date        = p_date,
     account_id  = p_account_id,
     note        = p_note,
-    receipt_url = p_receipt_url,
     fee         = p_fee,
     due_date    = p_due_date,
     person_name = p_person_name
@@ -276,7 +273,7 @@ $$;
 -- 3. DELETE TRANSACTION (atomic)
 -- ---------------------------------------------------------
 CREATE OR REPLACE FUNCTION delete_transaction(
-  p_tx_id   TEXT,
+  p_tx_id   UUID,
   p_user_id UUID
 )
 RETURNS BOOLEAN
