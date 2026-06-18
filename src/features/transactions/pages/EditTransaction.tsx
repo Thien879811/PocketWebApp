@@ -69,12 +69,19 @@ const EditTransaction: React.FC = () => {
   const onSubmit = (data: TransactionFormValues) => {
     if (!id) return
     const submissionData = { ...data, type: transactionType }
+    
+    // Handle null values for Supabase
     if (transactionType === 'withdrawal' && !data.category_id) {
       // @ts-ignore - Supabase accepts null for category_id
       submissionData.category_id = null
     }
 
-    if (transactionType === 'savings' && !data.goal_id) {
+    // Always handle goal_id - convert empty string to null
+    if (transactionType === 'savings') {
+      // @ts-ignore
+      submissionData.goal_id = data.goal_id && data.goal_id.trim() !== '' ? data.goal_id : null
+    } else {
+      // For non-savings transactions, always set goal_id to null
       // @ts-ignore
       submissionData.goal_id = null
     }
