@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/utils/supabase'
 import { useAuthStore } from '@/store/useAuthStore'
 import { type AppNavigation, type AppNavigationFormValues } from '../types/navigation.schema'
+import { notify } from '@/lib/notify'
 
 // Default navigation items to seed for new users
 const DEFAULT_NAV_ITEMS: Omit<AppNavigationFormValues, 'user_id'>[] = [
@@ -87,7 +88,11 @@ export const useCreateNavItem = () => {
       return item
     },
     onSuccess: () => {
+      notify.success('Thêm mục điều hướng thành công!')
       queryClient.invalidateQueries({ queryKey: ['app_navigation'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể thêm mục điều hướng')
     },
   })
 }
@@ -111,7 +116,11 @@ export const useUpdateNavItem = () => {
       return item
     },
     onSuccess: () => {
+      notify.success('Cập nhật mục điều hướng thành công!')
       queryClient.invalidateQueries({ queryKey: ['app_navigation'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể cập nhật mục điều hướng')
     },
   })
 }
@@ -128,7 +137,11 @@ export const useDeleteNavItem = () => {
       if (error) throw new Error(error.message)
     },
     onSuccess: () => {
+      notify.success('Xóa mục điều hướng thành công!')
       queryClient.invalidateQueries({ queryKey: ['app_navigation'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể xóa mục điều hướng')
     },
   })
 }

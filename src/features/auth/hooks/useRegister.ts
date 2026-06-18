@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { supabase } from '@/utils/supabase'
 import { registerSchema, type RegisterFormValues } from '../types/auth.schema'
+import { notify } from '@/lib/notify'
 
 export const useRegister = () => {
   const navigate = useNavigate()
@@ -38,12 +39,11 @@ export const useRegister = () => {
       return authData
     },
     onSuccess: () => {
-      // Persistent redirect (Assuming email confirmation is disabled for direct login)
+      notify.success('Đăng ký thành công!')
       navigate('/', { replace: true })
     },
     onError: (error: any) => {
-      // Handle registration error
-      console.error('Registration failed:', error.message)
+      notify.error(error.message || 'Đăng ký thất bại')
     }
   })
 

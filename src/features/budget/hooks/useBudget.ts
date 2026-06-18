@@ -6,6 +6,7 @@ import { useTransactions } from '../../transactions/hooks/useTransactions'
 import { useCategories } from '../../categories/hooks/useCategories'
 import type { Transaction } from '../../transactions/types/transaction.schema'
 import type { Category } from '../../categories/types/category.schema'
+import { notify } from '@/lib/notify'
 
 export interface BudgetPlan {
   id: string
@@ -104,7 +105,11 @@ export const useBudgetMutations = () => {
       return data
     },
     onSuccess: () => {
+      notify.success('Tạo ngân sách thành công!')
       queryClient.invalidateQueries({ queryKey: ['active-budget'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể tạo ngân sách')
     }
   })
 
@@ -124,7 +129,11 @@ export const useBudgetMutations = () => {
       return data
     },
     onSuccess: () => {
+      notify.success('Cập nhật ngân sách thành công!')
       queryClient.invalidateQueries({ queryKey: ['active-budget'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể cập nhật ngân sách')
     }
   })
 
@@ -142,7 +151,11 @@ export const useBudgetMutations = () => {
       return true
     },
     onSuccess: () => {
+      notify.success('Xóa ngân sách thành công!')
       queryClient.invalidateQueries({ queryKey: ['active-budget'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể xóa ngân sách')
     }
   })
 

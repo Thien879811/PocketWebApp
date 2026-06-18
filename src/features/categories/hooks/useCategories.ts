@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/utils/supabase'
 import { useAuthStore } from '@/store/useAuthStore'
 import { type Category, type CategoryFormValues } from '../types/category.schema'
+import { notify } from '@/lib/notify'
 
 export const useCategories = () => {
   const user = useAuthStore((state) => state.user)
@@ -61,7 +62,11 @@ export const useCreateCategory = () => {
       return category
     },
     onSuccess: () => {
+      notify.success('Tạo danh mục thành công!')
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể tạo danh mục')
     },
   })
 }
@@ -82,7 +87,11 @@ export const useUpdateCategory = () => {
       return category
     },
     onSuccess: () => {
+      notify.success('Cập nhật danh mục thành công!')
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể cập nhật danh mục')
     },
   })
 }
@@ -96,7 +105,11 @@ export const useDeleteCategory = () => {
       if (error) throw new Error(error.message)
     },
     onSuccess: () => {
+      notify.success('Xóa danh mục thành công!')
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể xóa danh mục')
     },
   })
 }

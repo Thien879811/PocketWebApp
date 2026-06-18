@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/utils/supabase'
 import { useAuthStore } from '@/store/useAuthStore'
 import { type Account, type AccountFormValues } from '../types/account.schema'
+import { notify } from '@/lib/notify'
 
 export const useAccounts = () => {
   const user = useAuthStore((state) => state.user)
@@ -42,7 +43,11 @@ export const useCreateAccount = () => {
       return account
     },
     onSuccess: () => {
+      notify.success('Tạo tài khoản thành công!')
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể tạo tài khoản')
     },
   })
 }
@@ -56,7 +61,11 @@ export const useDeleteAccount = () => {
       if (error) throw new Error(error.message)
     },
     onSuccess: () => {
+      notify.success('Xóa tài khoản thành công!')
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể xóa tài khoản')
     },
   })
 }

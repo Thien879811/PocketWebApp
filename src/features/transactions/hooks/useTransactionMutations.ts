@@ -3,48 +3,22 @@ import { supabase } from '@/utils/supabase'
 import { useAuthStore } from '@/store/useAuthStore'
 import { type TransactionFormValues } from '../types/transaction.schema'
 import { useNavigate } from 'react-router-dom'
+import { notify } from '@/lib/notify'
 
 /**
- * Fetch all accounts for a user and snapshot their balances into daily_balance_logs.
- * Uses upsert – safe to call multiple times per day.
+ * All balance mutations now go through PostgreSQL stored functions (RPC)
+ * that execute inside a SINGLE database transaction.
+ *
+ * If ANY step fails (insert, balance update, goal update, snapshot),
+ * the entire operation is rolled back automatically — no partial state.
+ *
+ * Required RPC functions (run supabase/migrations/20260618_transaction_atomic_rpc.sql):
+ *   - create_transaction(...)
+ *   - update_transaction(...)
+ *   - delete_transaction(...)
  */
-async function snapshotDailyBalances(userId: string, logDate?: string) {
-  try {
-    const date = (logDate?.split('T')[0]) ?? new Date().toISOString().split('T')[0]
 
-    // Fetch latest balances
-    const { data: accounts, error } = await supabase
-      .from('accounts')
-      .select('id, balance')
-      .eq('user_id', userId)
-
-    if (error) {
-      console.error('Error fetching accounts for snapshot:', error)
-      return
-    }
-
-    if (!accounts || accounts.length === 0) return
-
-    const rows = accounts.map((acc) => ({
-      user_id: userId,
-      log_date: date,
-      account_id: acc.id,
-      balance: acc.balance ?? 0,
-      updated_at: new Date().toISOString(),
-    }))
-
-    const { error: upsertError } = await supabase
-      .from('daily_balance_logs')
-      .upsert(rows, { onConflict: 'user_id,log_date,account_id' })
-
-    if (upsertError) {
-      console.error('Error upserting daily balance logs:', upsertError)
-    }
-  } catch (err) {
-    console.error('Snapshot failed:', err)
-  }
-}
-
+// ─── CREATE ─────────────────────────────────────────────
 export const useCreateTransaction = () => {
   const queryClient = useQueryClient()
   const user = useAuthStore((state) => state.user)
@@ -54,94 +28,39 @@ export const useCreateTransaction = () => {
     mutationFn: async (data: TransactionFormValues) => {
       if (!user) throw new Error('User not authenticated')
 
-      // 1. Insert Transaction record
-      const { data: transaction, error: txError } = await supabase
-        .from('transactions')
-        .insert([{ ...data, user_id: user.id }])
-        .select()
-        .single()
+      const { data: transaction, error } = await supabase.rpc('create_transaction', {
+        p_user_id: user.id,
+        p_amount: data.amount,
+        p_type: data.type,
+        p_category_id: data.category_id ?? null,
+        p_goal_id: data.goal_id ?? null,
+        p_date: data.date,
+        p_account_id: data.account_id,
+        p_note: data.note ?? null,
+        p_receipt_url: data.receipt_url ?? null,
+        p_fee: data.fee ?? 0,
+        p_due_date: data.due_date ?? null,
+        p_person_name: data.person_name ?? null,
+      })
 
-      if (txError) throw new Error(txError.message)
-
-      // 2. Fetch current account balance
-      const { data: account, error: accError } = await supabase
-        .from('accounts')
-        .select('balance')
-        .eq('id', data.account_id)
-        .single()
-
-      if (accError) throw new Error(accError.message)
-
-      // 3. Update Balances
-      if (data.type === 'withdrawal') {
-        // Decrease source account
-        await supabase
-          .from('accounts')
-          .update({ balance: (account.balance || 0) - data.amount - (data.fee || 0) })
-          .eq('id', data.account_id)
-
-        // Find and increase cash account
-        const { data: cashAccount, error: cashError } = await supabase
-          .from('accounts')
-          .select('id, balance')
-          .eq('user_id', user.id)
-          .eq('type', 'cash')
-          .single()
-
-        if (!cashError && cashAccount) {
-          await supabase
-            .from('accounts')
-            .update({ balance: (cashAccount.balance || 0) + data.amount })
-            .eq('id', cashAccount.id)
-        }
-      } else if (data.type === 'savings') {
-        // Savings: decrease account balance but do NOT count as expense
-        const newBalance = (account.balance || 0) - data.amount
-        await supabase
-          .from('accounts')
-          .update({ balance: newBalance })
-          .eq('id', data.account_id)
-
-        // If goal_id provided, automatically increase goal's current_amount
-        if (data.goal_id) {
-          const { data: goal, error: goalError } = await supabase
-            .from('goals')
-            .select('current_amount')
-            .eq('id', data.goal_id)
-            .single()
-
-          if (!goalError && goal) {
-            await supabase
-              .from('goals')
-              .update({ current_amount: (goal.current_amount || 0) + data.amount })
-              .eq('id', data.goal_id)
-          }
-        }
-      } else {
-        const isPlus = data.type === 'income' || data.type === 'borrow'
-        const newBalance = isPlus 
-          ? (account.balance || 0) + data.amount 
-          : (account.balance || 0) - data.amount
-
-        await supabase
-          .from('accounts')
-          .update({ balance: newBalance })
-          .eq('id', data.account_id)
-      }
-
+      if (error) throw new Error(error.message)
       return transaction
     },
-    onSuccess: async (_, variables) => {
+    onSuccess: () => {
+      notify.success('Tạo giao dịch thành công!')
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
       queryClient.invalidateQueries({ queryKey: ['goals'] })
-      if (user) await snapshotDailyBalances(user.id, variables.date)
       queryClient.invalidateQueries({ queryKey: ['daily_balance_logs'] })
       navigate('/')
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể tạo giao dịch')
     },
   })
 }
 
+// ─── UPDATE ─────────────────────────────────────────────
 export const useUpdateTransaction = () => {
   const queryClient = useQueryClient()
   const user = useAuthStore((state) => state.user)
@@ -151,166 +70,40 @@ export const useUpdateTransaction = () => {
     mutationFn: async ({ id, data }: { id: string; data: TransactionFormValues }) => {
       if (!user) throw new Error('User not authenticated')
 
-      // 1. Get old transaction to revert balance
-      const { data: oldTx, error: fetchError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('id', id)
-        .single()
+      const { data: transaction, error } = await supabase.rpc('update_transaction', {
+        p_tx_id: id,
+        p_user_id: user.id,
+        p_amount: data.amount,
+        p_type: data.type,
+        p_category_id: data.category_id ?? null,
+        p_goal_id: data.goal_id ?? null,
+        p_date: data.date,
+        p_account_id: data.account_id,
+        p_note: data.note ?? null,
+        p_receipt_url: data.receipt_url ?? null,
+        p_fee: data.fee ?? 0,
+        p_due_date: data.due_date ?? null,
+        p_person_name: data.person_name ?? null,
+      })
 
-      if (fetchError) throw new Error(fetchError.message)
-
-      // 2. Revert old transaction balance
-      const { data: oldAccount, error: oldAccError } = await supabase
-        .from('accounts')
-        .select('balance')
-        .eq('id', oldTx.account_id)
-        .single()
-
-      if (oldAccError) throw new Error(oldAccError.message)
-
-      if (oldTx.type === 'withdrawal') {
-        // Increase source account
-        await supabase
-          .from('accounts')
-          .update({ balance: (oldAccount.balance || 0) + oldTx.amount + (oldTx.fee || 0) })
-          .eq('id', oldTx.account_id)
-
-        // Find and decrease cash account
-        const { data: cashAccount, error: cashError } = await supabase
-          .from('accounts')
-          .select('id, balance')
-          .eq('user_id', user.id)
-          .eq('type', 'cash')
-          .single()
-
-        if (!cashError && cashAccount) {
-          await supabase
-            .from('accounts')
-            .update({ balance: (cashAccount.balance || 0) - oldTx.amount })
-            .eq('id', cashAccount.id)
-        }
-      } else if (oldTx.type === 'savings') {
-        // Revert savings: increase account balance and decrease goal
-        const revertedBalance = (oldAccount.balance || 0) + oldTx.amount
-        await supabase
-          .from('accounts')
-          .update({ balance: revertedBalance })
-          .eq('id', oldTx.account_id)
-
-        if (oldTx.goal_id) {
-          const { data: goal, error: goalError } = await supabase
-            .from('goals')
-            .select('current_amount')
-            .eq('id', oldTx.goal_id)
-            .single()
-
-          if (!goalError && goal) {
-            await supabase
-              .from('goals')
-              .update({ current_amount: Math.max(0, (goal.current_amount || 0) - oldTx.amount) })
-              .eq('id', oldTx.goal_id)
-          }
-        }
-      } else {
-        const isPlus = oldTx.type === 'income' || oldTx.type === 'borrow'
-        const revertedOldBalance = isPlus
-          ? (oldAccount.balance || 0) - oldTx.amount
-          : (oldAccount.balance || 0) + oldTx.amount
-
-        await supabase
-          .from('accounts')
-          .update({ balance: revertedOldBalance })
-          .eq('id', oldTx.account_id)
-      }
-
-      // 3. Update Transaction
-      const { data: transaction, error: txError } = await supabase
-        .from('transactions')
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single()
-
-      if (txError) throw new Error(txError.message)
-
-      // 4. Apply new transaction balance
-      const { data: newAccount, error: newAccError } = await supabase
-        .from('accounts')
-        .select('balance')
-        .eq('id', data.account_id)
-        .single()
-
-      if (newAccError) throw new Error(newAccError.message)
-
-      if (data.type === 'withdrawal') {
-        // Decrease source account
-        await supabase
-          .from('accounts')
-          .update({ balance: (newAccount.balance || 0) - data.amount - (data.fee || 0) })
-          .eq('id', data.account_id)
-
-        // Find and increase cash account
-        const { data: cashAccount, error: cashError } = await supabase
-          .from('accounts')
-          .select('id, balance')
-          .eq('user_id', user.id)
-          .eq('type', 'cash')
-          .single()
-
-        if (!cashError && cashAccount) {
-          await supabase
-            .from('accounts')
-            .update({ balance: (cashAccount.balance || 0) + data.amount })
-            .eq('id', cashAccount.id)
-        }
-      } else if (data.type === 'savings') {
-        // Apply savings: decrease account balance and increase goal
-        const newBalance = (newAccount.balance || 0) - data.amount
-        await supabase
-          .from('accounts')
-          .update({ balance: newBalance })
-          .eq('id', data.account_id)
-
-        if (data.goal_id) {
-          const { data: goal, error: goalError } = await supabase
-            .from('goals')
-            .select('current_amount')
-            .eq('id', data.goal_id)
-            .single()
-
-          if (!goalError && goal) {
-            await supabase
-              .from('goals')
-              .update({ current_amount: (goal.current_amount || 0) + data.amount })
-              .eq('id', data.goal_id)
-          }
-        }
-      } else {
-        const isPlus = data.type === 'income' || data.type === 'borrow'
-        const newBalance = isPlus
-          ? (newAccount.balance || 0) + data.amount
-          : (newAccount.balance || 0) - data.amount
-
-        await supabase
-          .from('accounts')
-          .update({ balance: newBalance })
-          .eq('id', data.account_id)
-      }
-
+      if (error) throw new Error(error.message)
       return transaction
     },
-    onSuccess: async (_, variables) => {
+    onSuccess: () => {
+      notify.success('Cập nhật giao dịch thành công!')
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
       queryClient.invalidateQueries({ queryKey: ['goals'] })
-      if (user) await snapshotDailyBalances(user.id, variables.data.date)
       queryClient.invalidateQueries({ queryKey: ['daily_balance_logs'] })
       navigate('/')
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể cập nhật giao dịch')
     },
   })
 }
 
+// ─── DELETE ─────────────────────────────────────────────
 export const useDeleteTransaction = () => {
   const queryClient = useQueryClient()
   const user = useAuthStore((state) => state.user)
@@ -319,93 +112,22 @@ export const useDeleteTransaction = () => {
     mutationFn: async (id: string) => {
       if (!user) throw new Error('User not authenticated')
 
-      // 1. Get transaction to revert balance
-      const { data: tx, error: fetchError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('id', id)
-        .single()
+      const { error } = await supabase.rpc('delete_transaction', {
+        p_tx_id: id,
+        p_user_id: user.id,
+      })
 
-      if (fetchError) throw new Error(fetchError.message)
-
-      // 2. Revert balances
-      const { data: account, error: accError } = await supabase
-        .from('accounts')
-        .select('balance')
-        .eq('id', tx.account_id)
-        .single()
-
-      if (accError) throw new Error(accError.message)
-
-      if (tx.type === 'withdrawal') {
-        // Increase source account
-        await supabase
-          .from('accounts')
-          .update({ balance: (account.balance || 0) + tx.amount + (tx.fee || 0) })
-          .eq('id', tx.account_id)
-
-        // Find and decrease cash account
-        const { data: cashAccount, error: cashError } = await supabase
-          .from('accounts')
-          .select('id, balance')
-          .eq('user_id', user.id)
-          .eq('type', 'cash')
-          .single()
-
-        if (!cashError && cashAccount) {
-          await supabase
-            .from('accounts')
-            .update({ balance: (cashAccount.balance || 0) - tx.amount })
-            .eq('id', cashAccount.id)
-        }
-      } else if (tx.type === 'savings') {
-        // Revert savings: increase account balance and decrease goal
-        const revertedBalance = (account.balance || 0) + tx.amount
-        await supabase
-          .from('accounts')
-          .update({ balance: revertedBalance })
-          .eq('id', tx.account_id)
-
-        if (tx.goal_id) {
-          const { data: goal, error: goalError } = await supabase
-            .from('goals')
-            .select('current_amount')
-            .eq('id', tx.goal_id)
-            .single()
-
-          if (!goalError && goal) {
-            await supabase
-              .from('goals')
-              .update({ current_amount: Math.max(0, (goal.current_amount || 0) - tx.amount) })
-              .eq('id', tx.goal_id)
-          }
-        }
-      } else {
-        const isPlus = tx.type === 'income' || tx.type === 'borrow'
-        const revertedBalance = isPlus
-          ? (account.balance || 0) - tx.amount
-          : (account.balance || 0) + tx.amount
-
-        await supabase
-          .from('accounts')
-          .update({ balance: revertedBalance })
-          .eq('id', tx.account_id)
-      }
-
-      // 3. Delete transaction
-      const { error: deleteError } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('id', id)
-
-      if (deleteError) throw new Error(deleteError.message)
+      if (error) throw new Error(error.message)
     },
-    onSuccess: async () => {
+    onSuccess: () => {
+      notify.success('Xóa giao dịch thành công!')
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
       queryClient.invalidateQueries({ queryKey: ['goals'] })
-      if (user) await snapshotDailyBalances(user.id)
       queryClient.invalidateQueries({ queryKey: ['daily_balance_logs'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể xóa giao dịch')
     },
   })
 }

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/utils/supabase'
 import { useAuthStore } from '@/store/useAuthStore'
 import { type Goal, type GoalFormValues } from '../types/goal.schema'
+import { notify } from '@/lib/notify'
 
 export const useGoals = () => {
   const user = useAuthStore((state) => state.user)
@@ -61,7 +62,11 @@ export const useCreateGoal = () => {
       return goal
     },
     onSuccess: () => {
+      notify.success('Tạo mục tiêu thành công!')
       queryClient.invalidateQueries({ queryKey: ['goals'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể tạo mục tiêu')
     },
   })
 }
@@ -82,7 +87,11 @@ export const useUpdateGoal = () => {
       return goal
     },
     onSuccess: () => {
+      notify.success('Cập nhật mục tiêu thành công!')
       queryClient.invalidateQueries({ queryKey: ['goals'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể cập nhật mục tiêu')
     },
   })
 }
@@ -96,7 +105,11 @@ export const useDeleteGoal = () => {
       if (error) throw new Error(error.message)
     },
     onSuccess: () => {
+      notify.success('Xóa mục tiêu thành công!')
       queryClient.invalidateQueries({ queryKey: ['goals'] })
+    },
+    onError: (err: Error) => {
+      notify.error(err.message || 'Không thể xóa mục tiêu')
     },
   })
 }
