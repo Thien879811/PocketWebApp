@@ -1,9 +1,49 @@
 -- ============================================================
--- Atomic Transaction RPC Functions
--- Moves all balance logic into PostgreSQL stored functions
--- so each operation runs in a SINGLE database transaction.
--- If ANY step fails, EVERYTHING is rolled back automatically.
+-- Fix: snapshot_balance type mismatch (uuid, text) vs (uuid, date)
+-- Drop and recreate snapshot_balance accepting TEXT (cast internally)
+-- Also recreate all 3 transaction functions with proper casts
 -- ============================================================
+
+-- 1. Drop ALL existing overloads cleanly
+DROP FUNCTION IF EXISTS snapshot_balance(UUID, TEXT);
+DROP FUNCTION IF EXISTS snapshot_balance(UUID, DATE);
+DROP FUNCTION IF EXISTS create_transaction(UUID, NUMERIC, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, NUMERIC, TEXT, TEXT);
+DROP FUNCTION IF EXISTS create_transaction(UUID, NUMERIC, TEXT, UUID, UUID, TEXT, UUID, TEXT, NUMERIC, TEXT, TEXT);
+DROP FUNCTION IF EXISTS update_transaction(TEXT, UUID, NUMERIC, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, NUMERIC, TEXT, TEXT);
+DROP FUNCTION IF EXISTS update_transaction(UUID, UUID, NUMERIC, TEXT, UUID, UUID, TEXT, UUID, TEXT, TEXT, NUMERIC, TEXT, TEXT);
+DROP FUNCTION IF EXISTS delete_transaction(TEXT, UUID);
+DROP FUNCTION IF EXISTS delete_transaction(UUID, UUID);
+
+-- ---------------------------------------------------------
+-- Helper: snapshot_balance — accepts TEXT, casts to DATE internally
+-- ---------------------------------------------------------
+CREATE OR REPLACE FUNCTION snapshot_balance(
+  p_user_id  UUID,
+  p_log_date TEXT
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_date DATE;
+  v_accounts RECORD;
+BEGIN
+  v_date := p_log_date::DATE;
+
+  FOR v_accounts IN
+    SELECT id, balance FROM accounts WHERE user_id = p_user_id
+  LOOP
+    INSERT INTO daily_balance_logs (user_id, log_date, account_id, balance, updated_at)
+    VALUES (p_user_id, v_date, v_accounts.id, COALESCE(v_accounts.balance, 0), NOW())
+    ON CONFLICT (user_id, log_date, account_id)
+    DO UPDATE SET
+      balance = EXCLUDED.balance,
+      updated_at = NOW();
+  END LOOP;
+END;
+$$;
+
 
 -- ---------------------------------------------------------
 -- 1. CREATE TRANSACTION (atomic)
@@ -39,7 +79,9 @@ BEGIN
     date, account_id, note, fee, due_date, person_name
   ) VALUES (
     p_user_id, p_amount, p_type, p_category_id, p_goal_id,
-    p_date, p_account_id, p_note, p_fee, p_due_date, p_person_name
+    p_date::DATE, p_account_id, p_note, p_fee,
+    CASE WHEN p_due_date IS NOT NULL THEN p_due_date::DATE ELSE NULL END,
+    p_person_name
   )
   RETURNING to_json(transactions.*) INTO v_transaction;
 
@@ -54,12 +96,10 @@ BEGIN
 
   -- 3. Update balances based on transaction type
   IF p_type = 'withdrawal' THEN
-    -- Decrease source account (includes fee)
     UPDATE accounts
     SET balance = v_account_balance - p_amount - COALESCE(p_fee, 0)
     WHERE id = p_account_id;
 
-    -- Find and increase cash account
     SELECT id, balance INTO v_cash_record
     FROM accounts
     WHERE user_id = p_user_id AND type = 'cash'
@@ -72,11 +112,9 @@ BEGIN
     END IF;
 
   ELSIF p_type = 'savings' THEN
-    -- Decrease account balance
     v_new_balance := v_account_balance - p_amount;
     UPDATE accounts SET balance = v_new_balance WHERE id = p_account_id;
 
-    -- If goal_id provided, increase goal's current_amount
     IF p_goal_id IS NOT NULL THEN
       SELECT id, current_amount INTO v_goal_record
       FROM goals WHERE id = p_goal_id;
@@ -89,15 +127,12 @@ BEGIN
     END IF;
 
   ELSE
-    -- income, borrow, lend, business, expense
     v_is_plus := (p_type = 'income' OR p_type = 'borrow');
-
     IF v_is_plus THEN
       v_new_balance := v_account_balance + p_amount;
     ELSE
       v_new_balance := v_account_balance - p_amount;
     END IF;
-
     UPDATE accounts SET balance = v_new_balance WHERE id = p_account_id;
   END IF;
 
@@ -152,12 +187,10 @@ BEGIN
   FROM accounts WHERE id = v_old_tx.account_id;
 
   IF v_old_tx.type = 'withdrawal' THEN
-    -- Revert source: add back amount + fee
     UPDATE accounts
     SET balance = v_account_balance + v_old_tx.amount + COALESCE(v_old_tx.fee, 0)
     WHERE id = v_old_tx.account_id;
 
-    -- Revert cash: subtract amount
     SELECT id, balance INTO v_cash_record
     FROM accounts
     WHERE user_id = p_user_id AND type = 'cash'
@@ -202,11 +235,11 @@ BEGIN
     type        = p_type,
     category_id = p_category_id,
     goal_id     = p_goal_id,
-    date        = p_date,
+    date        = p_date::DATE,
     account_id  = p_account_id,
     note        = p_note,
     fee         = p_fee,
-    due_date    = p_due_date,
+    due_date    = CASE WHEN p_due_date IS NOT NULL THEN p_due_date::DATE ELSE NULL END,
     person_name = p_person_name
   WHERE id = p_tx_id
   RETURNING to_json(transactions.*) INTO v_transaction;
@@ -260,8 +293,8 @@ BEGIN
   PERFORM snapshot_balance(p_user_id, p_date);
 
   -- If old date differs from new date, also snapshot old date
-  IF v_old_tx.date IS DISTINCT FROM p_date THEN
-    PERFORM snapshot_balance(p_user_id, v_old_tx.date);
+  IF v_old_tx.date IS DISTINCT FROM p_date::DATE THEN
+    PERFORM snapshot_balance(p_user_id, v_old_tx.date::TEXT);
   END IF;
 
   RETURN v_transaction;
@@ -346,39 +379,8 @@ BEGIN
   DELETE FROM transactions WHERE id = p_tx_id;
 
   -- 4. Snapshot daily balance
-  PERFORM snapshot_balance(p_user_id, v_old_tx.date);
+  PERFORM snapshot_balance(p_user_id, v_old_tx.date::TEXT);
 
   RETURN TRUE;
-END;
-$$;
-
-
--- ---------------------------------------------------------
--- Helper: snapshot_balance (upserts daily balance logs)
--- ---------------------------------------------------------
-CREATE OR REPLACE FUNCTION snapshot_balance(
-  p_user_id UUID,
-  p_log_date TEXT
-)
-RETURNS VOID
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  v_date TEXT;
-  v_accounts RECORD;
-BEGIN
-  v_date := split_part(p_log_date, 'T', 1);
-
-  FOR v_accounts IN
-    SELECT id, balance FROM accounts WHERE user_id = p_user_id
-  LOOP
-    INSERT INTO daily_balance_logs (user_id, log_date, account_id, balance, updated_at)
-    VALUES (p_user_id, v_date, v_accounts.id, COALESCE(v_accounts.balance, 0), NOW())
-    ON CONFLICT (user_id, log_date, account_id)
-    DO UPDATE SET
-      balance = EXCLUDED.balance,
-      updated_at = NOW();
-  END LOOP;
 END;
 $$;
