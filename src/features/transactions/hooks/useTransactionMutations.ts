@@ -94,6 +94,29 @@ export const useCreateTransaction = () => {
             .update({ balance: (cashAccount.balance || 0) + data.amount })
             .eq('id', cashAccount.id)
         }
+      } else if (data.type === 'savings') {
+        // Savings: decrease account balance but do NOT count as expense
+        const newBalance = (account.balance || 0) - data.amount
+        await supabase
+          .from('accounts')
+          .update({ balance: newBalance })
+          .eq('id', data.account_id)
+
+        // If goal_id provided, automatically increase goal's current_amount
+        if (data.goal_id) {
+          const { data: goal, error: goalError } = await supabase
+            .from('goals')
+            .select('current_amount')
+            .eq('id', data.goal_id)
+            .single()
+
+          if (!goalError && goal) {
+            await supabase
+              .from('goals')
+              .update({ current_amount: (goal.current_amount || 0) + data.amount })
+              .eq('id', data.goal_id)
+          }
+        }
       } else {
         const isPlus = data.type === 'income' || data.type === 'borrow'
         const newBalance = isPlus 
@@ -111,6 +134,7 @@ export const useCreateTransaction = () => {
     onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
+      queryClient.invalidateQueries({ queryKey: ['goals'] })
       if (user) await snapshotDailyBalances(user.id, variables.date)
       queryClient.invalidateQueries({ queryKey: ['daily_balance_logs'] })
       navigate('/')
@@ -166,6 +190,28 @@ export const useUpdateTransaction = () => {
             .update({ balance: (cashAccount.balance || 0) - oldTx.amount })
             .eq('id', cashAccount.id)
         }
+      } else if (oldTx.type === 'savings') {
+        // Revert savings: increase account balance and decrease goal
+        const revertedBalance = (oldAccount.balance || 0) + oldTx.amount
+        await supabase
+          .from('accounts')
+          .update({ balance: revertedBalance })
+          .eq('id', oldTx.account_id)
+
+        if (oldTx.goal_id) {
+          const { data: goal, error: goalError } = await supabase
+            .from('goals')
+            .select('current_amount')
+            .eq('id', oldTx.goal_id)
+            .single()
+
+          if (!goalError && goal) {
+            await supabase
+              .from('goals')
+              .update({ current_amount: Math.max(0, (goal.current_amount || 0) - oldTx.amount) })
+              .eq('id', oldTx.goal_id)
+          }
+        }
       } else {
         const isPlus = oldTx.type === 'income' || oldTx.type === 'borrow'
         const revertedOldBalance = isPlus
@@ -218,6 +264,28 @@ export const useUpdateTransaction = () => {
             .update({ balance: (cashAccount.balance || 0) + data.amount })
             .eq('id', cashAccount.id)
         }
+      } else if (data.type === 'savings') {
+        // Apply savings: decrease account balance and increase goal
+        const newBalance = (newAccount.balance || 0) - data.amount
+        await supabase
+          .from('accounts')
+          .update({ balance: newBalance })
+          .eq('id', data.account_id)
+
+        if (data.goal_id) {
+          const { data: goal, error: goalError } = await supabase
+            .from('goals')
+            .select('current_amount')
+            .eq('id', data.goal_id)
+            .single()
+
+          if (!goalError && goal) {
+            await supabase
+              .from('goals')
+              .update({ current_amount: (goal.current_amount || 0) + data.amount })
+              .eq('id', data.goal_id)
+          }
+        }
       } else {
         const isPlus = data.type === 'income' || data.type === 'borrow'
         const newBalance = isPlus
@@ -235,6 +303,7 @@ export const useUpdateTransaction = () => {
     onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
+      queryClient.invalidateQueries({ queryKey: ['goals'] })
       if (user) await snapshotDailyBalances(user.id, variables.data.date)
       queryClient.invalidateQueries({ queryKey: ['daily_balance_logs'] })
       navigate('/')
@@ -289,6 +358,28 @@ export const useDeleteTransaction = () => {
             .update({ balance: (cashAccount.balance || 0) - tx.amount })
             .eq('id', cashAccount.id)
         }
+      } else if (tx.type === 'savings') {
+        // Revert savings: increase account balance and decrease goal
+        const revertedBalance = (account.balance || 0) + tx.amount
+        await supabase
+          .from('accounts')
+          .update({ balance: revertedBalance })
+          .eq('id', tx.account_id)
+
+        if (tx.goal_id) {
+          const { data: goal, error: goalError } = await supabase
+            .from('goals')
+            .select('current_amount')
+            .eq('id', tx.goal_id)
+            .single()
+
+          if (!goalError && goal) {
+            await supabase
+              .from('goals')
+              .update({ current_amount: Math.max(0, (goal.current_amount || 0) - tx.amount) })
+              .eq('id', tx.goal_id)
+          }
+        }
       } else {
         const isPlus = tx.type === 'income' || tx.type === 'borrow'
         const revertedBalance = isPlus
@@ -312,6 +403,7 @@ export const useDeleteTransaction = () => {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['accounts'] })
+      queryClient.invalidateQueries({ queryKey: ['goals'] })
       if (user) await snapshotDailyBalances(user.id)
       queryClient.invalidateQueries({ queryKey: ['daily_balance_logs'] })
     },

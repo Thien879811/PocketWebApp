@@ -1,0 +1,185 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║              🔧 DATABASE CONSTRAINT FIX - SAVINGS TYPE                    ║
+║                                                                           ║
+║                    Error 23514 - CHECK Constraint Fix                    ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ERROR MESSAGE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  "new row for relation \"categories\" violates check constraint 
+   \"categories_type_check\""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROOT CAUSE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Database constraints only allow these types:
+  
+  ❌ income
+  ❌ expense
+  ❌ withdrawal
+  ❌ borrow
+  ❌ lend
+  ❌ business
+  
+  Missing:
+  ❌ savings ← NEEDS TO BE ADDED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SOLUTION (COPY & PASTE):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ALTER TABLE categories DROP CONSTRAINT IF EXISTS categories_type_check;
+ALTER TABLE categories ADD CONSTRAINT categories_type_check CHECK 
+  (type IN ('income', 'expense', 'withdrawal', 'borrow', 'lend', 'business', 'savings'));
+
+ALTER TABLE transactions DROP CONSTRAINT IF EXISTS transactions_type_check;
+ALTER TABLE transactions ADD CONSTRAINT transactions_type_check CHECK 
+  (type IN ('income', 'expense', 'withdrawal', 'borrow', 'lend', 'business', 'savings'));
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW TO APPLY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Step 1: Open Supabase Dashboard
+          → Your Project
+          → SQL Editor
+
+  Step 2: Paste the SQL above (see SOLUTION section)
+
+  Step 3: Click "Run" button
+
+  Step 4: Wait for success message ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BEFORE FIX:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Creating savings category:
+  
+  Input:  name='Du lịch', type='savings', icon='savings', color='green'
+  Result: ❌ Error 23514 - CHECK constraint violation
+  
+  Why:  Database doesn't allow 'savings' in type column
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AFTER FIX:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Creating savings category:
+  
+  Input:  name='Du lịch', type='savings', icon='savings', color='green'
+  Result: ✅ Success - Category created
+  
+  Why:  'savings' is now in the allowed types list
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TESTING AFTER FIX:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Test 1: Create Savings Category
+  ┌─────────────────────────────┐
+  │ Settings → Categories        │
+  │ → Add Category               │
+  │ Name: "Du lịch"              │
+  │ Type: "Tiết kiệm" ← Try this │
+  │ Color: Green                 │
+  │ → Create                     │
+  │ Result: ✅ Should work now   │
+  └─────────────────────────────┘
+
+  Test 2: Create Savings Transaction
+  ┌─────────────────────────────┐
+  │ Home → New Transaction        │
+  │ Amount: 500,000               │
+  │ Type: "Tiết kiệm" ← Try this │
+  │ Category: Your savings cat    │
+  │ → Save                        │
+  │ Result: ✅ Should work now   │
+  └─────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VERIFY THE FIX:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Run this SQL to confirm:
+  
+  SELECT constraint_name 
+  FROM information_schema.table_constraints 
+  WHERE table_name IN ('categories', 'transactions') 
+  AND constraint_type = 'CHECK';
+  
+  Expected result:
+  ✅ categories_type_check (updated with 'savings')
+  ✅ transactions_type_check (updated with 'savings')
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT CHANGES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  BEFORE:  type IN ('income', 'expense', 'withdrawal', 'borrow', 'lend', 'business')
+  AFTER:   type IN ('income', 'expense', 'withdrawal', 'borrow', 'lend', 'business', 'savings')
+                                                                                      ↑ ADDED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SAFETY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✅ Safe to apply - Just updating constraints
+  ✅ No data loss - No data is deleted
+  ✅ Reversible - Can rollback if needed
+  ✅ Quick - < 1 minute to complete
+  ✅ Non-breaking - Other types still work
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILES PROVIDED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. CONSTRAINT_FIX_QUICK.sql
+     → Minimal SQL - copy & paste directly
+
+  2. MIGRATION_ADD_SAVINGS_CONSTRAINT.sql
+     → Full migration with documentation
+
+  3. HOW_TO_FIX_SAVINGS_CONSTRAINT.md
+     → Detailed step-by-step guide
+
+  4. ERROR_FIX_SUMMARY.md
+     → Summary and reference
+
+  5. SUPABASE_CONSTRAINT_FIX.txt
+     → This file (visual guide)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+QUICK CHECKLIST:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [ ] Open Supabase SQL Editor
+  [ ] Copy SQL from CONSTRAINT_FIX_QUICK.sql
+  [ ] Paste into editor
+  [ ] Click "Run"
+  [ ] Wait for success ✅
+  [ ] Test creating savings category
+  [ ] Test creating savings transaction
+  [ ] Both work? → Done! 🎉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STATUS: Ready to apply
+TIME: < 1 minute
+DIFFICULTY: Easy ⭐☆☆☆☆
+RISK: Low 🟢
+
+Apply now → Test → Done ✅
+
+═══════════════════════════════════════════════════════════════════════════

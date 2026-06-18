@@ -2,11 +2,11 @@ import React from 'react'
 import { cn } from '@/utils/cn'
 import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 
-const TYPE_OPTIONS = ['income', 'expense', 'withdrawal', 'borrow', 'business'] as const
+const TYPE_OPTIONS = ['income', 'expense', 'savings', 'withdrawal', 'borrow', 'business'] as const
 
 interface TransactionTypeToggleProps {
   value: TransactionType
-  onChange: (type: 'income' | 'expense' | 'withdrawal' | 'borrow' | 'business') => void
+  onChange: (type: 'income' | 'expense' | 'savings' | 'withdrawal' | 'borrow' | 'business') => void
 }
 
 export const TransactionTypeToggle: React.FC<TransactionTypeToggleProps> = ({ value, onChange }) => (

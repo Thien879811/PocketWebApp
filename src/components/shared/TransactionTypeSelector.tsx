@@ -2,7 +2,7 @@ import React from 'react'
 import { cn } from '@/utils/cn'
 import { TRANSACTION_TYPES_METADATA, type TransactionType } from '@/types/transaction.types'
 
-const TYPE_OPTIONS = ['income', 'expense', 'business', 'withdrawal', 'borrow'] as const
+const TYPE_OPTIONS = ['income', 'expense', 'savings', 'business', 'withdrawal', 'borrow'] as const
 
 interface TransactionTypeSelectorProps {
   value: TransactionType

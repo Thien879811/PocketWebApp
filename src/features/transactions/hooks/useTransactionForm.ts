@@ -15,10 +15,10 @@ export const useTransactionForm = (
   const [transactionType, setTransactionType] = useState<TransactionType>('expense')
   const [showAccountSelector, setShowAccountSelector] = useState(false)
 
-  const handleTypeChange = (typeKey: 'income' | 'expense' | 'withdrawal' | 'borrow' | 'business') => {
+  const handleTypeChange = (typeKey: 'income' | 'expense' | 'savings' | 'withdrawal' | 'borrow' | 'business') => {
     setTransactionType(typeKey)
     setValue('type', typeKey)
-    if (typeKey === 'withdrawal') setValue('category_id', '')
+    if (typeKey === 'withdrawal' || typeKey === 'savings') setValue('category_id', '')
   }
 
   const handleSubTypeChange = (type: 'borrow' | 'lend') => {

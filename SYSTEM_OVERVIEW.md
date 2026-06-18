@@ -106,16 +106,17 @@ src/
 
 Đây là nền tảng của toàn bộ nghiệp vụ. Mỗi loại có quy tắc tác động số dư khác nhau:
 
-| Type | Nhãn | Prefix | Tác động số dư tài khoản | Tính vào ngân sách? |
-|------|------|--------|--------------------------|---------------------|
-| `income` | Thu nhập | `+` | `balance += amount` | Không |
-| `expense` | Chi tiêu | `-` | `balance -= amount` | **Có** |
-| `withdrawal` | Rút tiền | `-` | Xem mục 7.3 (logic đặc biệt 2 tài khoản) | Không |
-| `borrow` | Vay / Thu nợ | `+` | `balance += amount` | Không |
-| `lend` | Cho vay / Trả nợ | `-` | `balance -= amount` | Không |
-| `business` | Kinh doanh | `+` | `balance += amount` | Không |
+| Type | Nhãn | Prefix | Tác động số dư tài khoản | Tính vào ngân sách? | Cộng vào mục tiêu? |
+|------|------|--------|--------------------------|---------------------|-------------------|
+| `income` | Thu nhập | `+` | `balance += amount` | Không | Không |
+| `expense` | Chi tiêu | `-` | `balance -= amount` | **Có** | Không |
+| `withdrawal` | Rút tiền | `-` | Xem mục 7.3 (logic đặc biệt 2 tài khoản) | Không | Không |
+| `borrow` | Vay / Thu nợ | `+` | `balance += amount` | Không | Không |
+| `lend` | Cho vay / Trả nợ | `-` | `balance -= amount` | Không | Không |
+| `business` | Kinh doanh | `+` | `balance += amount` | Không | Không |
+| `savings` | **Tiết kiệm** | `-` | `balance -= amount` | **Không** | **Có** |
 
-> **Lưu ý quan trọng:** `thisMonthCount` (số giao dịch hiển thị trên dashboard) **không tính** giao dịch `withdrawal`.
+> **Lưu ý quan trọng:** `thisMonthCount` (số giao dịch hiển thị trên dashboard) **không tính** giao dịch `withdrawal` và `savings` (vì đây là chuyển tiền nội bộ, không phải thu/chi thực sự).
 
 ---
 
@@ -197,6 +198,9 @@ Step 3: UPDATE accounts.balance theo loại giao dịch:
   ├─ lend    → balance -= amount
   ├─ expense → balance -= amount
   ├─ business→ balance += amount
+  ├─ savings (LOGIC MỚI):
+  │   - balance -= amount  (trừ khỏi ví)
+  │   - Nếu goal_id: tự động cộng goal.current_amount += amount
   └─ withdrawal (LOGIC ĐẶC BIỆT):
        SELECT accounts WHERE user_id AND type = 'cash'  ← tìm ví tiền mặt
        UPDATE source_account.balance -= (amount + fee)  ← trừ ngân hàng
@@ -206,6 +210,7 @@ Step 3: UPDATE accounts.balance theo loại giao dịch:
 Step 4: onSuccess:
           invalidate ['transactions']
           invalidate ['accounts']
+          invalidate ['goals']  ← NEW: cập nhật mục tiêu nếu có savings
 
 Step 5: snapshotDailyBalances(userId, date)
           SELECT tất cả accounts của user
@@ -622,10 +627,72 @@ supabase.channel('public:notifications')
 | **Budget history invalidate thiếu** | Tạo/sửa/xoá budget chỉ invalidate `active-budget`, không invalidate `budget-history`. | ℹ️ Thấp |
 | **withdrawal tìm cash account bằng `.single()`** | Nếu user có nhiều hơn 1 tài khoản `type = 'cash'`, sẽ lỗi. | ⚠️ Trung bình |
 | **PWA cache không cover Supabase** | Domain Supabase không match pattern `https://api.*`. | ℹ️ Thấp |
+| **Savings với goal tùy chọn** | `goal_id` trong savings transaction là optional. Nếu không cung cấp, savings không tự động cập nhật goal nào. | ℹ️ Thấp |
 
 ---
 
-## 17. Hướng dẫn nhanh cho developer mới
+## 17. Tính năng Tiết kiệm (Savings Type) 🆕
+
+### 17.1 Mô tả chung
+
+Loại giao dịch `savings` (tiết kiệm) cho phép người dùng chuyển tiền từ ví chính vào mục tiêu tiết kiệm mà **không tính vào chi tiêu hàng tháng**.
+
+**Khác biệt so với `expense`:**
+- `expense`: Trừ khỏi số dư + **tính vào chi tiêu** + kiểm soát ngân sách
+- `savings`: Trừ khỏi số dư + **KHÔNG tính vào chi tiêu** + tự động cộng vào goal
+
+### 17.2 Luồng giao dịch Savings
+
+Khi tạo giao dịch `type = 'savings'`:
+
+```
+Bước 1: INSERT transactions {
+  amount: 500,
+  type: 'savings',
+  category_id: <savings_category>,  // danh mục "Tiết kiệm"
+  goal_id: <optional>,               // liên kết với mục tiêu
+  account_id: <ví_chính>
+  ...
+}
+
+Bước 2: UPDATE accounts SET balance -= amount
+  (Trừ tiền khỏi ví, giống expense)
+
+Bước 3: Nếu goal_id:
+  UPDATE goals SET current_amount += amount
+  (Tự động cộng vào tiến độ mục tiêu)
+
+Bước 4: queryClient.invalidateQueries(['goals'])
+  (Làm mới dữ liệu mục tiêu)
+```
+
+### 17.3 Loại trừ khỏi thống kê chi tiêu
+
+Hàm `getTransactionStats()` **không** tính savings vào:
+- `totalExpense` (tổng chi tiêu)
+- `topCategories` (phân tích danh mục expense)
+- `weeklyTrends`, `dailyTrends` (xu hướng chi tiêu)
+- `thisMonthCount` (loại trừ cả `withdrawal` và `savings`)
+
+### 17.4 Xoá/Sửa giao dịch Savings
+
+**Khi xoá** giao dịch savings:
+```
+Bước 1: Hoàn lại số dư: balance += amount
+Bước 2: Nếu goal_id: goal.current_amount = max(0, current_amount - amount)
+Bước 3: Invalidate ['goals']
+```
+
+**Khi sửa** giao dịch savings:
+```
+Bước 1: Hoàn lại cũ (giống xoá)
+Bước 2: Áp dụng mới (giống tạo)
+Bước 3: Nếu goal_id thay đổi, update cả goal cũ và goal mới
+```
+
+---
+
+## 18. Hướng dẫn nhanh cho developer mới
 
 1. **Bootstrap:** `src/App.tsx` → `src/routes/index.tsx`
 2. **Thêm màn hình mới:** Tạo page trong `src/features/<feature>/pages/`, thêm route lazy trong `src/routes/index.tsx`, bọc `<ProtectedRoute>` nếu cần đăng nhập.

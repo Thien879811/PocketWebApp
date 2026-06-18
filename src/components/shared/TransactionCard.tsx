@@ -13,6 +13,7 @@ const TYPE_LEFT_ACCENT: Record<TransactionType, string> = {
   borrow: 'border-l-purple-500',
   lend: 'border-l-blue-500',
   business: 'border-l-orange-500',
+  savings: 'border-l-green-600',
 }
 
 interface TransactionCardTx {

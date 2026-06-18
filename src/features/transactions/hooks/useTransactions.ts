@@ -120,6 +120,7 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
       lendMap[tx.category_id].amount += tx.amount
       lendMap[tx.category_id].count += 1
     }
+    // Note: 'savings' transactions are NOT included in category breakdowns
   })
 
   const mapToTopList = (map: Record<string, { amount: number, count: number }>) => 
@@ -184,7 +185,7 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
       }
     })
 
-  return {
+    return {
     totalIncome,
     totalExpense,
     totalBorrow,
@@ -198,6 +199,6 @@ export const getTransactionStats = (transactions: Transaction[], categories: Cat
     monthlyIncomeTrends,
     dailyTrends,
     dailyIncomeTrends,
-    thisMonthCount: thisMonthTx.filter(tx => !['withdrawal'].includes(tx.type)).length
+    thisMonthCount: thisMonthTx.filter(tx => !['withdrawal', 'savings'].includes(tx.type)).length
   }
 }

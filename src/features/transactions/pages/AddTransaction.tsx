@@ -4,11 +4,12 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X, ChevronRight, Calendar, Wallet, AlertTriangle, User, Clock } from 'lucide-react'
+import { Loader2, X, ChevronRight, Calendar, Wallet, AlertTriangle, User, Clock, Target } from 'lucide-react'
 import { transactionSchema, type TransactionFormValues } from '../types/transaction.schema'
 import { useCreateTransaction } from '../hooks/useTransactionMutations'
 import { useCategories } from '../../categories/hooks/useCategories'
 import { useAccounts } from '../../accounts/hooks/useAccounts'
+import { useGoals } from '../../goals/hooks/useGoals'
 import { useBudgetByDate, useBudgetStatus } from '../../budget/hooks/useBudget'
 import { useTransactionForm } from '../hooks/useTransactionForm'
 import { QuickAmountChips } from '../components/QuickAmountChips'
@@ -22,6 +23,7 @@ const AddTransaction: React.FC = () => {
   const { mutate: createTransaction, isPending } = useCreateTransaction()
   const { data: categories, isLoading: categoriesLoading } = useCategories()
   const { data: accounts } = useAccounts()
+  const { data: goals } = useGoals()
 
   const { handleSubmit, register, setValue, watch, formState: { errors } } = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -29,6 +31,7 @@ const AddTransaction: React.FC = () => {
       amount: 0,
       type: 'expense',
       category_id: '',
+      goal_id: '',
       date: new Date().toISOString().split('T')[0],
       note: '',
       account_id: '',
@@ -53,6 +56,7 @@ const AddTransaction: React.FC = () => {
 
   const currentAmount = watch('amount')
   const selectedCategoryId = watch('category_id')
+  const selectedGoalId = watch('goal_id')
   const selectedAccountId = watch('account_id')
   const selectedAccount = accounts?.find((a) => a.id === selectedAccountId)
 
@@ -63,6 +67,11 @@ const AddTransaction: React.FC = () => {
     if (transactionType === 'withdrawal' && !data.category_id) {
       // @ts-ignore
       submissionData.category_id = null
+    }
+    
+    if (transactionType === 'savings' && !data.goal_id) {
+      // @ts-ignore
+      submissionData.goal_id = null
     }
     
     if (transactionType === 'borrow' || transactionType === 'lend') {
@@ -203,6 +212,65 @@ const AddTransaction: React.FC = () => {
                 showAddButton
               />
             </div>
+
+            {/* ── Goal Selector for Savings ────────── */}
+            {transactionType === 'savings' && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-semibold text-on-surface-variant/70 uppercase tracking-wider">
+                    Mục tiêu
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/goals')}
+                    className="text-xs text-primary font-semibold hover:underline"
+                  >
+                    Quản lý
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {goals && goals.length > 0 ? (
+                    goals.map((goal) => (
+                      <button
+                        key={goal.id}
+                        type="button"
+                        onClick={() => setValue('goal_id', goal.id)}
+                        className={cn(
+                          'flex items-center gap-2.5 p-3.5 rounded-2xl border-2 transition-all text-left',
+                          selectedGoalId === goal.id
+                            ? 'bg-green-600/10 border-green-600 shadow-sm'
+                            : 'bg-surface-container-lowest border-outline-variant/20 hover:bg-surface-container'
+                        )}
+                      >
+                        <div className={cn(
+                          'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
+                          selectedGoalId === goal.id ? 'bg-green-600 text-white' : 'bg-surface-container text-primary'
+                        )}>
+                          <Target size={16} strokeWidth={2} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-on-surface truncate">{goal.name}</p>
+                          <p className="text-[10px] text-on-surface-variant/60 font-medium mt-0.5">
+                            {goal.current_amount > 0 ? formatCurrency(goal.current_amount) : '0đ'}
+                          </p>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-4">
+                      <p className="text-xs text-on-surface-variant/60 mb-2">Chưa có mục tiêu nào</p>
+                      <button
+                        type="button"
+                        onClick={() => navigate('/goals/add')}
+                        className="text-xs text-primary font-semibold hover:underline"
+                      >
+                        Tạo mục tiêu ngay
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* ── Details ──────────────────────────── */}
             <div className="space-y-3">
