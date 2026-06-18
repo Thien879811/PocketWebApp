@@ -41,7 +41,10 @@ const Home: React.FC = () => {
   const [chartView, setChartView] = useState<'daily' | 'monthly'>('daily')
 
   const user = useAuthStore((s) => s.user)
-  const { data: transactions, isLoading: txLoading } = useTransactions()
+  const { data: transactions, isLoading: txLoading } = useTransactions({
+    month: selectedDate.getMonth(),
+    year: selectedDate.getFullYear(),
+  })
   const { data: accounts, isLoading: accLoading } = useAccounts()
   const { data: categories } = useCategories()
   const { data: goals } = useGoals()

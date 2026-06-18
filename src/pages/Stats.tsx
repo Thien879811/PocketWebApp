@@ -18,11 +18,14 @@ type StatsType = typeof STAT_TYPES[number]
 
 const Stats: React.FC = () => {
   const navigate = useNavigate()
-  const { data: transactions, isLoading: txLoading } = useTransactions()
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const { data: transactions, isLoading: txLoading } = useTransactions({
+    month: selectedDate.getMonth(),
+    year: selectedDate.getFullYear(),
+  })
   const { data: categories, isLoading: catLoading } = useCategories()
   const [selectedModalCategory, setSelectedModalCategory] = useState<Category | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedDate, setSelectedDate] = useState(new Date())
   const [statsType, setStatsType] = useState<StatsType>('expense')
 
   const stats = transactions && categories

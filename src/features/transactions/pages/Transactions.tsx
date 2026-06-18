@@ -17,7 +17,10 @@ const Transactions: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [selectedDate, setSelectedDate] = useState(new Date())
 
-  const { data: transactions, isLoading: txLoading } = useTransactions()
+  const { data: transactions, isLoading: txLoading } = useTransactions({
+    month: selectedDate.getMonth(),
+    year: selectedDate.getFullYear(),
+  })
   const { data: categories } = useCategories()
 
   const filteredTransactions = transactions?.filter((tx) => {

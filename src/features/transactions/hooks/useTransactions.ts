@@ -3,19 +3,29 @@ import { supabase } from '@/utils/supabase'
 import { useAuthStore } from '@/store/useAuthStore'
 import { type Transaction } from '../types/transaction.schema'
 
-export const useTransactions = () => {
+export const useTransactions = (options?: { month?: number; year?: number }) => {
   const user = useAuthStore((state) => state.user)
 
   return useQuery<Transaction[]>({
-    queryKey: ['transactions', user?.id],
+    queryKey: ['transactions', user?.id, options?.year, options?.month],
     queryFn: async () => {
       if (!user) return []
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select('*')
         .eq('user_id', user.id)
-        .order('date', { ascending: false })
+
+      if (options?.year !== undefined && options?.month !== undefined) {
+        const monthStr = String(options.month + 1).padStart(2, '0')
+        const lastDay = new Date(options.year, options.month + 1, 0).getDate()
+        const lastDayStr = String(lastDay).padStart(2, '0')
+        query = query
+          .gte('date', `${options.year}-${monthStr}-01`)
+          .lte('date', `${options.year}-${monthStr}-${lastDayStr}`)
+      }
+
+      const { data, error } = await query.order('date', { ascending: false })
 
       if (error) throw new Error(error.message)
       return data || []
