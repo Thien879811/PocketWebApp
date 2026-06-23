@@ -120,6 +120,14 @@ const Settings: React.FC = () => {
           path: '/budget',
           iconBg: 'from-amber-500 to-amber-600',
         },
+        {
+          label: 'Trợ lý tài chính AI',
+          icon: 'settings_ai',
+          path: '/settings/ai',
+          iconBg: 'from-violet-500 to-violet-600',
+        },
+
+
       ],
     },
     {
