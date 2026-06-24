@@ -1,14 +1,46 @@
 import React, { useState } from 'react'
-import { ChevronLeft, Sparkles, Loader2 } from 'lucide-react'
+import { ChevronLeft, Sparkles, Loader2, TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/utils/supabase'
+
+interface AnalysisResult {
+  summary: string
+  totalIncome: number
+  totalExpense: number
+  transactionCount: number
+}
+
 const AISettings: React.FC = () => {
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<AnalysisResult | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
   const handleAnalyze = async () => {
-    const { data } = await supabase.functions.invoke(
-      'express/analysis/monthly'
-    );
-    console.log(data);
+    setLoading(true)
+    setError(null)
+    setResult(null)
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('express/analysis/monthly', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (fnError) {
+        throw new Error(fnError.message || 'Failed to invoke function')
+      }
+
+      if (data?.error) {
+        throw new Error(data.error)
+      }
+
+      setResult(data)
+    } catch (err: any) {
+      console.error('Analysis error:', err)
+      setError(err.message || 'Đã xảy ra lỗi khi phân tích.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -37,6 +69,7 @@ const AISettings: React.FC = () => {
         {/* AI Action */}
         <div className="bg-white p-6 rounded-[2rem] border border-secondary/20 shadow-xl shadow-secondary/5 space-y-4">
           <h3 className="font-headline font-black text-xl text-secondary flex items-center gap-2">
+            <Sparkles className="w-5 h-5" />
             Trợ lý tài chính AI
           </h3>
           <p className="text-sm font-medium text-on-surface-variant opacity-80 leading-relaxed">
@@ -45,13 +78,65 @@ const AISettings: React.FC = () => {
 
           <button
             onClick={handleAnalyze}
-
+            disabled={loading}
             className="w-full bg-secondary/10 border-2 border-secondary text-secondary py-4 rounded-2xl font-headline font-black text-lg hover:bg-secondary hover:text-white transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
-            <Loader2 className="w-6 h-6 animate-spin" />
-            Phân tích tài chính
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Đang phân tích...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5" />
+                Phân tích tài chính
+              </>
+            )}
           </button>
         </div>
+
+        {/* Error */}
+        {error && (
+          <div className="bg-red-50 p-4 rounded-2xl border border-red-200 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
+            <p className="text-sm text-red-700 font-medium">{error}</p>
+          </div>
+        )}
+
+        {/* Analysis Result */}
+        {result && (
+          <div className="space-y-4">
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-green-50 p-4 rounded-2xl border border-green-200 text-center">
+                <TrendingUp className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                <p className="text-xs text-green-600 font-bold">Thu nhập</p>
+                <p className="text-sm font-black text-green-800">{result.totalIncome.toLocaleString('vi-VN')}đ</p>
+              </div>
+              <div className="bg-red-50 p-4 rounded-2xl border border-red-200 text-center">
+                <TrendingDown className="w-5 h-5 text-red-500 mx-auto mb-1" />
+                <p className="text-xs text-red-500 font-bold">Chi tiêu</p>
+                <p className="text-sm font-black text-red-700">{result.totalExpense.toLocaleString('vi-VN')}đ</p>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-2xl border border-blue-200 text-center">
+                <CheckCircle className="w-5 h-5 text-blue-500 mx-auto mb-1" />
+                <p className="text-xs text-blue-500 font-bold">Giao dịch</p>
+                <p className="text-sm font-black text-blue-700">{result.transactionCount}</p>
+              </div>
+            </div>
+
+            {/* AI Analysis */}
+            <div className="bg-gradient-to-br from-secondary/5 to-primary/5 p-6 rounded-[2rem] border border-secondary/10 space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-secondary" />
+                <h3 className="font-headline font-bold text-secondary">Phân tích từ AI</h3>
+              </div>
+              <div className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap font-medium">
+                {result.summary}
+              </div>
+            </div>
+          </div>
+        )}
 
       </main>
     </div>
