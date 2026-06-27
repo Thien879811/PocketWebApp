@@ -6,6 +6,7 @@ import { Bell, X } from 'lucide-react';
 import { router } from '@/routes';
 import { useDueDateScheduler } from './useDueDateScheduler';
 import { useCustomNotificationScheduler } from './useCustomNotificationScheduler';
+import { registerFCM } from './RegisterNotification';
 
 // ─── Realtime notification card ────────────────────────────
 function RealtimeCard({
@@ -144,6 +145,12 @@ export const RealtimeNotifications: React.FC = () => {
 
   useDueDateScheduler();
   useCustomNotificationScheduler();
+
+  useEffect(() => {
+    if (user?.id) {
+      registerFCM(user.id);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
