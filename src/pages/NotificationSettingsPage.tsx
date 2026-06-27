@@ -11,6 +11,7 @@ import {
   Trash2,
   CheckCircle2,
   Plus,
+  Send,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useNotificationSettings } from '@/features/notifications/useNotificationSettings'
@@ -80,6 +81,21 @@ const NotificationSettingsPage: React.FC = () => {
       return data
     },
   })
+
+  // Check if user has an FCM token registered
+  const { data: fcmTokens } = useQuery({
+    queryKey: ['fcm_tokens_status', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fcm_tokens')
+        .select('id')
+        .eq('user_id', user!.id)
+      if (error) throw error
+      return data
+    },
+  })
+  const hasFcmToken = fcmTokens && fcmTokens.length > 0
 
   // Mutation to schedule custom notification
   const { mutate: scheduleNotification, isPending: isScheduling } = useMutation({
@@ -239,16 +255,26 @@ const NotificationSettingsPage: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap sm:flex-nowrap">
           {permissionStatus === 'granted' ? (
-            <button
-              type="button"
-              onClick={handleSendTestNotification}
-              className="h-10 px-4 bg-secondary-container text-on-secondary-container rounded-xl text-xs font-semibold hover:bg-secondary-container/85 active:scale-95 transition-all flex items-center gap-1.5"
-            >
-              <Sparkles size={13} />
-              Gửi thông báo thử
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleSendTestNotification}
+                className="h-10 px-3.5 bg-secondary-container text-on-secondary-container rounded-xl text-xs font-semibold hover:bg-secondary-container/85 active:scale-95 transition-all flex items-center gap-1.5"
+              >
+                <Sparkles size={13} />
+                Thử cục bộ
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/settings/notifications/send')}
+                className="h-10 px-3.5 bg-primary text-white rounded-xl text-xs font-semibold hover:brightness-105 active:scale-95 transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <Send size={13} />
+                Gửi Push FCM
+              </button>
+            </>
           ) : (
             <button
               type="button"
@@ -436,9 +462,17 @@ const NotificationSettingsPage: React.FC = () => {
 
       {/* ── Custom Scheduled Notification Form ──── */}
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold text-on-surface-variant/60 uppercase tracking-wider px-1">
-          Hẹn giờ thông báo tự chọn
-        </p>
+        <div className="flex justify-between items-center px-1">
+          <p className="text-[11px] font-semibold text-on-surface-variant/60 uppercase tracking-wider">
+            Hẹn giờ thông báo tự chọn
+          </p>
+          <span className={cn(
+            "text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1",
+            hasFcmToken ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-600 animate-pulse"
+          )}>
+            {hasFcmToken ? '✓ Đã kết nối Push FCM' : '⚠️ Chưa kết nối Push FCM'}
+          </span>
+        </div>
         <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 shadow-card">
           <form onSubmit={handleCreateCustom} className="space-y-4">
             

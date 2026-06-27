@@ -40,6 +40,7 @@ const ReloCreatePreference = lazy(() => import('@/apps/relo/pages/CreatePreferen
 const ReloEditPreference = lazy(() => import('@/apps/relo/pages/EditPreference'))
 const ReloEditContact = lazy(() => import('@/apps/relo/pages/EditContact'))
 const NotificationSettingsPage = lazy(() => import('@/pages/NotificationSettingsPage'))
+const SendPushNotification = lazy(() => import('@/pages/SendPushNotification'))
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center bg-surface dark:bg-background">
@@ -114,6 +115,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
             <NotificationSettingsPage />
+          </Suspense>
+        )
+      },
+      {
+        path: 'settings/notifications/send',
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+            <SendPushNotification />
           </Suspense>
         )
       },
