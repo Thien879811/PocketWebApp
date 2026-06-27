@@ -21,7 +21,7 @@ const AISettings: React.FC = () => {
     setError(null)
     setResult(null)
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('express/analysis/monthly', {
+      const { data, error: fnError } = await supabase.functions.invoke('clever-function/analysis/monthly', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
