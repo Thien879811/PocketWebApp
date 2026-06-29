@@ -1,5 +1,5 @@
 import React from 'react'
-import { LogOut, ChevronRight, Camera, Sparkles, Shield, Palette, Moon, Sun, Bell, Target, History, TrendingUp, Home, Receipt, BarChart3, Wallet, PiggyBank, Users } from 'lucide-react'
+import { LogOut, ChevronRight, Camera, Sparkles, Shield, Palette, Moon, Sun, Bell, Target, History, TrendingUp, Home, Receipt, BarChart3, Wallet, PiggyBank, Users, Bot } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useThemeStore } from '@/store/useThemeStore'
@@ -39,6 +39,7 @@ const Settings: React.FC = () => {
     light_mode: <Sun size={18} />,
     dark_mode: <Moon size={18} />,
     diversity_1: <Users size={18} />,
+    settings_ai: <Bot size={18} />
   }
 
   const settingsGroups = [
