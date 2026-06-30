@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useTransactions } from '@/features/transactions/hooks/useTransactions'
 import { exportTransactionsToExcel } from '@/features/reports/utils/exportTransactionsToExcel'
-import api from '@/lib/axios'
 import { notify } from '@/lib/notify'
+import { supabase } from '@/utils/supabase'
 
 /**
  * UI: Sync & Export (PocketFlow)
@@ -12,18 +12,27 @@ import { notify } from '@/lib/notify'
 export default function SyncExport() {
     // Use existing hook to fetch transaction history as source data for export/backups.
     // Options: since the UI is “Recent Snapshots”, we keep the query broad (no filters).
+
     const { data: transactions = [], isLoading } = useTransactions()
     const [isBackingUp, setIsBackingUp] = useState(false)
 
     const uploadLedgerBackupToGoogleDrive = async (fileNameBase: string) => {
         setIsBackingUp(true)
         try {
-            const res = await api.post('/sync/backup/upload-to-drive', {
-                transactions,
-                fileNameBase,
-            })
+            const { data: file, error: fnError } = await supabase.functions.invoke(
+                'dynamic-processor',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: { transactions, fileNameBase },
+                }
+            )
 
-            const file = res.data?.file
+            if (fnError) {
+                notify.error(fnError.message || 'Backup lên Google Drive thất bại.')
+                return
+            }
+
             if (!file?.webViewLink && !file?.id) {
                 notify.error('Không nhận được thông tin file từ Google Drive.')
                 return
