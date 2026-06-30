@@ -1,5 +1,25 @@
 import React from 'react'
-import { LogOut, ChevronRight, Camera, Sparkles, Shield, Palette, Moon, Sun, Bell, Target, History, TrendingUp, Home, Receipt, BarChart3, Wallet, PiggyBank, Users, Bot } from 'lucide-react'
+import {
+  LogOut,
+  ChevronRight,
+  Camera,
+  Sparkles,
+  Shield,
+  Palette,
+  Moon,
+  Sun,
+  Bell,
+  Target,
+  History,
+  TrendingUp,
+  Home,
+  Receipt,
+  BarChart3,
+  Wallet,
+  PiggyBank,
+  Users,
+  Bot
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useThemeStore } from '@/store/useThemeStore'
@@ -51,31 +71,31 @@ const Settings: React.FC = () => {
           label: 'Danh mục chi tiêu',
           icon: 'category',
           path: '/settings/categories',
-          iconBg: 'from-primary to-primary/80',
+          iconBg: 'from-primary to-primary/80'
         },
         {
           label: 'Cấu hình thông báo',
           icon: 'notifications',
           path: '/settings/notifications',
-          iconBg: 'from-violet-500 to-violet-600',
+          iconBg: 'from-violet-500 to-violet-600'
         },
         {
           label: 'Mục tiêu tích lũy',
           icon: 'flag',
           path: '/goals',
-          iconBg: 'from-green-500 to-green-600',
+          iconBg: 'from-green-500 to-green-600'
         },
         {
           label: 'Lịch sử ngân sách',
           icon: 'history',
           path: '/settings/budget-history',
-          iconBg: 'from-rose-500 to-rose-600',
+          iconBg: 'from-rose-500 to-rose-600'
         },
         {
           label: 'Biến động số dư',
           icon: 'trending_up',
           path: '/settings/balance-history',
-          iconBg: 'from-cyan-500 to-cyan-600',
+          iconBg: 'from-cyan-500 to-cyan-600'
         },
         {
           label: isDarkMode ? 'Chế độ sáng' : 'Chế độ tối',
@@ -83,9 +103,9 @@ const Settings: React.FC = () => {
           onClick: toggleTheme,
           iconBg: isDarkMode
             ? 'from-amber-400 to-amber-500'
-            : 'from-slate-600 to-slate-700',
-        },
-      ],
+            : 'from-slate-600 to-slate-700'
+        }
+      ]
     },
     {
       title: 'Liên kết nhanh',
@@ -95,41 +115,45 @@ const Settings: React.FC = () => {
           label: 'Trang chủ',
           icon: 'home',
           path: '/',
-          iconBg: 'from-blue-500 to-blue-600',
+          iconBg: 'from-blue-500 to-blue-600'
         },
         {
           label: 'Sổ giao dịch',
           icon: 'receipt_long',
           path: '/ledger',
-          iconBg: 'from-indigo-500 to-indigo-600',
+          iconBg: 'from-indigo-500 to-indigo-600'
         },
         {
           label: 'Thống kê',
           icon: 'insights',
           path: '/stats',
-          iconBg: 'from-violet-500 to-violet-600',
+          iconBg: 'from-violet-500 to-violet-600'
         },
         {
           label: 'Ví tiền',
           icon: 'account_balance_wallet',
           path: '/wallet',
-          iconBg: 'from-emerald-500 to-emerald-600',
+          iconBg: 'from-emerald-500 to-emerald-600'
         },
         {
           label: 'Kế hoạch chi tiêu',
           icon: 'savings',
           path: '/budget',
-          iconBg: 'from-amber-500 to-amber-600',
+          iconBg: 'from-amber-500 to-amber-600'
+        },
+        {
+          label: 'Sync & Export',
+          icon: 'cloud_sync',
+          path: '/settings/sync-export',
+          iconBg: 'from-primary to-violet-500'
         },
         {
           label: 'Trợ lý tài chính AI',
           icon: 'settings_ai',
           path: '/settings/ai',
-          iconBg: 'from-violet-500 to-violet-600',
-        },
-
-
-      ],
+          iconBg: 'from-violet-500 to-violet-600'
+        }
+      ]
     },
     {
       title: 'Ứng dụng mở rộng',
@@ -139,15 +163,14 @@ const Settings: React.FC = () => {
           label: 'Relo',
           icon: 'diversity_1',
           path: '/relo',
-          iconBg: 'from-rose-500 to-rose-600',
-        },
-      ],
-    },
+          iconBg: 'from-rose-500 to-rose-600'
+        }
+      ]
+    }
   ]
 
   return (
     <div className="max-w-xl mx-auto md:max-w-none space-y-7 pb-10">
-      {/* ── Page Header ─────────────────────────────── */}
       <div className="relative">
         <h1 className="text-3xl font-headline font-bold text-on-surface tracking-tight">
           Cài đặt
@@ -157,17 +180,13 @@ const Settings: React.FC = () => {
         </p>
       </div>
 
-      {/* ── Profile Card ─────────────────────────── */}
       <div className="relative group">
-        {/* Gradient background glow */}
         <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-violet-500/20 to-primary/20 rounded-3xl blur-sm opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
 
         <div className="relative bg-surface-container-lowest/90 backdrop-blur-xl rounded-3xl border border-white/10 dark:border-white/5 shadow-xl overflow-hidden">
-          {/* Top gradient bar */}
           <div className="h-1.5 w-full bg-gradient-to-r from-primary via-violet-500 to-primary" />
 
           <div className="p-6 flex items-center gap-5">
-            {/* Avatar with glow ring */}
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-br from-primary to-violet-500 rounded-2xl blur opacity-40 group-hover:opacity-60 transition-opacity" />
               <div className="relative">
@@ -182,7 +201,6 @@ const Settings: React.FC = () => {
               </div>
             </div>
 
-            {/* User info */}
             <div className="flex-1 min-w-0">
               <p className="font-headline font-bold text-lg text-on-surface truncate">
                 {displayName}
@@ -205,7 +223,6 @@ const Settings: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Settings Groups ─────────────────────── */}
       {settingsGroups.map((group, gIdx) => (
         <div
           key={gIdx}
@@ -227,11 +244,9 @@ const Settings: React.FC = () => {
                   'w-full flex items-center gap-4 px-5 py-4 text-left transition-all duration-200',
                   'hover:bg-surface-container/40 active:bg-primary/5',
                   'group/item',
-                  iIdx !== group.items.length - 1 &&
-                    'border-b border-outline-variant/8'
+                  iIdx !== group.items.length - 1 && 'border-b border-outline-variant/8'
                 )}
               >
-                {/* Gradient icon */}
                 <div
                   className={cn(
                     'w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0 text-white shadow-md transition-transform duration-200 group-hover/item:scale-105 group-active/item:scale-95',
@@ -245,12 +260,10 @@ const Settings: React.FC = () => {
                   )}
                 </div>
 
-                {/* Label */}
                 <span className="flex-1 text-[15px] font-medium text-on-surface">
                   {item.label}
                 </span>
 
-                {/* Chevron */}
                 {!item.onClick && (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center bg-outline-variant/10 group-hover/item:bg-primary/10 transition-colors">
                     <ChevronRight
@@ -265,7 +278,6 @@ const Settings: React.FC = () => {
         </div>
       ))}
 
-      {/* ── Sign Out ─────────────────────────────── */}
       <button
         onClick={logout}
         className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl border border-red-500/15 bg-red-500/5 text-red-500 dark:text-red-400 text-sm font-semibold hover:bg-red-500/10 hover:border-red-500/25 active:scale-[0.98] transition-all duration-200 group"
@@ -278,7 +290,6 @@ const Settings: React.FC = () => {
         Đăng xuất
       </button>
 
-      {/* ── Footer ─────────────────────────────── */}
       <div className="text-center pt-2 pb-4">
         <p className="text-[11px] font-medium text-on-surface-variant/30 tracking-wide">
           PocketFlow · Version 1.0.5

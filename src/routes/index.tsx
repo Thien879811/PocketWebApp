@@ -9,7 +9,7 @@ const Home = lazy(() => import('@/pages/Home'))
 const Login = lazy(() => import('@/pages/Login'))
 const Register = lazy(() => import('@/pages/Register'))
 const AddTransaction = lazy(() => import('@/features/transactions/pages/AddTransaction'))
-const Settings = lazy(() => import('@/pages/Settings'))
+const Settings = lazy(() => import('@/pages/Settings').then((m) => ({ default: m.default })))
 const Categories = lazy(() => import('@/features/categories/pages/Categories'))
 const AddCategory = lazy(() => import('@/features/categories/pages/AddCategory'))
 const EditCategory = lazy(() => import('@/features/categories/pages/EditCategory'))
@@ -41,6 +41,7 @@ const ReloEditPreference = lazy(() => import('@/apps/relo/pages/EditPreference')
 const ReloEditContact = lazy(() => import('@/apps/relo/pages/EditContact'))
 const NotificationSettingsPage = lazy(() => import('@/pages/NotificationSettingsPage'))
 const SendPushNotification = lazy(() => import('@/pages/SendPushNotification'))
+const SyncExport = lazy(() => import('@/features/reports/pages/SyncExport'))
 // ⏳ Loading Spinner for Suspense
 const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center bg-surface dark:bg-background">
@@ -107,6 +108,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
             <Settings />
+          </Suspense>
+        )
+      },
+      {
+        path: 'settings/sync-export',
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+            <SyncExport />
           </Suspense>
         )
       },
